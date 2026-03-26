@@ -1,0 +1,1 @@
+# corporaci-n-capsula-frontend
