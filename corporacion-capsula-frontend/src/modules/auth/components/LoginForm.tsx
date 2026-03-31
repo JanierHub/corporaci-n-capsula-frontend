@@ -13,7 +13,7 @@ const LoginForm = () => {
 
   const handleSubmit = () => {
     if (email === "admin@test.com" && password === "1234") {
-      alert("Login correcto")
+      navigate("/home")
     } else {
       alert("Credenciales incorrectas")
     }
