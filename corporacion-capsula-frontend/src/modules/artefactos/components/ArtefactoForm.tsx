@@ -1,57 +1,160 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Artefacto } from "../types/artefacto.types";
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
+import drBriefImg from "../../../assets/DCBrief1.jpg"
+import bulmaImg from "../../../assets/bulma1.jpg"
+import drHedoImg from "../../../assets/DCHedo1.jpg"
 
 type Props = {
   onSubmit: (data: Partial<Artefacto>) => void;
+  initialData?: Partial<Artefacto>;
 };
 
-const ArtefactoForm = ({ onSubmit }: Props) => {
-  const [form, setForm] = useState<Partial<Artefacto>>({
+// 🔥 SIMULANDO DATOS DEL BACKEND
+const cientificos = [
+  {
+    id: 1,
+    nombre: "Dr. Brief",
+    descripcion: "Fundador de Capsule Corp",
+    imagen: drBriefImg,
+  },
+  {
+    id: 2,
+    nombre: "Bulma",
+    descripcion: "Ingeniera jefa",
+    imagen: bulmaImg,
+  },
+  {
+    id: 3,
+    nombre: "Dr. Hedo",
+    descripcion: "Especialista en tecnología avanzada",
+    imagen: drHedoImg,
+  },
+];
+
+const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
+ const [form, setForm] = useState<Partial<Artefacto>>({
   nombre: "",
   descripcion: "",
   categoria: "defensa",
   origen: "terrestre",
   nivelPeligrosidad: 1,
-})
+  inventor: "", 
+});
 
+  useEffect(() => {
+    if (initialData) {
+      setForm(initialData);
+    }
+  }, [initialData]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
+    const { name, value } = e.target;
+
     setForm({
       ...form,
-      [e.target.name]: e.target.value,
+      [name]:
+        name === "nivelPeligrosidad" ? Number(value) : value,
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     onSubmit(form);
   };
 
+  const cientificoSeleccionado = cientificos.find(
+    (c) => c.nombre === form.inventor
+  )
+
   return (
-    <div className="bg-black/40 backdrop-blur-xl border border-cyan-400 rounded-2xl p-8 w-full max-w-md">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-black/40 backdrop-blur-xl border border-cyan-400 rounded-2xl p-8 w-full max-w-md"
+    >
       <h2 className="text-cyan-400 text-2xl mb-6 text-center">
-        Crear Artefacto
+        {initialData ? "Editar Artefacto" : "Crear Artefacto"}
       </h2>
 
-      <input
-        name="nombre"
-        placeholder="Nombre"
-        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+      {/* 🔬 CIENTIFICO */}
+      <label className="text-cyan-400 text-sm">Científico creador</label>
+      <p className="text-gray-400 text-xs mb-2">
+        Selecciona el responsable del artefacto
+      </p>
+
+          <select
+        name="inventor"
+        value={form.inventor || ""}
         onChange={handleChange}
-      />
+        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+      >
+        <option value="">Seleccionar científico</option>
+        {cientificos.map((c) => (
+          <option key={c.id} value={c.nombre}>
+            {c.nombre}
+          </option>
+        ))}
+      </select>
+      {/* 🖼️ PREVIEW */}
+      {cientificoSeleccionado && (
+        <div className="mb-4 text-center">
+          <img
+            src={cientificoSeleccionado.imagen}
+            alt="cientifico"
+            className="w-24 h-24 object-cover mx-auto rounded-full border border-cyan-400"
+          />
+          <p className="text-sm text-gray-300 mt-2">
+            {cientificoSeleccionado.descripcion}
+          </p>
+        </div>
+      )}
+
+      {/* 📝 DESCRIPCION */}
+      <label className="text-cyan-400 text-sm">Descripción</label>
+      <p className="text-gray-400 text-xs mb-2">
+        Explica qué hace el artefacto
+      </p>
 
       <input
         name="descripcion"
-        placeholder="Descripción"
-        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+        value={form.descripcion || ""}
         onChange={handleChange}
+        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
       />
 
+{/* 📅 FECHA */}
+<label className="text-cyan-400 text-sm">Fecha de creación</label>
+<p className="text-gray-400 text-xs mb-2">
+  Fecha en la que se desarrolló el artefacto
+</p>
+
+<DatePicker
+  selected={form.fechaCreacion ? new Date(form.fechaCreacion) : null}
+  onChange={(date: Date | null) =>
+    setForm({
+      ...form,
+      fechaCreacion: date?.toISOString().split("T")[0],
+    })
+  }
+  className="w-full p-3 bg-black/60 border border-cyan-400 text-white rounded-lg focus:outline-none"
+  calendarClassName="bg-black text-white border border-cyan-400 rounded-xl p-2 shadow-lg shadow-cyan-400/30"
+  dayClassName={() =>
+    "text-white hover:bg-cyan-400 hover:text-black rounded-full transition"
+  }
+  popperClassName="z-50"
+/>
+    <form className="flex flex-col gap-4"></form>
+
+      {/* ⚙️ CATEGORIA */}
+      <label className="text-cyan-400 text-sm">Categoría</label>
       <select
         name="categoria"
-        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+        value={form.categoria}
         onChange={handleChange}
+        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
       >
         <option value="defensa">Defensa</option>
         <option value="transporte">Transporte</option>
@@ -59,31 +162,39 @@ const ArtefactoForm = ({ onSubmit }: Props) => {
         <option value="energia">Energía</option>
       </select>
 
+      {/* 🌍 ORIGEN */}
+      <label className="text-cyan-400 text-sm">Origen</label>
       <select
         name="origen"
-        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+        value={form.origen}
         onChange={handleChange}
+        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
       >
         <option value="terrestre">Terrestre</option>
         <option value="extraterrestre">Extraterrestre</option>
       </select>
 
-      <input
+      {/* ⚠️ PELIGROSIDAD */}
+      <label className="text-cyan-400 text-sm">Nivel de peligrosidad</label>
+
+      <select
         name="nivelPeligrosidad"
-        type="number"
-        min="1"
-        max="5"
-        className="w-full mb-5 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+        value={form.nivelPeligrosidad}
         onChange={handleChange}
-      />
+        className="w-full mb-5 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+      >
+        <option value={1}>1 - Uso común </option>
+        <option value={2}>2 - Peligroso </option>
+        <option value={3}>3 - Muy peligroso </option>
+      </select>
 
       <button
+        type="submit"
         className="w-full bg-cyan-400 text-black p-3 rounded-lg font-bold"
-        onClick={handleSubmit}
       >
         Guardar
       </button>
-    </div>
+    </form>
   );
 };
 
