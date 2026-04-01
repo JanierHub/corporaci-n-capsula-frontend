@@ -51,7 +51,7 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
     onSubmit(data)
   }
 
-  // 🔥 corregido ===
+  // 🔥 comparación correcta
   const seleccionado = cientificosMock.find(c => c.id === cientifico)
 
   return (
@@ -81,7 +81,9 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
       <select
         className="w-full mb-3 p-2 bg-black/60 border border-cyan-400 text-white rounded"
         value={cientifico}
-        onChange={(e) => setCientifico(Number(e.target.value))}
+        onChange={(e) =>
+          setCientifico(e.target.value ? Number(e.target.value) : "")
+        }
       >
         <option value="">Seleccionar científico</option>
         {cientificosMock.map(c => (
