@@ -6,6 +6,7 @@ import { useArtefactos } from "../../../context/ArtefactosContext"
 const ArtefactoEdit = () => {
   const navigate = useNavigate()
   const { id } = useParams()
+
   const { artefactos, updateArtefacto } = useArtefactos()
 
   const artefacto = artefactos.find((a) => a.id === Number(id))
@@ -15,21 +16,27 @@ const ArtefactoEdit = () => {
     navigate("/artefactos")
   }
 
- if (!artefacto) {
-  return (
-    <div className="text-white text-center mt-20">
-      <h2 className="text-2xl text-red-400">Artefacto no encontrado</h2>
-      <p className="mt-2">Puede que recargaste la página</p>
+  // 🔥 si no existe
+  if (!artefacto) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-white bg-black">
+        <h2 className="text-2xl text-red-400 mb-4">
+          Artefacto no encontrado
+        </h2>
 
-      <button
-        onClick={() => navigate("/artefactos")}
-        className="mt-6 border border-cyan-400 px-6 py-2 rounded-lg hover:bg-cyan-400 hover:text-black transition"
-      >
-        Volver
-      </button>
-    </div>
-  )
-}
+        <p className="text-gray-300 mb-6">
+          Puede que recargaste la página o no exista
+        </p>
+
+        <button
+          onClick={() => navigate("/artefactos")}
+          className="border border-cyan-400 px-6 py-2 rounded-lg hover:bg-cyan-400 hover:text-black transition"
+        >
+          Volver
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -40,6 +47,7 @@ const ArtefactoEdit = () => {
         backgroundPosition: "center",
       }}
     >
+      {/* overlay */}
       <div className="fixed inset-0 bg-black/80 backdrop-blur-sm"></div>
 
       <div className="relative z-10 flex flex-col items-center w-full max-w-lg">
@@ -48,6 +56,7 @@ const ArtefactoEdit = () => {
           Editar Artefacto
         </h1>
 
+        {/* 🔥 reutiliza el form */}
         <ArtefactoForm
           onSubmit={handleUpdate}
           initialData={artefacto}

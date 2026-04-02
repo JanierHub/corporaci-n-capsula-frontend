@@ -1,9 +1,20 @@
 import { createContext, useContext, useState, useEffect } from "react"
-import { Artefacto } from "../modules/artefactos/types/artefacto.types"
+
+type Artefacto = {
+  id: number
+  nombre: string
+  descripcion: string
+  categoria: string
+  origen: string
+  nivelPeligrosidad: string
+  estado: string
+  inventor: string
+  fecha: string
+}
 
 type ContextType = {
   artefactos: Artefacto[]
-  addArtefacto: (a: Artefacto) => void
+  addArtefacto: (a: Omit<Artefacto, "id">) => void
   updateArtefacto: (id: number, data: Partial<Artefacto>) => void
 }
 
@@ -12,28 +23,22 @@ const ArtefactosContext = createContext<ContextType | null>(null)
 export const ArtefactosProvider = ({ children }: any) => {
   const [artefactos, setArtefactos] = useState<Artefacto[]>([])
 
-  //  CARGAR AL INICIAR
   useEffect(() => {
     const data = localStorage.getItem("artefactos")
-    if (data) {
-      setArtefactos(JSON.parse(data))
-    }
+    if (data) setArtefactos(JSON.parse(data))
   }, [])
 
-  //  GUARDAR CADA VEZ QUE CAMBIA
   useEffect(() => {
     localStorage.setItem("artefactos", JSON.stringify(artefactos))
   }, [artefactos])
 
-  const addArtefacto = (a: Artefacto) => {
-    setArtefactos((prev) => [...prev, { ...a, id: Date.now() }])
+  const addArtefacto = (a: Omit<Artefacto, "id">) => {
+    setArtefactos(prev => [...prev, { ...a, id: Date.now() }])
   }
 
   const updateArtefacto = (id: number, data: Partial<Artefacto>) => {
-    setArtefactos((prev) =>
-      prev.map((a) =>
-        a.id === id ? { ...a, ...data } : a
-      )
+    setArtefactos(prev =>
+      prev.map(a => (a.id === id ? { ...a, ...data } : a))
     )
   }
 
@@ -46,6 +51,6 @@ export const ArtefactosProvider = ({ children }: any) => {
 
 export const useArtefactos = () => {
   const ctx = useContext(ArtefactosContext)
-  if (!ctx) throw new Error("useArtefactos fuera de provider")
+  if (!ctx) throw new Error("fuera del provider")
   return ctx
 }

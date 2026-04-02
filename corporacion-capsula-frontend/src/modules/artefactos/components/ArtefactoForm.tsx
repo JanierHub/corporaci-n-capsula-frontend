@@ -1,193 +1,87 @@
-import { useState, useEffect } from "react";
-import { Artefacto } from "../types/artefacto.types";
-import DatePicker from "react-datepicker"
-import "react-datepicker/dist/react-datepicker.css"
-import drBriefImg from "../../../assets/DCBrief1.jpg"
-import bulmaImg from "../../../assets/bulma1.jpg"
-import drHedoImg from "../../../assets/DCHedo1.jpg"
+import { useState } from "react"
+import bulmaGif from "../../../assets/bulma2.gif"
+import geroGif from "../../../assets/DCGero1.gif"
 
 type Props = {
-  onSubmit: (data: Partial<Artefacto>) => void;
-  initialData?: Partial<Artefacto>;
-};
-
-// 🔥 SIMULANDO DATOS DEL BACKEND
-const cientificos = [
-  {
-    id: 1,
-    nombre: "Dr. Brief",
-    descripcion: "Fundador de Capsule Corp",
-    imagen: drBriefImg,
-  },
-  {
-    id: 2,
-    nombre: "Bulma",
-    descripcion: "Ingeniera jefa",
-    imagen: bulmaImg,
-  },
-  {
-    id: 3,
-    nombre: "Dr. Hedo",
-    descripcion: "Especialista en tecnología avanzada",
-    imagen: drHedoImg,
-  },
-];
+  onSubmit: (data: any) => void
+  initialData?: any
+}
 
 const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
- const [form, setForm] = useState<Partial<Artefacto>>({
-  nombre: "",
-  descripcion: "",
-  categoria: "defensa",
-  origen: "terrestre",
-  nivelPeligrosidad: 1,
-  inventor: "", 
-});
+  const [nombre, setNombre] = useState(initialData?.nombre || "")
+  const [descripcion, setDescripcion] = useState(initialData?.descripcion || "")
 
-  useEffect(() => {
-    if (initialData) {
-      setForm(initialData);
-    }
-  }, [initialData]);
+  // 🔥 ENUM (RESPETA DIAGRAMA)
+  const [categoria, setCategoria] = useState(initialData?.categoria || "")
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
+  // 🔥 STRING LIBRE
+  const [origen, setOrigen] = useState(initialData?.origen || "")
+  const [nivelPeligrosidad, setNivelPeligrosidad] = useState(initialData?.nivelPeligrosidad || "")
+  const [estado, setEstado] = useState(initialData?.estado || "")
+  const [inventor, setInventor] = useState(initialData?.inventor || "")
+  const [fecha, setFecha] = useState(initialData?.fecha || "")
 
-    setForm({
-      ...form,
-      [name]:
-        name === "nivelPeligrosidad" ? Number(value) : value,
-    });
-  };
+  const inventoresMock = [
+    { nombre: "Bulma", gif: bulmaGif },
+    { nombre: "Dr. Gero", gif: geroGif },
+  ]
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(form);
-  };
+  const seleccionado = inventoresMock.find(i => i.nombre === inventor)
 
-  const cientificoSeleccionado = cientificos.find(
-    (c) => c.nombre === form.inventor
-  )
+  const handleSubmit = (e: any) => {
+    e.preventDefault()
+
+    onSubmit({
+      nombre,
+      descripcion,
+      categoria,
+      origen,
+      nivelPeligrosidad,
+      estado,
+      inventor,
+      fecha,
+    })
+  }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-black/40 border border-cyan-400 p-6 rounded-xl backdrop-blur-xl w-full max-w-md"
-    >
-      <h2 className="text-cyan-400 text-xl mb-4">
-        Formulario Artefacto
-      </h2>
+    <form className="bg-black/40 border border-cyan-400 p-6 rounded-xl w-full max-w-md" onSubmit={handleSubmit}>
 
-      {/* 🔬 CIENTIFICO */}
-      <label className="text-cyan-400 text-sm">Científico creador</label>
-      <p className="text-gray-400 text-xs mb-2">
-        Selecciona el responsable del artefacto
-      </p>
+      <h2 className="text-cyan-400 text-xl mb-4">Formulario Artefacto</h2>
 
-          <select
-        name="inventor"
-        value={form.inventor || ""}
-        onChange={handleChange}
-        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-      >
-        <option value="">Seleccionar científico</option>
-        {cientificosMock.map(c => (
-          <option key={c.id} value={c.id}>
-            {c.nombre}
-          </option>
-        ))}
-      </select>
-      {/* 🖼️ PREVIEW */}
-      {cientificoSeleccionado && (
-        <div className="mb-4 text-center">
-          <img
-            src={seleccionado.imagen}
-            className="w-20 h-20 object-contain rounded-full border border-cyan-400"
-          />
+      <input placeholder="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} className="w-full mb-3 p-2 bg-black/60 border border-cyan-400 rounded"/>
+
+      <input placeholder="Descripción" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} className="w-full mb-3 p-2 bg-black/60 border border-cyan-400 rounded"/>
+
+      {/* 🔥 INVENTOR STRING */}
+      <input placeholder="Inventor (ej: Bulma)" value={inventor} onChange={(e) => setInventor(e.target.value)} className="w-full mb-3 p-2 bg-black/60 border border-cyan-400 rounded"/>
+
+      {seleccionado && (
+        <div className="mb-4 flex justify-center">
+          <img src={seleccionado.gif} className="w-24"/>
         </div>
       )}
 
-      {/* 📝 DESCRIPCION */}
-      <label className="text-cyan-400 text-sm">Descripción</label>
-      <p className="text-gray-400 text-xs mb-2">
-        Explica qué hace el artefacto
-      </p>
+      <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full mb-3 p-2 bg-black/60 border border-cyan-400 rounded"/>
 
-      <input
-        name="descripcion"
-        value={form.descripcion || ""}
-        onChange={handleChange}
-        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-      />
-
-{/* 📅 FECHA */}
-<label className="text-cyan-400 text-sm">Fecha de creación</label>
-<p className="text-gray-400 text-xs mb-2">
-  Fecha en la que se desarrolló el artefacto
-</p>
-
-<DatePicker
-  selected={form.fechaCreacion ? new Date(form.fechaCreacion) : null}
-  onChange={(date: Date | null) =>
-    setForm({
-      ...form,
-      fechaCreacion: date?.toISOString().split("T")[0],
-    })
-  }
-  className="w-full p-3 bg-black/60 border border-cyan-400 text-white rounded-lg focus:outline-none"
-  calendarClassName="bg-black text-white border border-cyan-400 rounded-xl p-2 shadow-lg shadow-cyan-400/30"
-  dayClassName={() =>
-    "text-white hover:bg-cyan-400 hover:text-black rounded-full transition"
-  }
-  popperClassName="z-50"
-/>
-    <form className="flex flex-col gap-4"></form>
-
-      {/* ⚙️ CATEGORIA */}
-      <label className="text-cyan-400 text-sm">Categoría</label>
-      <select
-        className="w-full mb-3 p-2 bg-black/60 border border-cyan-400 text-white rounded"
-        value={categoria}
-        onChange={(e) => setCategoria(e.target.value)}
-      >
-        <option value="defensa">Defensa</option>
-        <option value="transporte">Transporte</option>
-        <option value="domestico">Doméstico</option>
-        <option value="energia">Energía</option>
+      {/* 🔥 CATEGORIA ENUM */}
+      <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="w-full mb-3 p-2 bg-black/60 border border-cyan-400 rounded">
+        <option value="">Seleccionar categoría</option>
+        <option value="Defensa">Defensa</option>
+        <option value="Transporte">Transporte</option>
+        <option value="Domestica">Domestica</option>
+        <option value="Energia">Energia</option>
       </select>
 
-      {/* 🌍 ORIGEN */}
-      <label className="text-cyan-400 text-sm">Origen</label>
-      <select
-        className="w-full mb-3 p-2 bg-black/60 border border-cyan-400 text-white rounded"
-        value={origen}
-        onChange={(e) => setOrigen(e.target.value)}
-      >
-        <option value="terrestre">Terrestre</option>
-        <option value="extraterrestre">Extraterrestre</option>
-      </select>
+      <input placeholder="Origen (ej: Terrestre)" value={origen} onChange={(e) => setOrigen(e.target.value)} className="w-full mb-3 p-2 bg-black/60 border border-cyan-400 rounded"/>
 
-      {/* ⚠️ PELIGROSIDAD */}
-      <label className="text-cyan-400 text-sm">Nivel de peligrosidad</label>
+      <input placeholder="Nivel de peligrosidad (ej: Alto)" value={nivelPeligrosidad} onChange={(e) => setNivelPeligrosidad(e.target.value)} className="w-full mb-3 p-2 bg-black/60 border border-cyan-400 rounded"/>
 
-      <select
-        name="nivelPeligrosidad"
-        value={form.nivelPeligrosidad}
-        onChange={handleChange}
-        className="w-full mb-5 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-      >
-        <option value={1}>1 - Uso común </option>
-        <option value={2}>2 - Peligroso </option>
-        <option value={3}>3 - Muy peligroso </option>
-      </select>
+      <input placeholder="Estado (ej: Activo)" value={estado} onChange={(e) => setEstado(e.target.value)} className="w-full mb-4 p-2 bg-black/60 border border-cyan-400 rounded"/>
 
-      <button
-        type="submit"
-        className="w-full bg-cyan-400 text-black p-2 rounded font-bold"
-      >
+      <button className="w-full bg-cyan-400 text-black p-2 rounded font-bold">
         Guardar
       </button>
+
     </form>
   )
 }

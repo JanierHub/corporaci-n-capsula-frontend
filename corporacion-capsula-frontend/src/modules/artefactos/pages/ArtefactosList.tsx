@@ -9,34 +9,24 @@ const ArtefactosList = () => {
   const navigate = useNavigate()
   const { artefactos } = useArtefactos()
 
+  // 🔥 MOCK SOLO PARA UI (vacío compatible con backend)
   const artefactosMock = [
     {
       id: 1,
-      nombre: "Capsula Hoi Poi",
-      descripcion: "Permite almacenar objetos en miniatura",
-      categoria: "domestico",
-      origen: "terrestre",
-      nivelPeligrosidad: 1,
-    },
-    {
-      id: 2,
-      nombre: "Scouter",
-      descripcion: "Mide el nivel de poder de los enemigos",
-      categoria: "defensa",
-      origen: "extraterrestre",
-      nivelPeligrosidad: 3,
-    },
-    {
-      id: 3,
-      nombre: "Radar del Dragón",
-      descripcion: "Detecta las esferas del dragón",
-      categoria: "energia",
-      origen: "terrestre",
-      nivelPeligrosidad: 2,
+      nombre: "Artefacto Demo",
+      descripcion: "Ejemplo de artefacto",
+      categoria: "",
+      origen: "",
+      nivelPeligrosidad: "",
+      estado: "",
+      inventor: "",
+      fecha: "",
     },
   ]
 
+  // 🔥 usa datos reales si existen
   const lista = artefactos.length > 0 ? artefactos : artefactosMock
+
   const [selected, setSelected] = useState(lista[0])
 
   return (
@@ -51,7 +41,7 @@ const ArtefactosList = () => {
       {/* overlay */}
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
 
-      {/* 🔥 BOTÓN VOLVER ESFERA */}
+      {/* 🔥 BOTÓN VOLVER */}
       <div className="absolute top-5 right-5 z-20">
         <button
           onClick={() => navigate("/home")}
@@ -73,7 +63,6 @@ const ArtefactosList = () => {
 
         {/* 🔵 LISTA */}
         <div className="w-1/3 bg-black/50 border border-cyan-400 rounded-xl p-4 overflow-y-auto">
-
           <h2 className="text-cyan-400 mb-4 text-xl">Inventario</h2>
 
           {lista.map((a) => (
@@ -89,7 +78,6 @@ const ArtefactosList = () => {
               {a.nombre}
             </div>
           ))}
-
         </div>
 
         {/* 🔵 DETALLE */}
@@ -107,14 +95,20 @@ const ArtefactosList = () => {
                   {selected.descripcion}
                 </p>
 
+                {/* 🔥 DATOS FLEXIBLES */}
                 <div className="space-y-2 text-sm">
-                  <p>⚙ Categoría: {selected.categoria}</p>
-                  <p>🌍 Origen: {selected.origen}</p>
-                  <p>⚠ Peligro: {selected.nivelPeligrosidad}</p>
+
+<p>⚙ Categoría: {selected.categoria || "-"}</p>
+<p>🌍 Origen: {selected.origen || "-"}</p>
+<p>⚠ Peligrosidad: {selected.nivelPeligrosidad || "-"}</p>
+<p>🧪 Inventor: {selected.inventor || "-"}</p>
+<p>📊 Estado: {selected.estado || "-"}</p>
+<p>📅 Fecha: {selected.fecha || "-"}</p>
+
                 </div>
 
-                {/* 🔥 BOTÓN EDITAR FUNCIONAL */}
-                 <button
+                {/* 🔥 BOTÓN EDITAR */}
+                <button
                   onClick={() => navigate(`/edit/${selected.id}`)}
                   className="mt-6 border border-cyan-400 px-6 py-2 rounded-lg hover:bg-cyan-400 hover:text-black transition"
                 >
@@ -123,6 +117,7 @@ const ArtefactosList = () => {
 
               </div>
 
+              {/* 🔥 IMAGEN */}
               <div className="w-1/3 flex items-center justify-center">
                 <img
                   src={capsule}

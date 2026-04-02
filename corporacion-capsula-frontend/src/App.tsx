@@ -1,7 +1,12 @@
 import { AppRouter } from "./router"
+import { ArtefactosProvider } from "./context/ArtefactosContext"
 
 function App() {
-  return <AppRouter />
+  return (
+    <ArtefactosProvider>
+      <AppRouter />
+    </ArtefactosProvider>
+  )
 }
 
 export default App
