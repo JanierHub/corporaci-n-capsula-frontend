@@ -114,7 +114,7 @@ const ArtefactosList = () => {
                 </div>
 
                 {/* 🔥 BOTÓN EDITAR FUNCIONAL */}
-                <button
+                 <button
                   onClick={() => navigate(`/edit/${selected.id}`)}
                   className="mt-6 border border-cyan-400 px-6 py-2 rounded-lg hover:bg-cyan-400 hover:text-black transition"
                 >

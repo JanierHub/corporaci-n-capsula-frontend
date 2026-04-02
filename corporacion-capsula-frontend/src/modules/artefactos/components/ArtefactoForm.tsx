@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { Artefacto } from "../types/artefacto.types";
-import DatePicker from "react-datepicker"
-import "react-datepicker/dist/react-datepicker.css"
-import drBriefImg from "../../../assets/DCBrief1.jpg"
-import bulmaImg from "../../../assets/bulma1.jpg"
-import drHedoImg from "../../../assets/DCHedo1.jpg"
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import drBriefImg from "../../../assets/DCBrief1.jpg";
+import bulmaImg from "../../../assets/bulma1.jpg";
+import drHedoImg from "../../../assets/DCHedo1.jpg";
 
 type Props = {
   onSubmit: (data: Partial<Artefacto>) => void;
   initialData?: Partial<Artefacto>;
 };
 
-// 🔥 SIMULANDO DATOS DEL BACKEND
+// 🔬 DATOS SIMULADOS
 const cientificos = [
   {
     id: 1,
@@ -33,19 +33,25 @@ const cientificos = [
   },
 ];
 
+// ✅ AQUÍ ESTABA LO QUE TE FALTABA
 const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
- const [form, setForm] = useState<Partial<Artefacto>>({
-  nombre: "",
-  descripcion: "",
-  categoria: "defensa",
-  origen: "terrestre",
-  nivelPeligrosidad: 1,
-  inventor: "", 
-});
+
+  const [form, setForm] = useState<Partial<Artefacto>>({
+    nombre: "",
+    descripcion: "",
+    categoria: "defensa",
+    origen: "terrestre",
+    nivelPeligrosidad: 1,
+    inventor: "",
+    ...initialData,
+  });
 
   useEffect(() => {
     if (initialData) {
-      setForm(initialData);
+      setForm((prev) => ({
+        ...prev,
+        ...initialData,
+      }));
     }
   }, [initialData]);
 
@@ -68,7 +74,7 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
 
   const cientificoSeleccionado = cientificos.find(
     (c) => c.nombre === form.inventor
-  )
+  );
 
   return (
     <form
@@ -85,7 +91,7 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
         Selecciona el responsable del artefacto
       </p>
 
-          <select
+      <select
         name="inventor"
         value={form.inventor || ""}
         onChange={handleChange}
@@ -98,6 +104,7 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
           </option>
         ))}
       </select>
+
       {/* 🖼️ PREVIEW */}
       {cientificoSeleccionado && (
         <div className="mb-4 text-center">
@@ -113,43 +120,40 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
       )}
 
       {/* 📝 DESCRIPCION */}
-      <label className="text-cyan-400 text-sm">Descripción</label>
-      <p className="text-gray-400 text-xs mb-2">
-        Explica qué hace el artefacto
-      </p>
+        <label className="text-cyan-400 text-sm">Descripción</label>
+    <p className="text-gray-400 text-xs mb-2">
+      Explica qué hace el artefacto
+    </p>
 
-      <input
-        name="descripcion"
-        value={form.descripcion || ""}
-        onChange={handleChange}
-        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+    <input
+      name="descripcion"
+      value={form.descripcion || ""}
+      onChange={handleChange}
+      className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+    />
+
+      {/* 📅 FECHA */}
+      <label className="text-cyan-400 text-sm">Fecha de creación</label>
+        <p className="text-gray-400 text-xs mb-2">
+          Fecha en la que se desarrolló el artefacto
+        </p>
+      <DatePicker
+        selected={form.fechaCreacion ? new Date(form.fechaCreacion) : null}
+        onChange={(date: Date | null) =>
+          setForm({
+            ...form,
+            fechaCreacion: date?.toISOString().split("T")[0],
+          })
+        }
+        className="w-full p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
       />
 
-{/* 📅 FECHA */}
-<label className="text-cyan-400 text-sm">Fecha de creación</label>
-<p className="text-gray-400 text-xs mb-2">
-  Fecha en la que se desarrolló el artefacto
-</p>
-
-<DatePicker
-  selected={form.fechaCreacion ? new Date(form.fechaCreacion) : null}
-  onChange={(date: Date | null) =>
-    setForm({
-      ...form,
-      fechaCreacion: date?.toISOString().split("T")[0],
-    })
-  }
-  className="w-full p-3 bg-black/60 border border-cyan-400 text-white rounded-lg focus:outline-none"
-  calendarClassName="bg-black text-white border border-cyan-400 rounded-xl p-2 shadow-lg shadow-cyan-400/30"
-  dayClassName={() =>
-    "text-white hover:bg-cyan-400 hover:text-black rounded-full transition"
-  }
-  popperClassName="z-50"
-/>
-    <form className="flex flex-col gap-4"></form>
-
       {/* ⚙️ CATEGORIA */}
+      <br/>
       <label className="text-cyan-400 text-sm">Categoría</label>
+        <p className="text-gray-400 text-xs mb-2">
+          Tipo de uso del artefacto
+        </p>
       <select
         name="categoria"
         value={form.categoria}
@@ -164,6 +168,9 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
 
       {/* 🌍 ORIGEN */}
       <label className="text-cyan-400 text-sm">Origen</label>
+        <p className="text-gray-400 text-xs mb-2">
+          De dónde proviene el artefacto
+        </p>
       <select
         name="origen"
         value={form.origen}
@@ -176,16 +183,18 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
 
       {/* ⚠️ PELIGROSIDAD */}
       <label className="text-cyan-400 text-sm">Nivel de peligrosidad</label>
-
+        <p className="text-gray-400 text-xs mb-2">
+          Define qué tan riesgoso es el artefacto
+        </p>
       <select
         name="nivelPeligrosidad"
         value={form.nivelPeligrosidad}
         onChange={handleChange}
         className="w-full mb-5 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
       >
-        <option value={1}>1 - Uso común </option>
-        <option value={2}>2 - Peligroso </option>
-        <option value={3}>3 - Muy peligroso </option>
+        <option value={1}>1 - Uso común</option>
+        <option value={2}>2 - Peligroso</option>
+        <option value={3}>3 - Muy peligroso</option>
       </select>
 
       <button
