@@ -31,7 +31,7 @@ const ArtefactoCreate = () => {
           Crear Artefacto
         </h1>
 
-        {/* 🔥 AQUÍ METES EL FORM */}
+        {/*  AQUÍ METES EL FORM */}
         <ArtefactoForm onSubmit={handleCreate} />
 
         <button
