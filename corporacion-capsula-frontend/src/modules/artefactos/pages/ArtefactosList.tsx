@@ -2,36 +2,47 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useArtefactos } from "../../../context/ArtefactosContext"
 import bg from "../../../assets/3.jpg"
-import capsule from "../../../assets/13.gif"
 import esfera from "../../../assets/7.webp"
+
+import transporteGif from "../../../assets/transporte.gif"
+import energiaGif from "../../../assets/energia.gif"
+import domesticaGif from "../../../assets/domestica.gif"
+import defensaGif from "../../../assets/defensa.gif"
+
+const getGifByCategoria = (categoria: string) => {
+  switch (categoria) {
+    case "transporte": return transporteGif
+    case "energia": return energiaGif
+    case "domestico": return domesticaGif
+    case "defensa": return defensaGif
+    default: return energiaGif
+  }
+}
 
 const ArtefactosList = () => {
   const navigate = useNavigate()
   const { artefactos } = useArtefactos()
 
-  // 🔥 MOCK SOLO PARA UI (vacío compatible con backend)
   const artefactosMock = [
     {
       id: 1,
-      nombre: "Artefacto Demo",
-      descripcion: "Ejemplo de artefacto",
-      categoria: "",
-      origen: "",
-      nivelPeligrosidad: "",
-      estado: "",
-      inventor: "",
-      fecha: "",
+      nombre: "Capsula Hoi Poi",
+      descripcion: "Permite almacenar objetos en miniatura",
+      categoria: "transporte",
+      origen: "terrestre",
+      nivelPeligrosidad: 1,
+      estado: "activo",
+      inventor: "Bulma",
+      fecha: "2026-04-02",
     },
   ]
 
-  // 🔥 usa datos reales si existen
   const lista = artefactos.length > 0 ? artefactos : artefactosMock
-
   const [selected, setSelected] = useState(lista[0])
 
   return (
     <div
-      className="min-h-screen text-white relative overflow-hidden flex"
+      className="h-screen w-screen overflow-hidden text-white flex relative"
       style={{
         backgroundImage: `url(${bg})`,
         backgroundSize: "cover",
@@ -39,95 +50,85 @@ const ArtefactosList = () => {
       }}
     >
       {/* overlay */}
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-black/70"></div>
 
-      {/* 🔥 BOTÓN VOLVER */}
-      <div className="absolute top-5 right-5 z-20">
+      {/* 🔥 BOTÓN VOLVER FIJO (SIN MOVERSE) */}
+      <div className="fixed top-20 right-5 z-50">
         <button
           onClick={() => navigate("/home")}
-          className="flex flex-col items-center hover:scale-110 transition"
+          className="flex flex-col items-center"
         >
-          <div className="w-16 h-16 flex items-center justify-center">
-            <img
-              src={esfera}
-              className="w-full h-full object-contain drop-shadow-[0_0_15px_orange]"
-            />
-          </div>
-          <span className="text-xs text-yellow-300 mt-1">
+          <img
+            src={esfera}
+            className="w-12 drop-shadow-[0_0_10px_orange]"
+          />
+          <span className="text-yellow-300 text-sm font-bold">
             Volver
           </span>
         </button>
       </div>
 
-      <div className="relative z-10 flex w-full p-6 gap-6">
+      <div className="relative z-10 flex w-full h-full p-4 gap-4">
 
-        {/* 🔵 LISTA */}
-        <div className="w-1/3 bg-black/50 border border-cyan-400 rounded-xl p-4 overflow-y-auto">
-          <h2 className="text-cyan-400 mb-4 text-xl">Inventario</h2>
+        {/* LISTA */}
+        <div className="w-1/3 bg-orange-900/80 border-4 border-orange-400 rounded-xl p-4 flex flex-col">
 
-          {lista.map((a) => (
-            <div
-              key={a.id}
-              onClick={() => setSelected(a)}
-              className={`p-3 mb-2 cursor-pointer rounded-lg transition 
-                ${selected?.id === a.id
-                  ? "bg-cyan-400 text-black"
-                  : "bg-black/40 hover:bg-cyan-400 hover:text-black"
-                }`}
-            >
-              {a.nombre}
-            </div>
-          ))}
+          <h2 className="text-yellow-300 font-bold mb-3">
+            Inventario
+          </h2>
+
+          <div className="overflow-y-auto flex-1 pr-1">
+            {lista.map((a) => (
+              <div
+                key={a.id}
+                onClick={() => setSelected(a)}
+                className={`p-3 mb-2 cursor-pointer rounded
+                  ${selected?.id === a.id
+                    ? "bg-yellow-400 text-black"
+                    : "bg-orange-800 hover:bg-yellow-300 hover:text-black"
+                  }`}
+              >
+                ⚡ {a.nombre}
+              </div>
+            ))}
+          </div>
+
         </div>
 
-        {/* 🔵 DETALLE */}
-        <div className="w-2/3 bg-black/50 border border-cyan-400 rounded-xl p-6 flex">
+        {/* DETALLE */}
+        <div className="w-2/3 bg-orange-900/80 border-4 border-orange-400 rounded-xl p-4 flex flex-col">
 
-          {selected ? (
-            <>
-              <div className="w-2/3">
+          {/* 🔥 GIF POR CATEGORÍA */}
+          <div className="bg-orange-700 rounded mb-3 flex justify-center items-center h-52">
+            <img
+              src={getGifByCategoria(selected.categoria)}
+              className="h-40 object-contain"
+            />
+          </div>
 
-                <h2 className="text-2xl text-cyan-300 mb-4">
-                  {selected.nombre}
-                </h2>
+          <h2 className="text-2xl text-yellow-300 font-bold mb-2">
+            {selected.nombre}
+          </h2>
 
-                <p className="text-gray-300 mb-4">
-                  {selected.descripcion}
-                </p>
+          <div className="bg-gray-700 p-3 rounded mb-3 text-sm">
+            {selected.descripcion}
+          </div>
 
-                {/* 🔥 DATOS FLEXIBLES */}
-                <div className="space-y-2 text-sm">
+          <div className="space-y-2 text-sm">
+            <p>⚙ {selected.categoria}</p>
+            <p>🌍 {selected.origen}</p>
+            <p>⚠ {selected.nivelPeligrosidad}</p>
+            <p>🧪 {selected.inventor}</p>
+            <p>📊 {selected.estado}</p>
+            <p>📅 {selected.fecha}</p>
+          </div>
 
-<p>⚙ Categoría: {selected.categoria || "-"}</p>
-<p>🌍 Origen: {selected.origen || "-"}</p>
-<p>⚠ Peligrosidad: {selected.nivelPeligrosidad || "-"}</p>
-<p>🧪 Inventor: {selected.inventor || "-"}</p>
-<p>📊 Estado: {selected.estado || "-"}</p>
-<p>📅 Fecha: {selected.fecha || "-"}</p>
-
-                </div>
-
-                {/* 🔥 BOTÓN EDITAR */}
-                <button
-                  onClick={() => navigate(`/edit/${selected.id}`)}
-                  className="mt-6 border border-cyan-400 px-6 py-2 rounded-lg hover:bg-cyan-400 hover:text-black transition"
-                >
-                  Editar
-                </button>
-
-              </div>
-
-              {/* 🔥 IMAGEN */}
-              <div className="w-1/3 flex items-center justify-center">
-                <img
-                  src={capsule}
-                  className="w-40 object-contain drop-shadow-[0_0_20px_cyan]"
-                />
-              </div>
-            </>
-          ) : (
-            <p>No hay selección</p>
-          )}
+          <button
+            onClick={() => navigate(`/edit/${selected.id}`)}
+            className="mt-5 px-6 py-2 bg-yellow-400 text-black rounded hover:bg-orange-500"
+          >
+            Editar
+          </button>
 
         </div>
 

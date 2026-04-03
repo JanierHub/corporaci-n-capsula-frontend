@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom"
-import bg from "../../../assets/3.jpg"
 import ArtefactoForm from "../components/ArtefactoForm"
 import { useArtefactos } from "../../../context/ArtefactosContext"
+import bg from "../../../assets/3.jpg"
+import esfera from "../../../assets/7.webp"
+import SaiyanParticles from "../../../components/SaiyanParticles"
 
 const ArtefactoCreate = () => {
   const navigate = useNavigate()
@@ -9,12 +11,12 @@ const ArtefactoCreate = () => {
 
   const handleCreate = (data: any) => {
     addArtefacto(data)
-    navigate("/artefactos") // o la ruta donde listan
+    navigate("/artefactos")
   }
 
   return (
-  <div
-  className="min-h-screen text-white flex flex-col items-center relative overflow-y-auto py-10"
+    <div
+      className="h-screen w-screen overflow-hidden flex justify-center items-center text-white relative"
       style={{
         backgroundImage: `url(${bg})`,
         backgroundSize: "cover",
@@ -22,26 +24,32 @@ const ArtefactoCreate = () => {
       }}
     >
       {/* overlay */}
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
 
-      {/* contenido */}
-      <div className="relative z-10 flex flex-col items-center w-full max-w-lg">
+      {/* 🔥 PARTÍCULAS */}
+      <SaiyanParticles />
 
-        <h1 className="text-3xl text-cyan-400 mb-6">
-          Crear Artefacto
-        </h1>
-
-        {/*  AQUÍ METES EL FORM */}
-        <ArtefactoForm onSubmit={handleCreate} />
-
+      {/* 🔥 BOTÓN VOLVER (FIJO Y LIMPIO) */}
+      <div className="fixed top-20 right-5 z-50">
         <button
           onClick={() => navigate("/home")}
-          className="mt-6 border border-cyan-400 px-6 py-2 rounded-lg hover:bg-cyan-400 hover:text-black transition"
+          className="flex flex-col items-center"
         >
-          Volver
+          <img
+            src={esfera}
+            className="w-12 drop-shadow-[0_0_10px_orange]"
+          />
+          <span className="text-yellow-300 text-sm font-bold">
+            Volver
+          </span>
         </button>
-
       </div>
+
+      {/* FORM */}
+      <div className="relative z-10">
+        <ArtefactoForm onSubmit={handleCreate} />
+      </div>
+
     </div>
   )
 }
