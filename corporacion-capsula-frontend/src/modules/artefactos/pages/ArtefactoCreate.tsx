@@ -46,7 +46,7 @@ const ArtefactoCreate = () => {
       </div>
 
       {/* FORM */}
-      <div className="relative z-10">
+      <div className="relative z-15 w-full px-20">
         <ArtefactoForm onSubmit={handleCreate} />
       </div>
 

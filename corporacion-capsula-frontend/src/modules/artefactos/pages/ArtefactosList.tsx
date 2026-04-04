@@ -130,6 +130,13 @@ const ArtefactosList = () => {
             Editar
           </button>
 
+          <button
+            onClick={() => navigate(`/artefactos/delete/${selected.id}`)}
+            className="mt-3 px-6 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-500 transition shadow-[0_0_10px_red] border border-red-400"
+          >
+            🗑 Eliminar
+          </button>
+
         </div>
 
       </div>
