@@ -1,77 +1,50 @@
-import { useNavigate, useParams } from "react-router-dom"
-import bg from "../../../assets/3.jpg"
-import ArtefactoForm from "../components/ArtefactoForm"
-import { useArtefactos } from "../../../context/ArtefactosContext"
+import { useNavigate, useParams } from "react-router-dom";
+import ArtefactoForm from "../components/ArtefactoForm";
+import { useArtefactos } from "../../../context/ArtefactosContext";
+import bg from "../../../assets/3.jpg";
 
 const ArtefactoEdit = () => {
-  const navigate = useNavigate()
-  const { id } = useParams()
+  const navigate = useNavigate();
+  const { id } = useParams();
 
-  const { artefactos, updateArtefacto } = useArtefactos()
+  const { artefactos, editArtefacto } = useArtefactos();
 
-  const artefacto = artefactos.find((a) => a.id === Number(id))
+  const artefacto = artefactos.find((a) => a.id === id);
 
-  const handleUpdate = (data: any) => {
-    updateArtefacto(Number(id), data)
-    navigate("/artefactos")
-  }
+  const handleUpdate = async (data: any) => {
+    await editArtefacto(id!, data);
+    navigate("/artefactos");
+  };
 
-  // 🔥 si no existe
   if (!artefacto) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-white bg-black">
-        <h2 className="text-2xl text-red-400 mb-4">
-          Artefacto no encontrado
-        </h2>
-
-        <p className="text-gray-300 mb-6">
-          Puede que recargaste la página o no exista
-        </p>
-
-        <button
-          onClick={() => navigate("/artefactos")}
-          className="border border-cyan-400 px-6 py-2 rounded-lg hover:bg-cyan-400 hover:text-black transition"
-        >
+      <div className="min-h-screen flex items-center justify-center text-white bg-black">
+        <p>Artefacto no encontrado</p>
+        <button onClick={() => navigate("/artefactos")} className="ml-4 underline">
           Volver
         </button>
       </div>
-    )
+    );
   }
 
   return (
     <div
-      className="min-h-screen text-white flex flex-col items-center relative overflow-y-auto py-10"
+      className="min-h-screen flex flex-col items-center justify-center text-white"
       style={{
         backgroundImage: `url(${bg})`,
         backgroundSize: "cover",
-        backgroundPosition: "center",
       }}
     >
-      {/* overlay */}
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm"></div>
+      <ArtefactoForm onSubmit={handleUpdate} initialData={artefacto} />
 
-      <div className="relative z-10 flex flex-col items-center w-full max-w-lg">
-
-        <h1 className="text-3xl text-cyan-400 mb-6">
-          Editar Artefacto
-        </h1>
-
-        {/* 🔥 reutiliza el form */}
-        <ArtefactoForm
-          onSubmit={handleUpdate}
-          initialData={artefacto}
-        />
-
-        <button
-          onClick={() => navigate("/artefactos")}
-          className="mt-6 border border-cyan-400 px-6 py-2 rounded-lg hover:bg-cyan-400 hover:text-black transition"
-        >
-          Volver
-        </button>
-
-      </div>
+      <button
+        onClick={() => navigate("/artefactos")}
+        className="mt-6 border border-cyan-400 px-6 py-2 rounded-lg"
+      >
+        Volver
+      </button>
     </div>
-  )
-}
+  );
+};
 
-export default ArtefactoEdit
+export default ArtefactoEdit;

@@ -1,47 +1,89 @@
-import axios from "axios";
-import { API_URL } from "../../../config/api";
-import { Artefacto } from "../types/artefacto.types"
+import { api } from "../../../config/api";
+import { Artefacto } from "../types/artefacto.types";
 
-const API = `${API_URL}/artefactos`;
+// 🔥 MOCK VISUAL (ESTILO DBZ)
+const mockArtefactos: Artefacto[] = [
+  {
+    id: "1",
+    code: "CAP-001",
+    name: "Capsula Hoi Poi",
+    description: "Permite almacenar objetos en miniatura",
+    createdAt: "2026-04-08",
+    artifactType: "Tecnología",
+    category: "DOMESTIC",
+    origin: "TERRICOLA",
+    inventor: "Bulma",
+    dangerLevel: "Low",
+    confidentialityLevel: "Public",
+    state: "Activo",
+  },
+  {
+    id: "2",
+    code: "RAD-002",
+    name: "Radar del Dragón",
+    description: "Detecta esferas del dragón",
+    createdAt: "2026-04-08",
+    artifactType: "Detector",
+    category: "ENERGY",
+    origin: "TERRICOLA",
+    inventor: "Bulma",
+    dangerLevel: "Mid",
+    confidentialityLevel: "Restricted",
+    state: "Activo",
+  },
+  {
+    id: "3",
+    code: "ARM-003",
+    name: "Armadura Saiyajin",
+    description: "Resiste ataques de alto nivel",
+    createdAt: "2026-04-08",
+    artifactType: "Defensa",
+    category: "DEFENSE",
+    origin: "SAIYAJIN",
+    inventor: "Freezer Corp",
+    dangerLevel: "High",
+    confidentialityLevel: "Confidential",
+    state: "Activo",
+  },
+];
 
-// 🔹 GET → listar artefactos
-export const getArtefactos = async () => {
-  return [
-    {
-      id: 1,
-      nombre: "Capsula Hoi Poi",
-      descripcion: "Permite almacenar objetos en miniatura",
-      categoria: "domestico",
-      origen: "terrestre",
-      nivelPeligrosidad: 1,
-      nivelConfidencialidad: 2,
-    },
-    {
-      id: 2,
-      nombre: "Radar del Dragón",
-      descripcion: "Detecta esferas del dragón",
-      categoria: "energia",
-      origen: "terrestre",
-      nivelPeligrosidad: 3,
-      nivelConfidencialidad: 4,
-    },
-  ]
-}
+// 🔥 GET (REAL + FALLBACK MOCK)
+export const getArtefactos = async (): Promise<Artefacto[]> => {
+  try {
+    const res = await api.get("/artifacts");
+    return res.data;
+  } catch (error) {
+    console.warn("⚠ usando mock");
+    return mockArtefactos;
+  }
+};
 
-// 🔹 POST → crear artefacto
+// 🔥 CREATE
 export const createArtefacto = async (data: Artefacto) => {
-  const response = await axios.post(API, data);
-  return response.data;
+  const res = await api.post("/artifacts", data);
+  return res.data.data;
 };
 
-// 🔹 PUT → editar artefacto
-export const updateArtefacto = async (id: number, data: Artefacto) => {
-  const response = await axios.put(`${API}/${id}`, data);
-  return response.data;
+// 🔥 UPDATE
+export const updateArtefacto = async (
+  id: string,
+  data: Partial<Artefacto>
+) => {
+  const res = await api.patch(`/artifacts/${id}`, data);
+  return res.data.data;
 };
 
-// 🔹 DELETE → eliminar artefacto
-export const deleteArtefacto = async (id: number) => {
-  const response = await axios.delete(`${API}/${id}`);
-  return response.data;
+// 🔥 DEACTIVATE
+export const deactivateArtefacto = async (id: string) => {
+  const res = await api.patch(
+    `/artifacts/${id}`,
+    { state: "Inactivo" },
+    {
+      headers: {
+        "x-role": "Administrador",
+      },
+    }
+  );
+
+  return res.data.data;
 };

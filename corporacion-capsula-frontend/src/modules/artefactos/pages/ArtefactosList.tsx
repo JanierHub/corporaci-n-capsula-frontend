@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useArtefactos } from "../../../context/ArtefactosContext"
 import bg from "../../../assets/3.jpg"
@@ -11,34 +11,48 @@ import defensaGif from "../../../assets/defensa.gif"
 
 const getGifByCategoria = (categoria: string) => {
   switch (categoria) {
-    case "transporte": return transporteGif
-    case "energia": return energiaGif
-    case "domestico": return domesticaGif
-    case "defensa": return defensaGif
+    case "TRANSPORT": return transporteGif
+    case "ENERGY": return energiaGif
+    case "DOMESTIC": return domesticaGif
+    case "DEFENSE": return defensaGif
     default: return energiaGif
   }
 }
 
 const ArtefactosList = () => {
   const navigate = useNavigate()
-  const { artefactos } = useArtefactos()
+  const { artefactos, loadArtefactos } = useArtefactos()
 
-  const artefactosMock = [
-    {
-      id: 1,
-      nombre: "Capsula Hoi Poi",
-      descripcion: "Permite almacenar objetos en miniatura",
-      categoria: "transporte",
-      origen: "terrestre",
-      nivelPeligrosidad: 1,
-      estado: "activo",
-      inventor: "Bulma",
-      fecha: "2026-04-02",
-    },
-  ]
+  const [selected, setSelected] = useState<any>(null)
 
-  const lista = artefactos.length > 0 ? artefactos : artefactosMock
-  const [selected, setSelected] = useState(lista[0])
+  // 🔥 cargar datos (backend o mock)
+  useEffect(() => {
+    loadArtefactos()
+  }, [])
+
+  // 🔥 mapping backend → UI antigua
+  const lista = artefactos.map((a) => ({
+    id: a.id,
+    nombre: a.name,
+    descripcion: a.description,
+    categoria: a.category,
+    origen: a.origin,
+    nivelPeligrosidad: a.dangerLevel,
+    estado: a.state,
+    inventor: a.inventor,
+    fecha: a.createdAt,
+  }))
+
+  // 🔥 seleccionar primero
+  useEffect(() => {
+    if (lista.length > 0) {
+      setSelected(lista[0])
+    }
+  }, [artefactos])
+
+  if (!selected) {
+    return <div className="text-white p-10">Cargando...</div>
+  }
 
   return (
     <div
@@ -52,7 +66,7 @@ const ArtefactosList = () => {
       {/* overlay */}
       <div className="absolute inset-0 bg-black/70"></div>
 
-      {/* 🔥 BOTÓN VOLVER FIJO (SIN MOVERSE) */}
+      {/* 🔥 BOTÓN VOLVER */}
       <div className="fixed top-20 right-5 z-50">
         <button
           onClick={() => navigate("/home")}
@@ -98,7 +112,7 @@ const ArtefactosList = () => {
         {/* DETALLE */}
         <div className="w-2/3 bg-orange-900/80 border-4 border-orange-400 rounded-xl p-4 flex flex-col">
 
-          {/* 🔥 GIF POR CATEGORÍA */}
+          {/* GIF */}
           <div className="bg-orange-700 rounded mb-3 flex justify-center items-center h-52">
             <img
               src={getGifByCategoria(selected.categoria)}
@@ -123,18 +137,20 @@ const ArtefactosList = () => {
             <p>📅 {selected.fecha}</p>
           </div>
 
+          {/* EDITAR */}
           <button
-            onClick={() => navigate(`/edit/${selected.id}`)}
+            onClick={() => navigate(`/edit/${String(selected.id)}`)}
             className="mt-5 px-6 py-2 bg-yellow-400 text-black rounded hover:bg-orange-500"
           >
             Editar
           </button>
 
+          {/* 🔥 DESACTIVAR (ARREGLADO) */}
           <button
-            onClick={() => navigate(`/artefactos/delete/${selected.id}`)}
+            onClick={() => navigate(`/artefactos/delete/${String(selected.id)}`)}
             className="mt-3 px-6 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-500 transition shadow-[0_0_10px_red] border border-red-400"
           >
-            🗑 Eliminar
+            🗑 Desactivar
           </button>
 
         </div>
