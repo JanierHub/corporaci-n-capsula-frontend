@@ -25,13 +25,27 @@ const ArtefactosList = () => {
 
   const [selected, setSelected] = useState<any>(null)
 
-  // 🔥 cargar datos (backend o mock)
   useEffect(() => {
     loadArtefactos()
   }, [])
 
-  // 🔥 mapping backend → UI antigua
-  const lista = artefactos.map((a) => ({
+  const artefactosMock = [
+    {
+      id: "1",
+      name: "Capsula Hoi Poi",
+      description: "Permite almacenar objetos en miniatura",
+      category: "TRANSPORT",
+      origin: "TERRICOLA",
+      dangerLevel: "Low",
+      state: "Activo",
+      inventor: "Bulma",
+      createdAt: "2026-04-10",
+    }
+  ]
+
+  const data = artefactos.length > 0 ? artefactos : artefactosMock
+
+  const lista = data.map((a) => ({
     id: a.id,
     nombre: a.name,
     descripcion: a.description,
@@ -43,12 +57,11 @@ const ArtefactosList = () => {
     fecha: a.createdAt,
   }))
 
-  // 🔥 seleccionar primero
   useEffect(() => {
-    if (lista.length > 0) {
+    if (lista.length > 0 && !selected) {
       setSelected(lista[0])
     }
-  }, [artefactos])
+  }, [data])
 
   if (!selected) {
     return <div className="text-white p-10">Cargando...</div>
@@ -63,10 +76,9 @@ const ArtefactosList = () => {
         backgroundPosition: "center",
       }}
     >
-      {/* overlay */}
       <div className="absolute inset-0 bg-black/70"></div>
 
-      {/* 🔥 BOTÓN VOLVER */}
+      {/* BOTÓN VOLVER */}
       <div className="fixed top-20 right-5 z-50">
         <button
           onClick={() => navigate("/home")}
@@ -112,7 +124,6 @@ const ArtefactosList = () => {
         {/* DETALLE */}
         <div className="w-2/3 bg-orange-900/80 border-4 border-orange-400 rounded-xl p-4 flex flex-col">
 
-          {/* GIF */}
           <div className="bg-orange-700 rounded mb-3 flex justify-center items-center h-52">
             <img
               src={getGifByCategoria(selected.categoria)}
@@ -128,16 +139,29 @@ const ArtefactosList = () => {
             {selected.descripcion}
           </div>
 
+          {/* 🔥 AQUÍ ESTÁ EL AJUSTE */}
           <div className="space-y-2 text-sm">
             <p>⚙ {selected.categoria}</p>
             <p>🌍 {selected.origen}</p>
             <p>⚠ {selected.nivelPeligrosidad}</p>
             <p>🧪 {selected.inventor}</p>
-            <p>📊 {selected.estado}</p>
+
+            <p>
+              📊{" "}
+              <span
+                className={
+                  selected.estado === "Activo"
+                    ? "text-green-400"
+                    : "text-red-400 font-bold"
+                }
+              >
+                {selected.estado}
+              </span>
+            </p>
+
             <p>📅 {selected.fecha}</p>
           </div>
 
-          {/* EDITAR */}
           <button
             onClick={() => navigate(`/edit/${String(selected.id)}`)}
             className="mt-5 px-6 py-2 bg-yellow-400 text-black rounded hover:bg-orange-500"
@@ -145,7 +169,6 @@ const ArtefactosList = () => {
             Editar
           </button>
 
-          {/* 🔥 DESACTIVAR (ARREGLADO) */}
           <button
             onClick={() => navigate(`/artefactos/delete/${String(selected.id)}`)}
             className="mt-3 px-6 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-500 transition shadow-[0_0_10px_red] border border-red-400"

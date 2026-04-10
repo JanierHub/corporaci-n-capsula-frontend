@@ -1,72 +1,74 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState } from "react"
 
 import {
   getArtefactos,
   createArtefacto,
   updateArtefacto,
-  deactivateArtefacto as deactivateService,
-} from "../modules/artefactos/services/artefactoService";
+  deactivateArtefacto as apiDeactivate
+} from "../modules/artefactos/services/artefactoService"
 
-import { Artefacto } from "../modules/artefactos/types/artefacto.types";
+import { Artefacto } from "../modules/artefactos/types/artefacto.types"
 
 type ContextType = {
-  artefactos: Artefacto[];
-  loadArtefactos: () => Promise<void>;
-  addArtefacto: (a: Artefacto) => Promise<void>;
-  editArtefacto: (id: string, data: Partial<Artefacto>) => Promise<void>;
-  deactivateArtefacto: (id: string) => Promise<void>;
-};
+  artefactos: Artefacto[]
+  loadArtefactos: () => Promise<void>
+  addArtefacto: (a: Artefacto) => Promise<void>
+  editArtefacto: (id: string, data: Partial<Artefacto>) => Promise<void>
+  deactivateArtefacto: (id: string) => Promise<void>
+}
 
-const ArtefactosContext = createContext<ContextType | null>(null);
+const ArtefactosContext = createContext<ContextType | null>(null)
 
 export const ArtefactosProvider = ({ children }: any) => {
-  const [artefactos, setArtefactos] = useState<Artefacto[]>([]);
+  const [artefactos, setArtefactos] = useState<Artefacto[]>([])
 
-  // 🔥 GET
   const loadArtefactos = async () => {
     try {
-      const data = await getArtefactos();
-      setArtefactos(data);
+      const data = await getArtefactos()
+      setArtefactos(data)
     } catch (error) {
-      console.error("Error cargando artefactos:", error);
+      console.error("Error cargando artefactos:", error)
     }
-  };
+  }
 
-  // 🔥 CREATE
   const addArtefacto = async (a: Artefacto) => {
     try {
-      const nuevo = await createArtefacto(a);
-      setArtefactos((prev) => [...prev, nuevo]);
+      const nuevo = await createArtefacto(a)
+      setArtefactos(prev => [...prev, nuevo])
     } catch (error) {
-      console.error("Error creando artefacto:", error);
+      console.error("Error creando artefacto:", error)
     }
-  };
+  }
 
-  // 🔥 UPDATE (PATCH)
   const editArtefacto = async (id: string, data: Partial<Artefacto>) => {
     try {
-      const updated = await updateArtefacto(id, data);
-
-      setArtefactos((prev) =>
-        prev.map((a) => (a.id === id ? updated : a))
-      );
+      const updated = await updateArtefacto(id, data)
+      setArtefactos(prev =>
+        prev.map(a => (a.id === id ? updated : a))
+      )
     } catch (error) {
-      console.error("Error editando artefacto:", error);
+      console.error("Error editando:", error)
     }
-  };
+  }
 
-  // 🔥 DEACTIVATE (SOFT DELETE + ROLE)
+  // 🔥 FIX REAL AQUÍ
   const deactivateArtefacto = async (id: string) => {
     try {
-      const updated = await deactivateService(id);
+      await apiDeactivate(id)
 
-      setArtefactos((prev) =>
-        prev.map((a) => (a.id === id ? updated : a))
-      );
+      // 🔥 FORZAR CAMBIO LOCAL
+      setArtefactos(prev =>
+        prev.map(a =>
+          a.id === id
+            ? { ...a, state: "Inactivo" }
+            : a
+        )
+      )
+
     } catch (error) {
-      console.error("Error desactivando artefacto:", error);
+      console.error("Error desactivando:", error)
     }
-  };
+  }
 
   return (
     <ArtefactosContext.Provider
@@ -75,16 +77,16 @@ export const ArtefactosProvider = ({ children }: any) => {
         loadArtefactos,
         addArtefacto,
         editArtefacto,
-        deactivateArtefacto,
+        deactivateArtefacto
       }}
     >
       {children}
     </ArtefactosContext.Provider>
-  );
-};
+  )
+}
 
 export const useArtefactos = () => {
-  const ctx = useContext(ArtefactosContext);
-  if (!ctx) throw new Error("useArtefactos debe usarse dentro del provider");
-  return ctx;
-};
+  const ctx = useContext(ArtefactosContext)
+  if (!ctx) throw new Error("fuera del provider")
+  return ctx
+}
