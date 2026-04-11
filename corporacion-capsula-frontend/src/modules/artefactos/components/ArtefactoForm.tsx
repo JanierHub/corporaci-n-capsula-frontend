@@ -11,6 +11,17 @@ type Props = {
   initialData?: Partial<Artefacto>;
 };
 
+const defaultForm: Partial<Artefacto> = {
+  nombre: "",
+  descripcion: "",
+  categoria: "defensa",
+  origen: "terrestre",
+  nivelPeligrosidad: 1,
+  nivelConfidencialidad: 1,
+  inventor: "",
+  estado: "activo",
+}
+
 // 🔥 SIMULANDO DATOS DEL BACKEND
 const cientificos = [
   {
@@ -34,18 +45,11 @@ const cientificos = [
 ];
 
 const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
- const [form, setForm] = useState<Partial<Artefacto>>({
-  nombre: "",
-  descripcion: "",
-  categoria: "defensa",
-  origen: "terrestre",
-  nivelPeligrosidad: 1,
-  inventor: "", 
-});
+ const [form, setForm] = useState<Partial<Artefacto>>(defaultForm);
 
   useEffect(() => {
     if (initialData) {
-      setForm(initialData);
+      setForm({ ...defaultForm, ...initialData });
     }
   }, [initialData]);
 
@@ -57,7 +61,9 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
     setForm({
       ...form,
       [name]:
-        name === "nivelPeligrosidad" ? Number(value) : value,
+        name === "nivelPeligrosidad" || name === "nivelConfidencialidad"
+          ? Number(value)
+          : value,
     });
   };
 
@@ -78,6 +84,18 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
       <h2 className="text-cyan-400 text-2xl mb-6 text-center">
         {initialData ? "Editar Artefacto" : "Crear Artefacto"}
       </h2>
+
+      <label className="text-cyan-400 text-sm">Nombre</label>
+      <p className="text-gray-400 text-xs mb-2">
+        Identificador visible dentro del inventario
+      </p>
+
+      <input
+        name="nombre"
+        value={form.nombre || ""}
+        onChange={handleChange}
+        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+      />
 
       {/* 🔬 CIENTIFICO */}
       <label className="text-cyan-400 text-sm">Científico creador</label>
@@ -146,7 +164,6 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
   }
   popperClassName="z-50"
 />
-    <form className="flex flex-col gap-4"></form>
 
       {/* ⚙️ CATEGORIA */}
       <label className="text-cyan-400 text-sm">Categoría</label>
@@ -186,6 +203,31 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
         <option value={1}>1 - Uso común </option>
         <option value={2}>2 - Peligroso </option>
         <option value={3}>3 - Muy peligroso </option>
+      </select>
+
+      <label className="text-cyan-400 text-sm">Nivel de confidencialidad</label>
+      <select
+        name="nivelConfidencialidad"
+        value={form.nivelConfidencialidad}
+        onChange={handleChange}
+        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+      >
+        <option value={1}>1 - Público</option>
+        <option value={2}>2 - Restringido</option>
+        <option value={3}>3 - Reservado</option>
+        <option value={4}>4 - Ultra secreto</option>
+      </select>
+
+      <label className="text-cyan-400 text-sm">Estado</label>
+      <select
+        name="estado"
+        value={form.estado}
+        onChange={handleChange}
+        className="w-full mb-5 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+      >
+        <option value="activo">Activo</option>
+        <option value="en_pruebas">En pruebas</option>
+        <option value="obsoleto">Obsoleto</option>
       </select>
 
       <button
