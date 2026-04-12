@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useArtefactos } from "../../../context/ArtefactosContext"
 import bg from "../../../assets/3.jpg"
-import SaiyanParticles from "../../../components/SaiyanParticles"
 import esfera from "../../../assets/7.webp"
 
 const HOLD_DURATION = 3000
@@ -10,16 +9,21 @@ const HOLD_DURATION = 3000
 const ArtefactoEliminar = () => {
   const navigate = useNavigate()
   const { id } = useParams()
+  const { getArtefactoById, deactivateArtefacto } = useArtefactos()
 
-  const { artefactos, deactivateArtefacto } = useArtefactos()
-
-  const artefacto = artefactos.find(a => a.id === id)
+  const artefacto = getArtefactoById(Number(id))
 
   const [progreso, setProgreso] = useState(0)
   const [holding, setHolding] = useState(false)
 
   const intervalRef = useRef<any>(null)
   const startTimeRef = useRef<number | null>(null)
+
+  const confirmar = async () => {
+    if (!id) return
+    await deactivateArtefacto(id)
+    navigate("/artefactos")
+  }
 
   const startHold = () => {
     setHolding(true)
@@ -33,7 +37,6 @@ const ArtefactoEliminar = () => {
 
       if (pct >= 100) {
         clearInterval(intervalRef.current)
-        setHolding(false)
         confirmar()
       }
     }, 30)
@@ -45,118 +48,47 @@ const ArtefactoEliminar = () => {
     setProgreso(0)
   }
 
-  const confirmar = async () => {
-    if (!id) return
-
-    await deactivateArtefacto(id)
-    navigate("/artefactos")
-  }
-
-  useEffect(() => {
-    return () => clearInterval(intervalRef.current)
-  }, [])
-
-  if (!artefacto) {
-    return <div className="text-white p-10">Cargando...</div>
-  }
+  if (!artefacto) return <div className="text-white p-10">Cargando...</div>
 
   return (
-    <div
-      className="h-screen w-screen flex items-center justify-center text-white relative overflow-hidden"
-      style={{
-        backgroundImage: `url(${bg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center"
-      }}
+    <div className="min-h-screen flex items-center justify-center text-white"
+      style={{ backgroundImage: `url(${bg})`, backgroundSize: "cover" }}
     >
-      {/* overlay */}
       <div className="absolute inset-0 bg-black/80"></div>
 
-      <SaiyanParticles />
-
-      {/* BOTÓN VOLVER */}
-      <div className="fixed top-20 right-5 z-50">
-        <button
-          onClick={() => navigate("/artefactos")}
-          className="flex flex-col items-center"
-        >
-          <img src={esfera} className="w-12 drop-shadow-[0_0_10px_orange]" />
-          <span className="text-yellow-300 text-sm font-bold">
-            Volver
-          </span>
+      <div className="fixed top-20 right-5">
+        <button onClick={() => navigate("/artefactos")}>
+          <img src={esfera} className="w-12" />
         </button>
       </div>
 
-      {/* CARD */}
-      <div className="relative z-10 bg-black/80 p-6 rounded-xl border border-red-500 w-80 max-h-[90vh] overflow-hidden">
+      <div className="relative z-10 bg-black/80 p-6 rounded-xl border border-red-500 w-80">
 
         <h2 className="text-red-400 text-xl mb-3">
           Desactivar Artefacto
         </h2>
 
-        <p className="font-bold">{artefacto.name}</p>
-        <p className="text-sm text-gray-300 mb-2">
-          {artefacto.description}
+        <p>{artefacto.nombre}</p>
+
+        <p className={artefacto.estado === "obsoleto" ? "text-red-400" : "text-green-400"}>
+          {artefacto.estado === "obsoleto" ? "Inactivo" : "Activo"}
         </p>
 
-        <p
-          className={
-            artefacto.state === "Activo"
-              ? "text-green-400"
-              : "text-red-400"
-          }
-        >
-          {artefacto.state}
-        </p>
-
-        {/* 🔥 CÍRCULO CON HUELLA */}
-        <div
-          className={`relative w-32 h-32 mx-auto mt-4 flex items-center justify-center rounded-full border-4
-          ${holding
-              ? "border-red-400 shadow-[0_0_30px_red]"
-              : "border-red-700/50"
-            }`}
-        >
-          <div
-            className={`absolute inset-0 rounded-full ${
-              holding ? "bg-red-500/20 animate-pulse" : ""
-            }`}
-          />
-
-          <svg
-            viewBox="0 0 24 24"
-            className={`w-12 h-12 transition-all
-            ${holding
-                ? "text-red-400 scale-110 drop-shadow-[0_0_10px_red]"
-                : "text-red-700"
-              }`}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            <path d="M12 3c-3 0-5 2-5 5 0 2 1 3 2 4 1 1 2 2 2 4" />
-            <path d="M12 3c3 0 5 2 5 5 0 2-1 3-2 4-1 1-2 2-2 4" />
-            <path d="M8 13c0 2 1 3 2 4" />
-            <path d="M16 13c0 2-1 3-2 4" />
-          </svg>
+        <div className="w-32 h-32 mx-auto mt-4 border rounded-full flex items-center justify-center">
+          🖐
         </div>
 
-        {/* BOTÓN */}
         <button
           onMouseDown={startHold}
           onMouseUp={stopHold}
           onMouseLeave={stopHold}
-          className="mt-4 px-6 py-2 border border-red-500 text-red-400 rounded w-full"
+          className="mt-4 w-full border border-red-500 py-2"
         >
-          {holding ? "Manteniendo..." : "Mantener para desactivar"}
+          Mantener para desactivar
         </button>
 
-        {/* BARRA */}
-        <div className="w-full bg-gray-700 h-2 mt-2 rounded overflow-hidden">
-          <div
-            className="bg-red-500 h-2 transition-all"
-            style={{ width: `${progreso}%` }}
-          />
+        <div className="w-full bg-gray-700 h-2 mt-2">
+          <div className="bg-red-500 h-2" style={{ width: `${progreso}%` }} />
         </div>
 
       </div>

@@ -9,28 +9,23 @@ const ArtefactoCreate = () => {
   const navigate = useNavigate();
   const { addArtefacto } = useArtefactos();
 
-  const handleCreate = async (data: any) => {
-    await addArtefacto(data);
+  const handleCreate = (data: any) => {
+    addArtefacto(data);
     navigate("/artefactos");
   };
 
   return (
     <div
       className="h-screen w-screen flex justify-center items-center text-white relative"
-      style={{
-        backgroundImage: `url(${bg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+      style={{ backgroundImage: `url(${bg})`, backgroundSize: "cover" }}
     >
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-black/70"></div>
 
       <SaiyanParticles />
 
       <div className="fixed top-20 right-5 z-50">
         <button onClick={() => navigate("/home")} className="flex flex-col items-center">
-          <img src={esfera} className="w-12 drop-shadow-[0_0_10px_orange]" />
-          <span className="text-yellow-300 text-sm font-bold">Volver</span>
+          <img src={esfera} className="w-12" />
         </button>
       </div>
 

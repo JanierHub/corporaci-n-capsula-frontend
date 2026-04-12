@@ -1,14 +1,15 @@
-import { api } from "../../../config/api";
+export const registerUser = async (data: any) => {
+  const res = await fetch("http://localhost:3000/api/v1/user", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      nombre: data.name,
+      edad: Number(data.age || 18),
+      contraseña: data.password,
+    }),
+  });
 
-export const login = async (data: {
-  userId: string;
-  password: string;
-  authHash: string;
-}) => {
-  const res = await api.post("/auth/login", data);
-
-  return {
-    role: res.data.data,
-    message: res.data.message,
-  };
+  return res.json();
 };

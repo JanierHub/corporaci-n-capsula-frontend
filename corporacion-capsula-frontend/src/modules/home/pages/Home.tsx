@@ -6,10 +6,12 @@ import logo from "../../../assets/5.gif"
 const Home = () => {
   const navigate = useNavigate()
 
+  // 🔥 traer nombre guardado
+  const userName = localStorage.getItem("userName")
+
   return (
     <div className="relative w-full h-screen overflow-hidden text-white">
 
-      {/* 🎬 VIDEO FONDO */}
       <video
         autoPlay
         loop
@@ -19,19 +21,15 @@ const Home = () => {
         <source src={videoBg} type="video/mp4" />
       </video>
 
-      {/* overlay oscuro */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
 
-      {/* cápsula animada */}
       <img
         src={capsule}
         className="absolute top-10 right-10 w-24 animate-bounce opacity-70 z-10"
       />
 
-      {/* contenido */}
       <div className="relative z-10 flex w-full h-full">
 
-        {/* 🔵 PANEL IZQUIERDO */}
         <div className="w-1/2 flex items-center justify-center p-10">
 
           <div className="bg-black/40 border border-cyan-400 rounded-2xl p-8 w-full max-w-md backdrop-blur-xl">
@@ -43,8 +41,9 @@ const Home = () => {
                 className="w-28 mb-4 drop-shadow-[0_0_20px_cyan]"
               />
 
+              {/* 🔥 AQUÍ ESTÁ EL CAMBIO */}
               <h2 className="text-xl text-cyan-300">
-                Bienvenido, Usuario
+                Bienvenido, {userName || "Usuario"}
               </h2>
 
               <p className="text-gray-400 text-sm mb-6">
@@ -74,7 +73,6 @@ const Home = () => {
 
         </div>
 
-        {/* 🔵 PANEL DERECHO */}
         <div className="w-1/2 flex items-center justify-center">
 
           <div className="text-center max-w-md">
@@ -88,7 +86,6 @@ const Home = () => {
               Controla, crea y administra dispositivos con niveles de seguridad avanzados.
             </p>
 
-            {/* aura tipo ki */}
             <div className="mt-10 w-40 h-40 mx-auto bg-cyan-400 rounded-full blur-3xl opacity-30 animate-pulse"></div>
 
           </div>

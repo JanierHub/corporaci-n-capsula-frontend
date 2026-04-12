@@ -1,12 +1,6 @@
 import { useState } from "react";
-import { Artefacto } from "../types/artefacto.types";
 
-type Props = {
-  onSubmit: (data: Artefacto) => void;
-  initialData?: Partial<Artefacto>;
-};
-
-const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
+const ArtefactoForm = ({ onSubmit, initialData }: any) => {
 
   const [codigo, setCodigo] = useState(initialData?.code || "");
   const [nombre, setNombre] = useState(initialData?.name || "");
@@ -21,135 +15,104 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const data: Artefacto = {
-      code: codigo,
+    onSubmit({
       name: nombre,
       description: descripcion,
-      createdAt: fecha,
-      artifactType: tipoArtefacto,
-
-      category:
-        categoria === "Transporte" ? "TRANSPORT" :
-        categoria === "Energia" ? "ENERGY" :
-        categoria === "Defensa" ? "DEFENSE" :
-        categoria === "Domestica" ? "DOMESTIC" :
-        "ENERGY",
-
-      origin:
-        origen === "Saiyajin" ? "SAIYAJIN" :
-        origen === "Namekiano" ? "NAMEKIANO" :
-        "TERRICOLA",
-
-      inventor,
-
-      dangerLevel:
-        nivelPeligrosidad === "alto" ? "High" :
-        nivelPeligrosidad === "medio" ? "Mid" :
-        "Low",
-
-      confidentialityLevel: "Public",
-      state: "Activo",
-    };
-
-    onSubmit(data);
+      category: "ENERGY",
+      origin: "TERRICOLA",
+    });
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-black/70 p-6 rounded-xl border border-yellow-400 shadow-[0_0_20px_orange]"
+      className="bg-orange-900/80 border-4 border-orange-400 rounded-xl p-6 w-full max-w-4xl mx-auto shadow-[0_0_20px_orange]"
     >
 
-      <h2 className="text-2xl text-yellow-300 mb-4 font-bold">
-        Crear Artefacto
+      <h2 className="text-2xl text-yellow-300 font-bold mb-6 text-center">
+        Registrar Artefacto
       </h2>
 
-      {/* CODIGO */}
-      <input
-        placeholder="Código"
-        value={codigo}
-        onChange={(e) => setCodigo(e.target.value)}
-        className="w-full mb-3 p-2 bg-black border border-yellow-400 text-white rounded"
-      />
+      <div className="grid grid-cols-2 gap-4">
 
-      {/* NOMBRE */}
-      <input
-        placeholder="Nombre"
-        value={nombre}
-        onChange={(e) => setNombre(e.target.value)}
-        className="w-full mb-3 p-2 bg-black border border-yellow-400 text-white rounded"
-      />
+        <input
+          placeholder="Código"
+          value={codigo}
+          onChange={(e) => setCodigo(e.target.value)}
+          className="p-2 bg-black border border-orange-400 rounded text-white"
+        />
 
-      {/* DESCRIPCIÓN */}
-      <textarea
-        placeholder="Descripción"
-        value={descripcion}
-        onChange={(e) => setDescripcion(e.target.value)}
-        className="w-full mb-3 p-2 bg-black border border-yellow-400 text-white rounded"
-      />
+        <input
+          placeholder="Nombre"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          className="p-2 bg-black border border-orange-400 rounded text-white"
+        />
 
-      {/* FECHA */}
-      <input
-        type="date"
-        value={fecha}
-        onChange={(e) => setFecha(e.target.value)}
-        className="w-full mb-3 p-2 bg-black border border-yellow-400 text-white rounded"
-      />
+        <textarea
+          placeholder="Descripción"
+          value={descripcion}
+          onChange={(e) => setDescripcion(e.target.value)}
+          className="col-span-2 p-2 bg-black border border-orange-400 rounded text-white"
+        />
 
-      {/* TIPO */}
-      <input
-        placeholder="Tipo de artefacto"
-        value={tipoArtefacto}
-        onChange={(e) => setTipoArtefacto(e.target.value)}
-        className="w-full mb-3 p-2 bg-black border border-yellow-400 text-white rounded"
-      />
+        <input
+          type="date"
+          value={fecha}
+          onChange={(e) => setFecha(e.target.value)}
+          className="p-2 bg-black border border-orange-400 rounded text-white"
+        />
 
-      {/* CATEGORIA */}
-      <select
-        onChange={(e) => setCategoria(e.target.value)}
-        className="w-full mb-3 p-2 bg-black border border-yellow-400 text-white rounded"
-      >
-        <option>Seleccionar categoría</option>
-        <option>Transporte</option>
-        <option>Energia</option>
-        <option>Defensa</option>
-        <option>Domestica</option>
-      </select>
+        <input
+          placeholder="Tipo de artefacto"
+          value={tipoArtefacto}
+          onChange={(e) => setTipoArtefacto(e.target.value)}
+          className="p-2 bg-black border border-orange-400 rounded text-white"
+        />
 
-      {/* ORIGEN */}
-      <select
-        onChange={(e) => setOrigen(e.target.value)}
-        className="w-full mb-3 p-2 bg-black border border-yellow-400 text-white rounded"
-      >
-        <option>Seleccionar origen</option>
-        <option>Terricola</option>
-        <option>Saiyajin</option>
-        <option>Namekiano</option>
-      </select>
+        <select
+          onChange={(e) => setCategoria(e.target.value)}
+          className="p-2 bg-black border border-orange-400 rounded text-white"
+        >
+          <option>Categoría</option>
+          <option>Transporte</option>
+          <option>Energia</option>
+          <option>Defensa</option>
+          <option>Domestica</option>
+        </select>
 
-      {/* INVENTOR */}
-      <input
-        placeholder="Inventor"
-        value={inventor}
-        onChange={(e) => setInventor(e.target.value)}
-        className="w-full mb-3 p-2 bg-black border border-yellow-400 text-white rounded"
-      />
+        <select
+          onChange={(e) => setOrigen(e.target.value)}
+          className="p-2 bg-black border border-orange-400 rounded text-white"
+        >
+          <option>Origen</option>
+          <option>Terricola</option>
+          <option>Saiyajin</option>
+          <option>Namekiano</option>
+        </select>
 
-      {/* PELIGROSIDAD */}
-      <select
-        onChange={(e) => setNivelPeligrosidad(e.target.value)}
-        className="w-full mb-4 p-2 bg-black border border-yellow-400 text-white rounded"
-      >
-        <option>Seleccionar peligrosidad</option>
-        <option value="bajo">Bajo</option>
-        <option value="medio">Medio</option>
-        <option value="alto">Alto</option>
-      </select>
+        <input
+          placeholder="Inventor"
+          value={inventor}
+          onChange={(e) => setInventor(e.target.value)}
+          className="p-2 bg-black border border-orange-400 rounded text-white"
+        />
 
-      {/* BOTÓN */}
+        <select
+          onChange={(e) => setNivelPeligrosidad(e.target.value)}
+          className="p-2 bg-black border border-orange-400 rounded text-white"
+        >
+          <option>Nivel peligrosidad</option>
+          <option value="bajo">Bajo</option>
+          <option value="medio">Medio</option>
+          <option value="alto">Alto</option>
+        </select>
+
+      </div>
+
       <button
         type="submit"
-        className="w-full py-2 bg-yellow-400 text-black font-bold rounded hover:bg-orange-500 transition"
+        className="mt-6 w-full py-3 bg-yellow-400 text-black font-bold rounded hover:bg-orange-500 transition"
       >
         Guardar Artefacto
       </button>
