@@ -27,5 +27,6 @@ export function isAdministrator(): boolean {
 }
 
 export function canEditArtifacts(): boolean {
-  return normalizeRole(getStoredUserRole()).length > 0
+  const role = normalizeRole(getStoredUserRole())
+  return role === normalizeRole(ROLE_ADMINISTRADOR) || role === normalizeRole(ROLE_USUARIO)
 }

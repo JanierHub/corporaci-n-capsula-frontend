@@ -16,7 +16,6 @@ const defaultForm = (): Partial<Artefacto> => ({
   categoria: "defensa",
   origen: "terrestre",
   nivelPeligrosidad: 1,
-  nivelConfidencialidad: 1,
   estado: "activo",
 })
 
@@ -51,7 +50,7 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
       ...form,
       [name]:
         name === "nivelPeligrosidad" || name === "nivelConfidencialidad"
-          ? Number(value)
+          ? (value === "" ? undefined : Number(value))
           : value,
     })
   }
@@ -141,7 +140,7 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
       <p className="text-orange-200/80 text-xs text-center mb-5">
         Campos alineados con POST <code className="text-yellow-200">/api/v1/artifacts</code>:
         nombre_artefacto, descripcion, fecha_creacion, id_tipo, id_categoria, origen, nivel_peligrosidad,
-        confidentialityLevel opcional.
+        y <code className="text-yellow-200">confidentialityLevel</code> opcional solo al crear.
       </p>
 
       {error ? (
@@ -270,18 +269,25 @@ const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
           <option value={5}>5 — Destrucción masiva</option>
         </select>
 
-        <select
-          name="nivelConfidencialidad"
-          value={form.nivelConfidencialidad || ""}
-          onChange={handleChange}
-          className={inputClass}
-        >
-          <option value="">confidentialityLevel (opcional en API)</option>
-          <option value={1}>Public</option>
-          <option value={2}>Restricted</option>
-          <option value={3}>Confidential</option>
-          <option value={4}>Ultra-confidential</option>
-        </select>
+        {!initialData ? (
+          <select
+            name="nivelConfidencialidad"
+            value={form.nivelConfidencialidad ?? ""}
+            onChange={handleChange}
+            className={inputClass}
+          >
+            <option value="">confidentialityLevel (opcional en API)</option>
+            <option value={1}>Public</option>
+            <option value={2}>Restricted</option>
+            <option value={3}>Confidential</option>
+            <option value={4}>Ultra-confidential</option>
+          </select>
+        ) : (
+          <div className="text-xs text-orange-100/80 rounded border border-orange-500/30 bg-black/20 px-3 py-2">
+            La confidencialidad no se actualiza desde el API actual; en edición solo enviamos
+            nombre, descripción, categoría, origen, nivel de peligrosidad y estado.
+          </div>
+        )}
       </div>
 
       <button

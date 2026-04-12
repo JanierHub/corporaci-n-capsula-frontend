@@ -74,6 +74,11 @@ const parseNivel = (value: unknown, fallback: number) => {
   return fallback
 }
 
+const parseOptionalNivel = (value: unknown): number | undefined => {
+  if (value === undefined || value === null || value === "") return undefined
+  return parseNivel(value, 1)
+}
+
 const today = () => new Date().toISOString().split("T")[0]
 
 /** Backend crea con `YYYY-MM-DD`; la BD puede devolver `dd/mm/aaaa`. */
@@ -167,9 +172,8 @@ export const normalizeArtefacto = (item: ArtefactoApi): Artefacto => ({
   categoria: normalizeCategoria(item.id_categoria ?? item.categoria ?? item.category),
   origen: normalizeOrigen(item.origen ?? item.origin ?? item.source),
   nivelPeligrosidad: parseNivel(item.nivelPeligrosidad ?? item.dangerLevel ?? item.nivel_peligrosidad, 1),
-  nivelConfidencialidad: parseNivel(
-    item.nivelConfidencialidad ?? item.confidentialityLevel ?? item.nivel_confidencialidad ?? item.confidentiality_level,
-    1
+  nivelConfidencialidad: parseOptionalNivel(
+    item.nivelConfidencialidad ?? item.confidentialityLevel ?? item.nivel_confidencialidad ?? item.confidentiality_level
   ),
   estado: normalizeEstado(item.estado ?? item.state ?? item.status),
   inventor: item.inventor ?? item.creator ?? item.createdBy ?? item.nombre_usuario ?? "",
@@ -217,7 +221,9 @@ const toCreatePayload = (data: Partial<Artefacto>) => {
     id_categoria: categoriaToIdCategoria(data.categoria),
     origen: origenToBackend(data.origen),
     nivel_peligrosidad: Math.min(5, Math.max(1, Number(data.nivelPeligrosidad ?? 1))) as 1 | 2 | 3 | 4 | 5,
-    confidentialityLevel: confidentialityToBackend(data.nivelConfidencialidad),
+    ...(data.nivelConfidencialidad
+      ? { confidentialityLevel: confidentialityToBackend(data.nivelConfidencialidad) }
+      : {}),
   }
 }
 

@@ -54,7 +54,7 @@ const Home = () => {
                 Sistema Capsule Corp
                 {!isAdmin && userRole ? (
                   <span className="block mt-2 text-amber-200/90">
-                    Tu rol no incluye gestión de artefactos en el API; ver inventario puede estar limitado.
+                    Tu rol puede consultar y editar artefactos, pero no crear ni cambiar su estado.
                   </span>
                 ) : null}
               </p>

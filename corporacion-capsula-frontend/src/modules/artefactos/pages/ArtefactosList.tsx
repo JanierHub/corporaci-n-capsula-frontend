@@ -6,6 +6,21 @@ import bg from "../../../assets/3.jpg"
 import esfera from "../../../assets/7.webp"
 import { gifPorIdTipo } from "../constants/artifactVisuals"
 
+const confidentialityLabel = (value?: number) => {
+  switch (value) {
+    case 1:
+      return "Public"
+    case 2:
+      return "Restricted"
+    case 3:
+      return "Confidential"
+    case 4:
+      return "Ultra-confidential"
+    default:
+      return "No definido"
+  }
+}
+
 const ArtefactosList = () => {
   const navigate = useNavigate()
   const { artefactos, loadArtefactos, toggleArtefactoEstado } = useArtefactos()
@@ -141,7 +156,7 @@ const ArtefactosList = () => {
                 <p>⚙ {selected.categoria}</p>
                 <p>🌍 {selected.origen}</p>
                 <p>⚠ {selected.nivelPeligrosidad}</p>
-                <p>🔐 {selected.nivelConfidencialidad}</p>
+                <p>🔐 {confidentialityLabel(selected.nivelConfidencialidad)}</p>
                 <p>🧪 {selected.inventor || "No definido"}</p>
                 <p>
                   📊{" "}
