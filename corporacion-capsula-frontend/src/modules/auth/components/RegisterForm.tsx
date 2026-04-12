@@ -89,7 +89,7 @@ const RegisterForm = () => {
             <span className="text-cyan-300">age</span>, <span className="text-cyan-300">idrol</span>,{" "}
             <span className="text-cyan-300">pass</span> y <span className="text-cyan-300">authType</span>.
           </p>
-<p> hola</p>
+
           <input
             className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
             placeholder="Nombre (name)"
