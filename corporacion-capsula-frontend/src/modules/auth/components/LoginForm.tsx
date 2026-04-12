@@ -1,44 +1,46 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 
 import bg from "../../../assets/3.jpg"
 import logo from "../../../assets/5.gif"
 import capsule from "../../../assets/13.gif"
+import { loginUser } from "../services/authService"
+import { persistSessionFromLoginResponse, SESSION_USER_NAME_KEY } from "../utils/roles"
 
 const LoginForm = () => {
   const navigate = useNavigate()
+  const location = useLocation()
 
-  const [name, setName] = useState("")
+  const [userName, setUserName] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
 
   const handleSubmit = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/v1/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          userId: name,
-          password,
-          authHash: "test",
-        }),
+      const session = await loginUser({
+        userName: userName.trim(),
+        password,
       })
 
-      const data = await res.json()
-
-      console.log("LOGIN:", data)
-
-      if (res.ok) {
-        localStorage.setItem("userName", name) // 🔥 guardar nombre
-        navigate("/home")
-      } else {
-        alert("Credenciales incorrectas")
-      }
-
-    } catch (error) {
-      alert("Error de conexión")
+      localStorage.setItem(SESSION_USER_NAME_KEY, userName.trim())
+      persistSessionFromLoginResponse(session)
+      setError("")
+      const state = location.state as { from?: string } | undefined
+      const raw = state?.from
+      const safePath =
+        typeof raw === "string" &&
+        raw.startsWith("/") &&
+        !raw.startsWith("//")
+          ? raw
+          : "/home"
+      navigate(safePath, { replace: true })
+    } catch (err) {
+      console.error("Error al iniciar sesion:", err)
+      setError(
+        err instanceof Error
+          ? err.message
+          : "No se pudo iniciar sesion."
+      )
     }
   }
 
@@ -72,8 +74,9 @@ const LoginForm = () => {
           <input
             className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
             placeholder="Nombre"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            autoComplete="username"
           />
 
           <input
@@ -82,7 +85,16 @@ const LoginForm = () => {
             placeholder="Contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
           />
+
+          <p className="text-gray-400 text-xs mb-5">
+            En esta version, los usuarios nuevos los crea un administrador autenticado desde el sistema.
+          </p>
+
+          {error ? (
+            <p className="mb-4 text-sm text-red-300">{error}</p>
+          ) : null}
 
           <button
             className="w-full bg-cyan-400 text-black p-3 rounded-lg font-bold"
@@ -92,13 +104,7 @@ const LoginForm = () => {
           </button>
 
           <p className="text-gray-300 text-sm text-center mt-6">
-            ¿No tienes cuenta?{" "}
-            <span
-              className="text-cyan-400 cursor-pointer hover:underline"
-              onClick={() => navigate("/register")}
-            >
-              Regístrate
-            </span>
+            Si necesitas un usuario nuevo, debe crearlo un administrador desde dentro del sistema.
           </p>
 
         </div>

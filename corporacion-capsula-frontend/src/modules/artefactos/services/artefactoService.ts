@@ -1,7 +1,10 @@
 import { API_URL } from "../../../config/api"
+import { getBearerAuthHeader } from "../../auth/utils/roles"
 import { Artefacto } from "../types/artefacto.types"
+import { enriquecerArtefactoConImagen } from "../utils/artefactoImagenes"
 
-const API_CANDIDATES = [`${API_URL}/artefactos`, `${API_URL}/artifacts`]
+/** El backend expone `artifacts` (401 sin token); `artefactos` suele ser 404. */
+const API_CANDIDATES = [`${API_URL}/artifacts`, `${API_URL}/artefactos`]
 const REQUEST_TIMEOUT = 5000
 
 type ArtefactoApi = Partial<Artefacto> & {
@@ -18,6 +21,7 @@ type ArtefactoApi = Partial<Artefacto> & {
   categoriaNombre?: string
   categoryName?: string
   id_categoria?: number | string
+  id_tipo?: number | string
   origin?: string
   origen?: string
   source?: string
@@ -27,8 +31,9 @@ type ArtefactoApi = Partial<Artefacto> & {
   nivel_confidencialidad?: number | string
   confidentiality_level?: number | string
   state?: string
-  estado?: string
+  estado?: string | boolean
   status?: string
+  nombre_artefacto?: string
   createdAt?: string
   fecha_creacion?: string
   fechaCreacion?: string
@@ -67,6 +72,19 @@ const normalizeCategoria = (value: unknown): Artefacto["categoria"] => {
   return "defensa"
 }
 
+/** `id_categoria` en BD (backend artifactSchema categoryEnum 1–4). */
+const categoriaFromId = (id: unknown): Artefacto["categoria"] | undefined => {
+  const n = typeof id === "string" ? Number(id) : typeof id === "number" ? id : NaN
+  if (Number.isNaN(n)) return undefined
+  const map: Record<number, Artefacto["categoria"]> = {
+    1: "transporte",
+    2: "domestico",
+    3: "energia",
+    4: "defensa",
+  }
+  return map[n]
+}
+
 const normalizeOrigen = (value: unknown): Artefacto["origen"] => {
   const origen = String(value ?? "").toLowerCase()
   if (origen.includes("terri")) return "terrestre"
@@ -74,25 +92,69 @@ const normalizeOrigen = (value: unknown): Artefacto["origen"] => {
 }
 
 const normalizeEstado = (value: unknown): NonNullable<Artefacto["estado"]> => {
+  if (value === false) return "obsoleto"
+  if (value === true) return "activo"
   const estado = String(value ?? "").toLowerCase()
   if (estado.includes("prueba")) return "en_pruebas"
   if (estado.includes("obsoleto") || estado.includes("inactive")) return "obsoleto"
   return "activo"
 }
 
-export const normalizeArtefacto = (item: ArtefactoApi): Artefacto => ({
-  id: Number(item.id ?? item.artifactId ?? item.id_artefacto ?? 0),
-  nombre: item.nombre ?? item.name ?? "Artefacto sin nombre",
-  descripcion: item.descripcion ?? item.description ?? "",
-  categoria: item.categoria ?? normalizeCategoria(item.category),
-  origen: item.origen ?? normalizeOrigen(item.origin),
-  nivelPeligrosidad: parseNivel(item.dangerLevel ?? item.nivel_peligrosidad, 1),
-  nivelConfidencialidad: parseNivel(item.confidentialityLevel ?? item.nivel_confidencialidad, 1),
-  estado: item.estado ?? normalizeEstado(item.state),
-  inventor: item.inventor ?? item.creator ?? "",
-  fechaCreacion: item.fechaCreacion ?? item.createdAt ?? "",
-  fechaActualizacion: item.fechaActualizacion ?? item.updatedAt ?? "",
-})
+export const normalizeArtefacto = (item: ArtefactoApi): Artefacto => {
+  const rawOrigen =
+    typeof item.origen === "string" && item.origen.trim()
+      ? item.origen.trim()
+      : undefined
+  const idCat =
+    typeof item.id_categoria === "number"
+      ? item.id_categoria
+      : typeof item.id_categoria === "string"
+        ? Number(item.id_categoria)
+        : undefined
+  const idTipoNum =
+    typeof item.id_tipo === "number"
+      ? item.id_tipo
+      : typeof item.id_tipo === "string"
+        ? Number(item.id_tipo)
+        : undefined
+
+  return {
+    id: Number(item.id ?? item.artifactId ?? item.id_artefacto ?? 0),
+    nombre:
+      item.nombre ??
+      item.name ??
+      item.nombre_artefacto ??
+      item.nombre_Artefacto ??
+      "Artefacto sin nombre",
+    descripcion: item.descripcion ?? item.description ?? "",
+    categoria:
+      item.categoria ??
+      categoriaFromId(item.id_categoria) ??
+      normalizeCategoria(item.category),
+    origen: rawOrigen
+      ? normalizeOrigen(rawOrigen)
+      : item.origen
+        ? normalizeOrigen(item.origen)
+        : normalizeOrigen(item.origin),
+    origenDb: rawOrigen,
+    nivelPeligrosidad: parseNivel(item.dangerLevel ?? item.nivel_peligrosidad, 1),
+    nivelConfidencialidad: parseNivel(
+      item.confidentialityLevel ?? item.nivel_confidencialidad,
+      1
+    ),
+    estado:
+      typeof item.estado === "boolean"
+        ? normalizeEstado(item.estado)
+        : item.estado ?? normalizeEstado(item.state ?? item.status),
+    inventor: item.inventor ?? item.creator ?? "",
+    fechaCreacion:
+      item.fechaCreacion ?? item.createdAt ?? item.fecha_creacion ?? "",
+    fechaActualizacion:
+      item.fechaActualizacion ?? item.updatedAt ?? item.fecha_actualizacion ?? "",
+    idCategoria: Number.isFinite(idCat as number) ? idCat : undefined,
+    idTipo: Number.isFinite(idTipoNum as number) ? idTipoNum : undefined,
+  }
+}
 
 const artefactosMock: Artefacto[] = [
   normalizeArtefacto({
@@ -111,9 +173,19 @@ const artefactosMock: Artefacto[] = [
 const fetchWithTimeout = async (input: RequestInfo | URL, init?: RequestInit) => {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
+  const headers = new Headers(init?.headers)
+  const auth = getBearerAuthHeader()
+  if (auth) {
+    Object.entries(auth).forEach(([k, v]) => headers.set(k, v))
+  }
 
   try {
-    return await fetch(input, { ...init, signal: controller.signal })
+    return await fetch(input, {
+      ...init,
+      credentials: "include",
+      headers,
+      signal: controller.signal,
+    })
   } finally {
     clearTimeout(timeoutId)
   }
@@ -132,7 +204,7 @@ const requestFirstAvailable = async () => {
   for (const baseUrl of API_CANDIDATES) {
     try {
       const res = await fetchWithTimeout(baseUrl)
-      if (res.ok) return res
+      if (res.status !== 404) return res
     } catch {}
   }
   throw new Error("No API disponible")
@@ -142,42 +214,231 @@ const requestFirstAvailable = async () => {
 export const getArtefactos = async (): Promise<Artefacto[]> => {
   try {
     const response = await requestFirstAvailable()
+
+    if (!response.ok) {
+      const body = await parseJsonSafely(response)
+      console.error("Error API:", response.status, body)
+      return []
+    }
+
     const data = await parseJsonSafely(response)
 
     console.log("DATA API:", data)
 
-    const payload =
-      Array.isArray(data)
-        ? data
-        : Array.isArray(data?.data)
-        ? data.data
-        : Array.isArray(data?.artifacts)
-        ? data.artifacts
-        : Array.isArray(data?.artefactos)
-        ? data.artefactos
-        : []
+    const extractPayload = (raw: unknown): unknown[] => {
+      if (Array.isArray(raw)) return raw
+      if (!raw || typeof raw !== "object") return []
+      const o = raw as Record<string, unknown>
+      const keys = [
+        "data",
+        "artifacts",
+        "artefactos",
+        "rows",
+        "items",
+        "results",
+        "result",
+        "records",
+      ] as const
+      for (const k of keys) {
+        const v = o[k]
+        if (Array.isArray(v)) return v
+      }
+      const nested = o.data ?? o.payload
+      if (nested && typeof nested === "object" && !Array.isArray(nested)) {
+        const inner = extractPayload(nested)
+        if (inner.length > 0) return inner
+      }
+      return []
+    }
+
+    const payload = extractPayload(data)
 
     if (!payload || payload.length === 0) {
       console.warn("Usando mock porque API está vacía")
-      return artefactosMock
+      return artefactosMock.map(enriquecerArtefactoConImagen)
     }
 
-    return payload.map(normalizeArtefacto)
+    return payload.map(normalizeArtefacto).map(enriquecerArtefactoConImagen)
 
   } catch (error) {
     console.error("Error API:", error)
-    return artefactosMock
+    return []
   }
 }
 
-export const createArtefacto = async (data: Partial<Artefacto>) => {
-  return normalizeArtefacto({ ...data, id: Date.now() })
+const extractCreateError = (payload: unknown) => {
+  if (payload && typeof payload === "object" && "message" in payload) {
+    const m = (payload as { message: unknown }).message
+    if (typeof m === "string" && m.trim()) return m
+    if (Array.isArray(m)) {
+      const parts = m
+        .map((item) => {
+          if (!item || typeof item !== "object") return null
+          const field = "field" in item ? String((item as { field?: string }).field ?? "") : ""
+          const msg = "message" in item ? String((item as { message?: string }).message ?? "") : ""
+          return [field, msg].filter(Boolean).join(": ")
+        })
+        .filter(Boolean)
+      if (parts.length) return parts.join(" | ")
+    }
+  }
+  return "No se pudo crear el artefacto"
 }
 
-export const updateArtefactoRequest = async (id: number, data: Partial<Artefacto>) => {
-  return normalizeArtefacto({ ...data, id })
+/** POST al backend; devuelve el `id_artefacto` creado o null. */
+export const createArtefacto = async (
+  data: Partial<Artefacto> & { imagenDataUrl?: string | null }
+): Promise<number | null> => {
+  const { imagenDataUrl: _img, ...fields } = data
+  const rawFecha = (fields.fechaCreacion ?? "").trim().slice(0, 10)
+  const fechaCreacion = /^\d{4}-\d{2}-\d{2}$/.test(rawFecha)
+    ? rawFecha
+    : new Date().toISOString().slice(0, 10)
+
+  const idCat = fields.idCategoria ?? 1
+  const idTipo = fields.idTipo ?? 1
+  const np = fields.nivelPeligrosidad ?? 1
+  const o = (fields.origenDb ?? "TERRICOLA").toUpperCase()
+  const origen =
+    o === "TERRICOLA" || o === "SAIYAJIN" || o === "NAMEKIANO" ? o : "TERRICOLA"
+
+  const nombre = fields.nombre?.trim() ?? ""
+  const descripcion = fields.descripcion?.trim() ?? ""
+  if (!nombre || !descripcion) {
+    throw new Error("Nombre y descripción son obligatorios.")
+  }
+
+  const body = {
+    nombre_artefacto: nombre,
+    descripcion,
+    fecha_creacion: fechaCreacion,
+    id_tipo: idTipo,
+    id_categoria: idCat,
+    origen,
+    nivel_peligrosidad: np,
+  }
+
+  const res = await fetchWithTimeout(`${API_URL}/artifacts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+
+  if (!res.ok) {
+    const err = await parseJsonSafely(res)
+    console.error("POST artefacto:", res.status, err)
+    throw new Error(extractCreateError(err))
+  }
+
+  const raw = await parseJsonSafely(res)
+  const row =
+    raw &&
+    typeof raw === "object" &&
+    "data" in raw &&
+    (raw as { data?: unknown }).data &&
+    typeof (raw as { data: unknown }).data === "object"
+      ? (raw as { data: ArtefactoApi }).data
+      : null
+  if (row && typeof row === "object") {
+    const nid = Number((row as ArtefactoApi).id_artefacto ?? (row as ArtefactoApi).id ?? 0)
+    return Number.isFinite(nid) && nid > 0 ? nid : null
+  }
+  return null
 }
 
-export const deleteArtefacto = async () => {
-  return true
+export const fetchArtefactoById = async (id: number): Promise<Artefacto | null> => {
+  try {
+    const res = await fetchWithTimeout(`${API_URL}/artifacts/${id}`)
+    if (!res.ok) return null
+    const raw = await parseJsonSafely(res)
+    if (!raw || typeof raw !== "object") return null
+    return enriquecerArtefactoConImagen(normalizeArtefacto(raw as ArtefactoApi))
+  } catch {
+    return null
+  }
+}
+
+type PatchBody = {
+  nombre_artefacto?: string
+  descripcion?: string
+  id_categoria?: number
+  origen?: string
+  nivel_peligrosidad?: number
+  estado?: boolean
+}
+
+const estadoToBool = (e: Artefacto["estado"] | undefined): boolean | undefined => {
+  if (e === undefined) return undefined
+  return e !== "obsoleto"
+}
+
+export const updateArtefactoRequest = async (
+  id: number,
+  data: Partial<Artefacto> & { imagenDataUrl?: string | null }
+) => {
+  const { imagenDataUrl: _i, ...patch } = data
+  const body: PatchBody = {}
+  if (patch.nombre !== undefined) body.nombre_artefacto = patch.nombre
+  if (patch.descripcion !== undefined) body.descripcion = patch.descripcion
+  if (patch.idCategoria !== undefined) body.id_categoria = patch.idCategoria
+  if (patch.origenDb !== undefined) body.origen = patch.origenDb
+  if (patch.nivelPeligrosidad !== undefined) body.nivel_peligrosidad = patch.nivelPeligrosidad
+  const est = estadoToBool(patch.estado)
+  if (est !== undefined) body.estado = est
+
+  try {
+    const res = await fetchWithTimeout(`${API_URL}/artifacts/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) {
+      const errBody = await parseJsonSafely(res)
+      console.error("PATCH artefacto:", res.status, errBody)
+      return normalizeArtefacto({ ...patch, id } as ArtefactoApi)
+    }
+    const raw = await parseJsonSafely(res)
+    const row =
+      raw &&
+      typeof raw === "object" &&
+      "data" in raw &&
+      (raw as { data?: unknown }).data &&
+      typeof (raw as { data?: unknown }).data === "object"
+        ? (raw as { data: ArtefactoApi }).data
+        : raw
+    if (row && typeof row === "object") {
+      return normalizeArtefacto(row as ArtefactoApi)
+    }
+  } catch (e) {
+    console.error("updateArtefactoRequest", e)
+  }
+  return normalizeArtefacto({ ...patch, id } as ArtefactoApi)
+}
+
+export const deleteArtefacto = async (id: number): Promise<Artefacto | null> => {
+  try {
+    const res = await fetchWithTimeout(`${API_URL}/artifacts/${id}`, {
+      method: "DELETE",
+    })
+    if (!res.ok) {
+      const errBody = await parseJsonSafely(res)
+      console.error("DELETE artefacto:", res.status, errBody)
+      return null
+    }
+    const raw = await parseJsonSafely(res)
+    const row =
+      raw &&
+      typeof raw === "object" &&
+      "data" in raw &&
+      (raw as { data?: unknown }).data &&
+      typeof (raw as { data?: unknown }).data === "object"
+        ? (raw as { data: ArtefactoApi }).data
+        : raw
+    if (row && typeof row === "object") {
+      return normalizeArtefacto(row as ArtefactoApi)
+    }
+  } catch (e) {
+    console.error("deleteArtefacto", e)
+  }
+  return null
 }

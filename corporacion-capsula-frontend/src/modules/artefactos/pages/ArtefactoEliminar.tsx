@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useArtefactos } from "../../../context/ArtefactosContext"
+import { isAdministrator } from "../../auth/utils/roles"
 import bg from "../../../assets/3.jpg"
 import esfera from "../../../assets/7.webp"
 
@@ -46,6 +47,27 @@ const ArtefactoEliminar = () => {
     clearInterval(intervalRef.current)
     setHolding(false)
     setProgreso(0)
+  }
+
+  if (!isAdministrator()) {
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center text-white p-8"
+        style={{ backgroundImage: `url(${bg})`, backgroundSize: "cover" }}
+      >
+        <div className="absolute inset-0 bg-black/80" />
+        <div className="relative z-10 text-center max-w-md">
+          <p className="text-lg mb-4">Solo un administrador puede desactivar artefactos.</p>
+          <button
+            type="button"
+            className="px-4 py-2 bg-orange-500 rounded-lg font-bold"
+            onClick={() => navigate("/artefactos")}
+          >
+            Volver al inventario
+          </button>
+        </div>
+      </div>
+    )
   }
 
   if (!artefacto) return <div className="text-white p-10">Cargando...</div>

@@ -9,10 +9,15 @@ const ArtefactoCreate = () => {
   const navigate = useNavigate();
   const { addArtefacto } = useArtefactos();
 
-  const handleCreate = (data: any) => {
-    addArtefacto(data);
-    navigate("/artefactos");
-  };
+  const handleCreate = async (data: Parameters<typeof addArtefacto>[0]) => {
+    try {
+      await addArtefacto(data)
+      navigate("/artefactos")
+    } catch (e) {
+      console.error(e)
+      window.alert(e instanceof Error ? e.message : "No se pudo crear el artefacto.")
+    }
+  }
 
   return (
     <div
@@ -30,7 +35,7 @@ const ArtefactoCreate = () => {
       </div>
 
       <div className="relative z-10 w-full px-20">
-        <ArtefactoForm onSubmit={handleCreate} />
+        <ArtefactoForm mode="create" onSubmit={handleCreate} />
       </div>
     </div>
   );

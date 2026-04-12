@@ -1,8 +1,22 @@
 import { useNavigate } from "react-router-dom"
 import logo from "../assets/5.gif"
+import { logoutUser } from "../modules/auth/services/authService"
+import { clearStoredSession, getStoredUserRole } from "../modules/auth/utils/roles"
 
 const Navbar = () => {
   const navigate = useNavigate()
+  const userRole = getStoredUserRole()
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser()
+    } catch (error) {
+      console.error("No se pudo cerrar sesion en backend:", error)
+    } finally {
+      clearStoredSession()
+      navigate("/")
+    }
+  }
 
   return (
     <div className="fixed top-0 left-0 w-full z-50 bg-black/60 backdrop-blur-md border-b border-cyan-400">
@@ -20,13 +34,20 @@ const Navbar = () => {
           </span>
         </div>
 
-        {/* SOLO LOGOUT */}
-        <button
-          onClick={() => navigate("/")}
-          className="text-red-400 hover:text-red-600 transition font-bold"
-        >
-          Logout
-        </button>
+        <div className="flex items-center gap-4">
+          {userRole ? (
+            <span className="text-cyan-200 text-sm">
+              Rol: {userRole}
+            </span>
+          ) : null}
+
+          <button
+            onClick={handleLogout}
+            className="text-red-400 hover:text-red-600 transition font-bold"
+          >
+            Logout
+          </button>
+        </div>
 
       </div>
     </div>

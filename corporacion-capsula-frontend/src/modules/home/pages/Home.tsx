@@ -2,12 +2,14 @@ import { useNavigate } from "react-router-dom"
 import videoBg from "../../../assets/14.mp4"
 import capsule from "../../../assets/13.gif"
 import logo from "../../../assets/5.gif"
+import { getStoredUserName, getStoredUserRole, isAdministrator } from "../../auth/utils/roles"
 
 const Home = () => {
   const navigate = useNavigate()
 
-  // 🔥 traer nombre guardado
-  const userName = localStorage.getItem("userName")
+  const userName = getStoredUserName()
+  const userRole = getStoredUserRole()
+  const isAdmin = isAdministrator()
 
   return (
     <div className="relative w-full h-screen overflow-hidden text-white">
@@ -50,6 +52,10 @@ const Home = () => {
                 Sistema Capsule Corp
               </p>
 
+              <p className="text-cyan-200/90 text-xs mb-6">
+                Rol actual: {userRole || "Sin rol"}
+              </p>
+
             </div>
 
             <div className="flex flex-col gap-4">
@@ -61,12 +67,27 @@ const Home = () => {
                 Ver Inventario
               </button>
 
-              <button
-                onClick={() => navigate("/create")}
-                className="border border-cyan-400 py-3 rounded-lg hover:bg-cyan-400 hover:text-black transition"
-              >
-                Crear Artefacto
-              </button>
+              {isAdmin ? (
+                <>
+                  <button
+                    onClick={() => navigate("/create")}
+                    className="border border-cyan-400 py-3 rounded-lg hover:bg-cyan-400 hover:text-black transition"
+                  >
+                    Crear Artefacto
+                  </button>
+
+                  <button
+                    onClick={() => navigate("/register")}
+                    className="border border-emerald-400 py-3 rounded-lg hover:bg-emerald-400 hover:text-black transition"
+                  >
+                    Crear Usuario
+                  </button>
+                </>
+              ) : (
+                <div className="border border-cyan-400/40 py-3 px-4 rounded-lg text-sm text-gray-300 bg-black/20">
+                  Las acciones de crear artefactos y crear usuarios estan reservadas al rol Administrador.
+                </div>
+              )}
 
             </div>
           </div>

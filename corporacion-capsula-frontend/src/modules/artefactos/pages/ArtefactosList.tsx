@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useArtefactos } from "../../../context/ArtefactosContext"
+import { isAdministrator } from "../../auth/utils/roles"
 import bg from "../../../assets/3.jpg"
 import esfera from "../../../assets/7.webp"
+import capsuleIcon from "../../../assets/13.gif"
 
 import transporteGif from "../../../assets/transporte.gif"
 import energiaGif from "../../../assets/energia.gif"
@@ -28,6 +30,8 @@ const ArtefactosList = () => {
     toggleArtefactoEstado,
   } = useArtefactos()
 
+  const canManageEstado = isAdministrator()
+
   const [selected, setSelected] = useState<any>(null)
 
   useEffect(() => {
@@ -35,7 +39,17 @@ const ArtefactosList = () => {
   }, [loadArtefactos])
 
   useEffect(() => {
-    if (artefactos.length > 0) setSelected(artefactos[0])
+    if (artefactos.length === 0) {
+      setSelected(null)
+      return
+    }
+    setSelected((prev) => {
+      if (prev) {
+        const fresh = artefactos.find((a) => a.id === prev.id)
+        if (fresh) return fresh
+      }
+      return artefactos[0]
+    })
   }, [artefactos])
 
   return (
@@ -63,13 +77,18 @@ const ArtefactosList = () => {
               <div
                 key={a.id}
                 onClick={() => setSelected(a)}
-                className={`p-3 mb-2 cursor-pointer rounded ${
+                className={`flex items-center gap-3 p-3 mb-2 cursor-pointer rounded ${
                   selected?.id === a.id
                     ? "bg-yellow-400 text-black"
                     : "bg-orange-800 hover:bg-yellow-300 hover:text-black"
                 }`}
               >
-                ⚡ {a.nombre}
+                <img
+                  src={a.imagenPersonalizada ?? getGif(a.categoria)}
+                  alt=""
+                  className="w-12 h-12 rounded object-cover border border-orange-500/50 shrink-0 bg-black/40"
+                />
+                <span className="font-medium">⚡ {a.nombre}</span>
               </div>
             ))
           )}
@@ -80,8 +99,12 @@ const ArtefactosList = () => {
             <p>Selecciona un artefacto</p>
           ) : (
             <>
-              <div className="bg-orange-700 rounded mb-3 flex justify-center items-center h-52">
-                <img src={getGif(selected.categoria)} className="h-40" />
+              <div className="bg-orange-700 rounded mb-3 flex justify-center items-center h-52 overflow-hidden">
+                <img
+                  src={selected.imagenPersonalizada ?? getGif(selected.categoria)}
+                  alt=""
+                  className="max-h-full max-w-full object-contain"
+                />
               </div>
 
               <h2 className="text-2xl text-yellow-300 font-bold mb-2">
@@ -104,28 +127,45 @@ const ArtefactosList = () => {
               </div>
 
               <button
+                type="button"
                 onClick={() => navigate(`/edit/${selected.id}`)}
-                className="mt-4 w-full py-2 bg-yellow-400 text-black rounded"
+                className="mt-4 w-full group relative overflow-hidden rounded-xl border-2 border-yellow-400/90 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 py-3 px-4 shadow-[0_0_22px_rgba(251,191,36,0.45)] transition hover:scale-[1.02] hover:shadow-[0_0_32px_rgba(251,191,36,0.6)]"
               >
-                Editar
+                <span className="flex items-center justify-center gap-3">
+                  <img
+                    src={capsuleIcon}
+                    alt=""
+                    className="h-11 w-11 object-contain drop-shadow-[0_0_8px_rgba(0,0,0,0.45)]"
+                  />
+                  <span className="text-black font-extrabold text-lg tracking-wide">
+                    Editar artefacto
+                  </span>
+                </span>
               </button>
 
-              <button
-                onClick={async () => {
-                  if (selected.estado === "obsoleto") {
-                    await toggleArtefactoEstado(selected.id)
-                  } else {
-                    navigate(`/artefactos/delete/${selected.id}`)
-                  }
-                }}
-                className={`mt-2 w-full py-2 rounded font-bold transition ${
-                  selected.estado === "obsoleto"
-                    ? "bg-green-500 hover:bg-green-400"
-                    : "bg-red-600 hover:bg-red-500"
-                }`}
-              >
-                {selected.estado === "obsoleto" ? "🟢 Activar" : "🗑 Desactivar"}
-              </button>
+              {canManageEstado ? (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (selected.estado === "obsoleto") {
+                      await toggleArtefactoEstado(selected.id)
+                    } else {
+                      navigate(`/artefactos/delete/${selected.id}`)
+                    }
+                  }}
+                  className={`mt-2 w-full py-2 rounded font-bold transition ${
+                    selected.estado === "obsoleto"
+                      ? "bg-green-500 hover:bg-green-400"
+                      : "bg-red-600 hover:bg-red-500"
+                  }`}
+                >
+                  {selected.estado === "obsoleto" ? "🟢 Activar" : "🗑 Desactivar"}
+                </button>
+              ) : (
+                <p className="mt-3 text-xs text-gray-400 border border-orange-500/40 rounded-lg py-2 px-3">
+                  Activar y desactivar artefactos solo está permitido para el rol Administrador.
+                </p>
+              )}
             </>
           )}
         </div>

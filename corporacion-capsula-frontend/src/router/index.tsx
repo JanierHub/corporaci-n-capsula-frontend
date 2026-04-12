@@ -9,6 +9,7 @@ import ArtefactoEdit from "../modules/artefactos/pages/ArtefactoEdit"
 import ArtefactoEliminar from "../modules/artefactos/pages/ArtefactoEliminar"
 
 import MainLayout from "../layouts/MainLayout"
+import RequireAuth from "./RequireAuth"
 
 export const AppRouter = () => {
   return (
@@ -16,14 +17,17 @@ export const AppRouter = () => {
       <Routes>
 
         <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
 
-        <Route element={<MainLayout />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/artefactos" element={<ArtefactosList />} />
-          <Route path="/create" element={<ArtefactoCreate />} />
-          <Route path="/edit/:id" element={<ArtefactoEdit />} />
-          <Route path="/artefactos/delete/:id" element={<ArtefactoEliminar />} />
+        <Route element={<RequireAuth />}>
+          <Route path="/register" element={<Register />} />
+
+          <Route element={<MainLayout />}>
+            <Route path="/home" element={<Home />} />
+            <Route path="/artefactos" element={<ArtefactosList />} />
+            <Route path="/create" element={<ArtefactoCreate />} />
+            <Route path="/edit/:id" element={<ArtefactoEdit />} />
+            <Route path="/artefactos/delete/:id" element={<ArtefactoEliminar />} />
+          </Route>
         </Route>
 
       </Routes>
