@@ -23,8 +23,8 @@ export const AppRouter = () => {
         <Route element={<MainLayout />}>
           <Route path="/home" element={<Home />} />
           <Route path="/artefactos" element={<ArtefactosList />} />
-          <Route path="/create" element={<ArtefactoCreate />} />
-          <Route path="/edit/:id" element={<ArtefactoEdit />} />
+          <Route path="/artefactos/create" element={<ArtefactoCreate />} />
+          <Route path="/artefactos/edit/:id" element={<ArtefactoEdit />} />
           <Route path="/artefactos/delete/:id" element={<ArtefactoEliminar />} />
         </Route>
 

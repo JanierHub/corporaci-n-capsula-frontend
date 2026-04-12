@@ -1,243 +1,298 @@
-import { useState, useEffect } from "react";
-import { Artefacto } from "../types/artefacto.types";
-import DatePicker from "react-datepicker"
-import "react-datepicker/dist/react-datepicker.css"
-import drBriefImg from "../../../assets/DCBrief1.jpg"
-import bulmaImg from "../../../assets/bulma1.jpg"
-import drHedoImg from "../../../assets/DCHedo1.jpg"
+import { useEffect, useState } from "react"
+import { Artefacto } from "../types/artefacto.types"
+import { TIPO_ARTEFACTO_OPTIONS, gifPorIdTipo } from "../constants/artifactVisuals"
+import { CATEGORIA_ID_LABELS, idCategoriaToCategoria } from "../utils/artifactMaps"
 
 type Props = {
-  onSubmit: (data: Partial<Artefacto>) => void;
-  initialData?: Partial<Artefacto>;
-};
+  onSubmit: (data: Partial<Artefacto>) => Promise<void> | void
+  initialData?: Partial<Artefacto>
+}
 
-const defaultForm: Partial<Artefacto> = {
+const defaultForm = (): Partial<Artefacto> => ({
   nombre: "",
   descripcion: "",
+  fechaCreacion: new Date().toISOString().split("T")[0],
+  tipoArtefacto: "1",
   categoria: "defensa",
   origen: "terrestre",
   nivelPeligrosidad: 1,
   nivelConfidencialidad: 1,
-  inventor: "",
   estado: "activo",
-}
+})
 
-// 🔥 SIMULANDO DATOS DEL BACKEND
-const cientificos = [
-  {
-    id: 1,
-    nombre: "Dr. Brief",
-    descripcion: "Fundador de Capsule Corp",
-    imagen: drBriefImg,
-  },
-  {
-    id: 2,
-    nombre: "Bulma",
-    descripcion: "Ingeniera jefa",
-    imagen: bulmaImg,
-  },
-  {
-    id: 3,
-    nombre: "Dr. Hedo",
-    descripcion: "Especialista en tecnología avanzada",
-    imagen: drHedoImg,
-  },
-];
+const MAX_FOTO_BYTES = 1_800_000
 
 const ArtefactoForm = ({ onSubmit, initialData }: Props) => {
- const [form, setForm] = useState<Partial<Artefacto>>(defaultForm);
+  const [form, setForm] = useState<Partial<Artefacto>>(defaultForm)
+  const [error, setError] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null)
 
   useEffect(() => {
     if (initialData) {
-      setForm({ ...defaultForm, ...initialData });
+      const base = { ...defaultForm(), ...initialData }
+      if (initialData.fotoDataUrl) setFotoPreview(initialData.fotoDataUrl)
+      setForm(base)
+      return
     }
-  }, [initialData]);
+    setForm(defaultForm())
+    setFotoPreview(null)
+  }, [initialData])
+
+  const idTipoNum = Math.min(4, Math.max(1, Number(form.tipoArtefacto) || 1))
+  const gifVista = gifPorIdTipo(form.tipoArtefacto)
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
-
+    const { name, value } = e.target
+    setError("")
     setForm({
       ...form,
       [name]:
         name === "nivelPeligrosidad" || name === "nivelConfidencialidad"
           ? Number(value)
           : value,
-    });
-  };
+    })
+  }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(form);
-  };
+  const handleCategoriaById = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const id = Number(e.target.value)
+    setError("")
+    setForm({
+      ...form,
+      categoria: idCategoriaToCategoria(id),
+    })
+  }
 
-  const cientificoSeleccionado = cientificos.find(
-    (c) => c.nombre === form.inventor
-  )
+  const handleFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    setError("")
+    if (!file) {
+      setFotoPreview(null)
+      setForm((f) => ({ ...f, fotoDataUrl: undefined }))
+      return
+    }
+    if (file.size > MAX_FOTO_BYTES) {
+      setError("La imagen es demasiado grande (máx. ~1,7 MB).")
+      e.target.value = ""
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = () => {
+      const dataUrl = String(reader.result ?? "")
+      setFotoPreview(dataUrl)
+      setForm((f) => ({ ...f, fotoDataUrl: dataUrl }))
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const quitarFoto = () => {
+    setFotoPreview(null)
+    setForm((f) => ({ ...f, fotoDataUrl: initialData ? null : undefined }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!form.nombre?.trim()) {
+      setError("El nombre es obligatorio.")
+      return
+    }
+    if (!form.descripcion?.trim()) {
+      setError("La descripción es obligatoria.")
+      return
+    }
+    if (!form.fechaCreacion || !/^\d{4}-\d{2}-\d{2}$/.test(form.fechaCreacion)) {
+      setError("Indica una fecha válida (YYYY-MM-DD).")
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await onSubmit({
+        ...form,
+        nombre: form.nombre.trim(),
+        descripcion: form.descripcion.trim(),
+        tipoArtefacto: String(Math.max(1, Number(form.tipoArtefacto ?? 1))),
+        fotoDataUrl:
+          form.fotoDataUrl === null ? null : form.fotoDataUrl || undefined,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const inputClass =
+    "w-full p-2 bg-black/60 border border-orange-400 rounded text-white placeholder:text-orange-200/60"
+
+  const idCategoriaActual = CATEGORIA_ID_LABELS.find(
+    (c) => idCategoriaToCategoria(c.id) === form.categoria
+  )?.id ?? 1
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-black/40 backdrop-blur-xl border border-cyan-400 rounded-2xl p-8 w-full max-w-md"
+      className="bg-orange-900/70 border-4 border-orange-400 p-6 rounded-xl w-full max-w-5xl mx-auto"
     >
-      <h2 className="text-cyan-400 text-2xl mb-6 text-center">
-        {initialData ? "Editar Artefacto" : "Crear Artefacto"}
+      <h2 className="text-orange-300 text-xl mb-2 font-bold text-center">
+        {initialData ? "Editar Artefacto" : "Registrar Artefacto"}
       </h2>
-
-      <label className="text-cyan-400 text-sm">Nombre</label>
-      <p className="text-gray-400 text-xs mb-2">
-        Identificador visible dentro del inventario
+      <p className="text-orange-200/80 text-xs text-center mb-5">
+        Campos alineados con POST <code className="text-yellow-200">/api/v1/artifacts</code>:
+        nombre_artefacto, descripcion, fecha_creacion, id_tipo, id_categoria, origen, nivel_peligrosidad,
+        confidentialityLevel opcional.
       </p>
 
-      <input
-        name="nombre"
-        value={form.nombre || ""}
-        onChange={handleChange}
-        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-      />
-
-      {/* 🔬 CIENTIFICO */}
-      <label className="text-cyan-400 text-sm">Científico creador</label>
-      <p className="text-gray-400 text-xs mb-2">
-        Selecciona el responsable del artefacto
-      </p>
-
-          <select
-        name="inventor"
-        value={form.inventor || ""}
-        onChange={handleChange}
-        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-      >
-        <option value="">Seleccionar científico</option>
-        {cientificos.map((c) => (
-          <option key={c.id} value={c.nombre}>
-            {c.nombre}
-          </option>
-        ))}
-      </select>
-      {/* 🖼️ PREVIEW */}
-      {cientificoSeleccionado && (
-        <div className="mb-4 text-center">
-          <img
-            src={cientificoSeleccionado.imagen}
-            alt="cientifico"
-            className="w-24 h-24 object-cover mx-auto rounded-full border border-cyan-400"
-          />
-          <p className="text-sm text-gray-300 mt-2">
-            {cientificoSeleccionado.descripcion}
-          </p>
+      {error ? (
+        <div className="mb-4 rounded-lg border border-red-400 bg-red-950/40 px-3 py-2 text-sm text-red-200">
+          {error}
         </div>
-      )}
+      ) : null}
 
-      {/* 📝 DESCRIPCION */}
-      <label className="text-cyan-400 text-sm">Descripción</label>
-      <p className="text-gray-400 text-xs mb-2">
-        Explica qué hace el artefacto
-      </p>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <input
+          name="nombre"
+          placeholder="nombre_artefacto"
+          value={form.nombre || ""}
+          onChange={handleChange}
+          required
+          className={inputClass}
+        />
 
-      <input
-        name="descripcion"
-        value={form.descripcion || ""}
-        onChange={handleChange}
-        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-      />
+        <input
+          type="date"
+          name="fechaCreacion"
+          value={form.fechaCreacion || ""}
+          onChange={handleChange}
+          className={inputClass}
+        />
 
-{/* 📅 FECHA */}
-<label className="text-cyan-400 text-sm">Fecha de creación</label>
-<p className="text-gray-400 text-xs mb-2">
-  Fecha en la que se desarrolló el artefacto
-</p>
+        <textarea
+          name="descripcion"
+          placeholder="descripcion"
+          value={form.descripcion || ""}
+          onChange={(e) => {
+            setError("")
+            setForm({ ...form, descripcion: e.target.value })
+          }}
+          required
+          className={`${inputClass} min-h-24 resize-none md:col-span-2`}
+        />
 
-<DatePicker
-  selected={form.fechaCreacion ? new Date(form.fechaCreacion) : null}
-  onChange={(date: Date | null) =>
-    setForm({
-      ...form,
-      fechaCreacion: date?.toISOString().split("T")[0],
-    })
-  }
-  className="w-full p-3 bg-black/60 border border-cyan-400 text-white rounded-lg focus:outline-none"
-  calendarClassName="bg-black text-white border border-cyan-400 rounded-xl p-2 shadow-lg shadow-cyan-400/30"
-  dayClassName={() =>
-    "text-white hover:bg-cyan-400 hover:text-black rounded-full transition"
-  }
-  popperClassName="z-50"
-/>
+        <div className="md:col-span-2">
+          <label className="block text-orange-200 text-sm mb-1 font-semibold">
+            Tipo de artefacto (id_tipo) — define el GIF de icono
+          </label>
+          <select
+            name="tipoArtefacto"
+            value={String(idTipoNum)}
+            onChange={handleChange}
+            className={inputClass}
+          >
+            {TIPO_ARTEFACTO_OPTIONS.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.id} — {t.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      {/* ⚙️ CATEGORIA */}
-      <label className="text-cyan-400 text-sm">Categoría</label>
-      <select
-        name="categoria"
-        value={form.categoria}
-        onChange={handleChange}
-        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-      >
-        <option value="defensa">Defensa</option>
-        <option value="transporte">Transporte</option>
-        <option value="domestico">Doméstico</option>
-        <option value="energia">Energía</option>
-      </select>
+        <div className="md:col-span-2 flex flex-col md:flex-row gap-4 items-center justify-center bg-black/30 rounded-lg p-4 border border-orange-500/40">
+          <div className="relative w-44 h-44 rounded-lg overflow-hidden border-2 border-orange-400 shrink-0">
+            <img
+              src={fotoPreview || gifVista}
+              alt="Vista tipo"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="text-sm text-orange-100/90 max-w-md">
+            <p className="font-semibold text-yellow-300 mb-1">Vista previa</p>
+            <p>
+              Por defecto se usa el GIF del <strong>tipo</strong> (id_tipo). Opcionalmente sube una foto
+              propia (se guarda en el navegador por id hasta que el API permita adjuntos).
+            </p>
+          </div>
+        </div>
 
-      {/* 🌍 ORIGEN */}
-      <label className="text-cyan-400 text-sm">Origen</label>
-      <select
-        name="origen"
-        value={form.origen}
-        onChange={handleChange}
-        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-      >
-        <option value="terrestre">Terrestre</option>
-        <option value="extraterrestre">Extraterrestre</option>
-      </select>
+        <div className="md:col-span-2">
+          <label className="block text-orange-200 text-sm mb-1">Foto opcional (archivo)</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFoto}
+            className={`${inputClass} text-sm file:mr-3 file:rounded file:border-0 file:bg-orange-500 file:px-3 file:py-1`}
+          />
+          {fotoPreview ? (
+            <button
+              type="button"
+              onClick={quitarFoto}
+              className="mt-2 text-xs text-red-300 underline"
+            >
+              Quitar foto y usar solo el GIF del tipo
+            </button>
+          ) : null}
+        </div>
 
-      {/* ⚠️ PELIGROSIDAD */}
-      <label className="text-cyan-400 text-sm">Nivel de peligrosidad</label>
+        <div>
+          <label className="block text-orange-200 text-sm mb-1">id_categoria (BD)</label>
+          <select
+            value={idCategoriaActual}
+            onChange={handleCategoriaById}
+            className={inputClass}
+          >
+            {CATEGORIA_ID_LABELS.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <select
-        name="nivelPeligrosidad"
-        value={form.nivelPeligrosidad}
-        onChange={handleChange}
-        className="w-full mb-5 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-      >
-        <option value={1}>1 - Uso común </option>
-        <option value={2}>2 - Peligroso </option>
-        <option value={3}>3 - Muy peligroso </option>
-      </select>
+        <select name="origen" value={form.origen || ""} onChange={handleChange} className={inputClass}>
+          <option value="">origen (API)</option>
+          <option value="terrestre">TERRICOLA (terrestre)</option>
+          <option value="saiyajin">SAIYAJIN</option>
+          <option value="namekiano">NAMEKIANO</option>
+        </select>
 
-      <label className="text-cyan-400 text-sm">Nivel de confidencialidad</label>
-      <select
-        name="nivelConfidencialidad"
-        value={form.nivelConfidencialidad}
-        onChange={handleChange}
-        className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-      >
-        <option value={1}>1 - Público</option>
-        <option value={2}>2 - Restringido</option>
-        <option value={3}>3 - Reservado</option>
-        <option value={4}>4 - Ultra secreto</option>
-      </select>
+        <select
+          name="nivelPeligrosidad"
+          value={form.nivelPeligrosidad || ""}
+          onChange={handleChange}
+          className={inputClass}
+        >
+          <option value="">nivel_peligrosidad</option>
+          <option value={1}>1 — Sin peligro</option>
+          <option value={2}>2</option>
+          <option value={3}>3</option>
+          <option value={4}>4</option>
+          <option value={5}>5 — Destrucción masiva</option>
+        </select>
 
-      <label className="text-cyan-400 text-sm">Estado</label>
-      <select
-        name="estado"
-        value={form.estado}
-        onChange={handleChange}
-        className="w-full mb-5 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-      >
-        <option value="activo">Activo</option>
-        <option value="en_pruebas">En pruebas</option>
-        <option value="obsoleto">Obsoleto</option>
-      </select>
+        <select
+          name="nivelConfidencialidad"
+          value={form.nivelConfidencialidad || ""}
+          onChange={handleChange}
+          className={inputClass}
+        >
+          <option value="">confidentialityLevel (opcional en API)</option>
+          <option value={1}>Public</option>
+          <option value={2}>Restricted</option>
+          <option value={3}>Confidential</option>
+          <option value={4}>Ultra-confidential</option>
+        </select>
+      </div>
 
       <button
         type="submit"
-        className="w-full bg-cyan-400 text-black p-3 rounded-lg font-bold"
+        disabled={isSubmitting}
+        className="w-full bg-orange-400 text-black p-2 mt-4 font-bold rounded disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        Guardar
+        {isSubmitting ? "Guardando..." : "Guardar Artefacto"}
       </button>
     </form>
-  );
-};
+  )
+}
 
-export default ArtefactoForm;
+export default ArtefactoForm

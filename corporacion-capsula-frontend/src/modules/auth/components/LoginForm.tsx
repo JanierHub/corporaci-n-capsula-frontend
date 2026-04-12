@@ -4,18 +4,32 @@ import { useNavigate } from "react-router-dom"
 import bg from "../../../assets/3.jpg"
 import logo from "../../../assets/5.gif"
 import capsule from "../../../assets/13.gif"
+import { loginUser } from "../services/authService"
+import { SESSION_ROLE_KEY } from "../utils/roles"
 
 const LoginForm = () => {
   const navigate = useNavigate()
 
-  const [email, setEmail] = useState("")
+  const [userName, setUserName] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
 
-  const handleSubmit = () => {
-    if (email === "admin@test.com" && password === "1234") {
+  const handleSubmit = async () => {
+    try {
+      const session = await loginUser({
+        userName: userName.trim(),
+        password,
+      })
+
+      sessionStorage.setItem("currentUserName", userName.trim())
+      sessionStorage.setItem("currentUserId", userName.trim())
+      sessionStorage.setItem(SESSION_ROLE_KEY, session.data ?? "")
+      setError("")
       navigate("/home")
-    } else {
-      alert("Credenciales incorrectas")
+    } catch {
+      setError(
+        "No se pudo iniciar sesión. Usa el mismo nombre con el que registraste y contraseña (mín. 8 caracteres). La cookie del token debe aceptarse (mismo dominio/origen que en CORS)."
+      )
     }
   }
 
@@ -46,7 +60,6 @@ const LoginForm = () => {
 
       <div className="relative w-full max-w-md px-4">
         <div className="bg-black/40 backdrop-blur-xl border border-cyan-400 rounded-2xl p-8 shadow-xl shadow-cyan-500/20">
-
           <div className="flex justify-center mb-6 relative">
             <div className="absolute w-32 h-32 bg-cyan-400 rounded-full blur-3xl opacity-30 animate-pulse"></div>
 
@@ -62,18 +75,28 @@ const LoginForm = () => {
 
           <input
             className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-            placeholder="Correo electrónico"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Nombre de usuario (como al registrarte)"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            autoComplete="username"
           />
 
           <input
             type="password"
-            className="w-full mb-5 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+            className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
             placeholder="Contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
           />
+
+          <p className="text-gray-400 text-xs mb-5">
+            El backend valida usuario y contraseña; el token va en cookie y se envía solo en peticiones con credenciales.
+          </p>
+
+          {error ? (
+            <p className="mb-4 text-sm text-red-300">{error}</p>
+          ) : null}
 
           <button
             className="w-full bg-cyan-400 text-black p-3 rounded-lg font-bold"

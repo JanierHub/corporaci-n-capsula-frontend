@@ -1,24 +1,60 @@
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import bg from "../../../assets/3.jpg"
 import ArtefactoForm from "../components/ArtefactoForm"
 import { useArtefactos } from "../../../context/ArtefactosContext"
+import { Artefacto } from "../types/artefacto.types"
+import { isAdministrator } from "../../auth/utils/roles"
 
 const ArtefactoEdit = () => {
   const navigate = useNavigate()
   const { id } = useParams()
-  const { getArtefactoById, updateArtefacto } = useArtefactos()
+  const { getArtefactoById, updateArtefacto, loadArtefactos } = useArtefactos()
 
   const artefacto = useMemo(
     () => getArtefactoById(Number(id)),
     [getArtefactoById, id]
   )
 
-  const handleSubmit = (data: any) => {
+  useEffect(() => {
+    if (!artefacto) {
+      loadArtefactos()
+    }
+  }, [artefacto, loadArtefactos])
+
+  const handleSubmit = async (data: Partial<Artefacto>) => {
     if (!artefacto) return
 
-    updateArtefacto(artefacto.id, data)
+    await updateArtefacto(artefacto.id, data)
     navigate("/artefactos")
+  }
+
+  if (!isAdministrator()) {
+    return (
+      <div
+        className="min-h-screen text-white flex items-center justify-center relative overflow-y-auto py-10"
+        style={{
+          backgroundImage: `url(${bg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <div className="relative z-10 bg-black/80 p-6 rounded-xl border border-amber-500 max-w-md text-center px-6">
+          <h2 className="text-amber-300 text-xl mb-3">Permiso denegado</h2>
+          <p className="text-gray-300 text-sm mb-4">
+            Editar artefactos está reservado al rol <strong>Administrador</strong>.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate("/artefactos")}
+            className="border border-cyan-400 px-6 py-2 rounded-lg hover:bg-cyan-400 hover:text-black transition"
+          >
+            Volver al inventario
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -30,7 +66,6 @@ const ArtefactoEdit = () => {
         backgroundPosition: "center",
       }}
     >
-      {/* overlay */}
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
 
       <div className="relative z-10 flex flex-col items-center w-full max-w-lg">

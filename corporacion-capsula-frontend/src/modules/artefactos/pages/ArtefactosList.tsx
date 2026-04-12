@@ -1,37 +1,21 @@
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useArtefactos } from "../../../context/ArtefactosContext"
+import { getStoredUserRole, isAdministrator } from "../../auth/utils/roles"
 import bg from "../../../assets/3.jpg"
 import esfera from "../../../assets/7.webp"
-import transporteGif from "../../../assets/1.gif"
-import energiaGif from "../../../assets/11.gif"
-import domesticaGif from "../../../assets/13.gif"
-import defensaGif from "../../../assets/5.gif"
-
-const getGifByCategoria = (categoria: string) => {
-  switch (categoria) {
-    case "transporte":
-      return transporteGif
-    case "energia":
-      return energiaGif
-    case "domestico":
-      return domesticaGif
-    case "defensa":
-      return defensaGif
-    default:
-      return energiaGif
-  }
-}
+import { gifPorIdTipo } from "../constants/artifactVisuals"
 
 const ArtefactosList = () => {
   const navigate = useNavigate()
-  const { artefactos, loadArtefactos } = useArtefactos()
+  const { artefactos, loadArtefactos, toggleArtefactoEstado } = useArtefactos()
+  const [togglingId, setTogglingId] = useState<number | null>(null)
   const lista = useMemo(() => artefactos, [artefactos])
   const [selectedId, setSelectedId] = useState<number | null>(lista[0]?.id ?? null)
 
   useEffect(() => {
     loadArtefactos()
-  }, [])
+  }, [loadArtefactos])
 
   useEffect(() => {
     if (!lista.length) {
@@ -46,6 +30,12 @@ const ArtefactosList = () => {
   }, [lista, selectedId])
 
   const selected = lista.find((artefacto) => artefacto.id === selectedId) ?? null
+  const canManageArtifacts = isAdministrator()
+  const roleLabel = getStoredUserRole()
+
+  const imagenSeleccionada = selected
+    ? selected.fotoDataUrl || gifPorIdTipo(selected.tipoArtefacto)
+    : ""
 
   return (
     <div
@@ -80,29 +70,53 @@ const ArtefactosList = () => {
           </h2>
 
           <div className="overflow-y-auto flex-1 pr-1">
-            {lista.map((a) => (
-              <div
-                key={a.id}
-                onClick={() => setSelectedId(a.id)}
-                className={`p-3 mb-2 cursor-pointer rounded
-                  ${selectedId === a.id
-                    ? "bg-yellow-400 text-black"
-                    : "bg-orange-800 hover:bg-yellow-300 hover:text-black"
-                  }`}
-              >
-                ⚡ {a.nombre}
+            {lista.length > 0 ? (
+              lista.map((a) => {
+                const inactivo = a.estado === "obsoleto"
+                return (
+                  <div
+                    key={a.id}
+                    onClick={() => setSelectedId(a.id)}
+                    className={`p-3 mb-2 cursor-pointer rounded border-2 transition
+                    ${selectedId === a.id
+                      ? "bg-yellow-400 text-black border-yellow-200"
+                      : inactivo
+                        ? "bg-orange-950/90 border-red-500/60 text-orange-100 hover:bg-orange-900 hover:text-white"
+                        : "bg-orange-800 border-transparent hover:bg-yellow-300 hover:text-black"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={a.fotoDataUrl || gifPorIdTipo(a.tipoArtefacto)}
+                        alt=""
+                        className="w-10 h-10 rounded object-cover shrink-0 border border-orange-400/50"
+                      />
+                      <div>
+                        <div className="font-semibold">⚡ {a.nombre}</div>
+                        {inactivo && (
+                          <div className="text-xs mt-0.5 text-red-300 font-bold">Desactivado</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <div className="text-sm text-yellow-100/80">
+                No hay artefactos disponibles.
               </div>
-            ))}
+            )}
           </div>
         </div>
 
         <div className="w-2/3 bg-orange-900/80 border-4 border-orange-400 rounded-xl p-4 flex flex-col">
           {selected ? (
             <>
-              <div className="bg-orange-700 rounded mb-3 flex justify-center items-center h-52">
+              <div className="bg-orange-700 rounded mb-3 flex justify-center items-center h-52 overflow-hidden">
                 <img
-                  src={getGifByCategoria(selected.categoria)}
-                  className="h-40 object-contain"
+                  src={imagenSeleccionada}
+                  alt=""
+                  className="h-44 w-full max-w-md object-contain"
                 />
               </div>
 
@@ -118,6 +132,7 @@ const ArtefactosList = () => {
                 <p>⚙ {selected.categoria}</p>
                 <p>🌍 {selected.origen}</p>
                 <p>⚠ {selected.nivelPeligrosidad}</p>
+                <p>🔐 {selected.nivelConfidencialidad}</p>
                 <p>🧪 {selected.inventor || "No definido"}</p>
                 <p>
                   📊{" "}
@@ -125,28 +140,70 @@ const ArtefactosList = () => {
                     className={
                       selected.estado === "obsoleto"
                         ? "text-red-400 font-bold"
-                        : "text-green-400"
+                        : selected.estado === "en_pruebas"
+                          ? "text-yellow-300 font-bold"
+                          : "text-green-400 font-bold"
                     }
                   >
-                    {selected.estado === "obsoleto" ? "Inactivo" : "Activo"}
+                    {selected.estado === "obsoleto"
+                      ? "Inactivo"
+                      : selected.estado === "en_pruebas"
+                        ? "En pruebas"
+                        : "Activo"}
                   </span>
                 </p>
                 <p>📅 {selected.fechaCreacion || "Sin fecha"}</p>
+                <p>🛰️ ID {selected.id}</p>
+                {roleLabel ? (
+                  <p className="text-xs text-orange-200/90 mt-1">
+                    Rol: <span className="font-semibold">{roleLabel}</span>
+                    {!canManageArtifacts ? " (sin permiso para activar/desactivar)" : null}
+                  </p>
+                ) : null}
               </div>
 
-              <button
-                onClick={() => navigate(`/edit/${String(selected.id)}`)}
-                className="mt-5 px-6 py-2 bg-yellow-400 text-black rounded hover:bg-orange-500"
-              >
-                Editar
-              </button>
+              {canManageArtifacts ? (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/artefactos/edit/${String(selected.id)}`)}
+                  className="mt-5 px-6 py-2 bg-yellow-400 text-black rounded hover:bg-orange-500"
+                >
+                  Editar
+                </button>
+              ) : null}
 
-              <button
-                onClick={() => navigate(`/artefactos/delete/${String(selected.id)}`)}
-                className="mt-3 px-6 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-500 transition shadow-[0_0_10px_red] border border-red-400"
-              >
-                🗑 Desactivar
-              </button>
+              {canManageArtifacts ? (
+                selected.estado === "obsoleto" ? (
+                  <button
+                    type="button"
+                    disabled={togglingId === selected.id}
+                    onClick={async () => {
+                      setTogglingId(selected.id)
+                      try {
+                        await toggleArtefactoEstado(selected.id)
+                      } finally {
+                        setTogglingId(null)
+                      }
+                    }}
+                    className="mt-3 px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-500 transition shadow-[0_0_10px_lime] border border-green-400 disabled:opacity-60"
+                  >
+                    {togglingId === selected.id ? "Activando…" : "✓ Activar"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/artefactos/delete/${String(selected.id)}`)}
+                    className="mt-3 px-6 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-500 transition shadow-[0_0_10px_red] border border-red-400"
+                  >
+                    🗑 Desactivar
+                  </button>
+                )
+              ) : (
+                <p className="mt-4 text-sm text-orange-200/90 border border-orange-500/40 rounded-lg px-3 py-2 bg-black/20">
+                  Solo el rol <strong>Administrador</strong> puede crear, editar y cambiar el estado
+                  (activar/desactivar) de los artefactos.
+                </p>
+              )}
             </>
           ) : (
             <div className="text-white p-10">Cargando...</div>

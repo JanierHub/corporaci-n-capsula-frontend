@@ -1,10 +1,13 @@
 import { useNavigate } from "react-router-dom"
+import { getStoredUserRole, isAdministrator } from "../../auth/utils/roles"
 import videoBg from "../../../assets/14.mp4"
 import capsule from "../../../assets/13.gif"
 import logo from "../../../assets/5.gif"
 
 const Home = () => {
   const navigate = useNavigate()
+  const userRole = getStoredUserRole()
+  const isAdmin = isAdministrator()
 
   return (
     <div className="relative w-full h-screen overflow-hidden text-white">
@@ -44,11 +47,16 @@ const Home = () => {
               />
 
               <h2 className="text-xl text-cyan-300">
-                Bienvenido, Usuario
+                Bienvenido{userRole ? ` — ${userRole}` : ""}
               </h2>
 
               <p className="text-gray-400 text-sm mb-6">
                 Sistema Capsule Corp
+                {!isAdmin && userRole ? (
+                  <span className="block mt-2 text-amber-200/90">
+                    Tu rol no incluye gestión de artefactos en el API; ver inventario puede estar limitado.
+                  </span>
+                ) : null}
               </p>
 
             </div>
@@ -62,12 +70,15 @@ const Home = () => {
                 Ver Inventario
               </button>
 
-              <button
-                onClick={() => navigate("/create")}
-                className="border border-cyan-400 py-3 rounded-lg hover:bg-cyan-400 hover:text-black transition"
-              >
-                Crear Artefacto
-              </button>
+              {isAdmin ? (
+                <button
+                  type="button"
+                  onClick={() => navigate("/artefactos/create")}
+                  className="border border-cyan-400 py-3 rounded-lg hover:bg-cyan-400 hover:text-black transition"
+                >
+                  Crear Artefacto
+                </button>
+              ) : null}
 
             </div>
           </div>
