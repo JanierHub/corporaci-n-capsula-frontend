@@ -3,6 +3,40 @@ import type { CreateUserBody, LoginBody, LoginResponse } from "../../../types/ap
 
 export type { LoginResponse } from "../../../types/api.types"
 
+const parseErrorMessage = (payload: unknown, fallback: string) => {
+  if (
+    payload &&
+    typeof payload === "object" &&
+    "message" in payload &&
+    Array.isArray(payload.message)
+  ) {
+    const issues = payload.message
+      .map((issue) => {
+        if (!issue || typeof issue !== "object") return null
+        const field = "field" in issue ? String(issue.field ?? "") : ""
+        const message = "message" in issue ? String(issue.message ?? "") : ""
+        return [field, message].filter(Boolean).join(": ")
+      })
+      .filter(Boolean)
+
+    if (issues.length > 0) {
+      return issues.join(" | ")
+    }
+  }
+
+  if (
+    payload &&
+    typeof payload === "object" &&
+    "message" in payload &&
+    typeof payload.message === "string" &&
+    payload.message.trim()
+  ) {
+    return payload.message
+  }
+
+  return fallback
+}
+
 const requestJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
   const response = await fetch(url, {
     credentials: "include",
@@ -14,7 +48,14 @@ const requestJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
   })
 
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`)
+    let payload: unknown = null
+    try {
+      payload = await response.json()
+    } catch {
+      payload = null
+    }
+
+    throw new Error(parseErrorMessage(payload, `HTTP ${response.status}`))
   }
 
   return response.json()
