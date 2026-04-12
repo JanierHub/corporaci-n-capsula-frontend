@@ -27,76 +27,24 @@ const ArtefactosContext = createContext<ContextType | null>(null)
 const sortArtefactos = (items: Artefacto[]) =>
   [...items].sort((a, b) => Number(a.id) - Number(b.id))
 
-const artefactosIniciales: Artefacto[] = [
-  {
-    id: 1,
-    nombre: "Capsula Hoi Poi",
-    descripcion: "Permite almacenar objetos en miniatura",
-    categoria: "domestico",
-    origen: "terrestre",
-    nivelPeligrosidad: 1,
-    nivelConfidencialidad: 2,
-    estado: "activo",
-    inventor: "Dr. Brief",
-    fechaCreacion: "2026-01-12",
-    fechaActualizacion: "2026-01-12",
-    tipoArtefacto: "4",
-  },
-  {
-    id: 2,
-    nombre: "Scouter",
-    descripcion: "Mide el nivel de poder de los enemigos",
-    categoria: "defensa",
-    origen: "extraterrestre",
-    nivelPeligrosidad: 3,
-    nivelConfidencialidad: 4,
-    estado: "en_pruebas",
-    inventor: "Bulma",
-    fechaCreacion: "2026-02-08",
-    fechaActualizacion: "2026-02-08",
-    tipoArtefacto: "1",
-  },
-  {
-    id: 3,
-    nombre: "Radar del Dragón",
-    descripcion: "Detecta las esferas del dragón",
-    categoria: "energia",
-    origen: "terrestre",
-    nivelPeligrosidad: 2,
-    nivelConfidencialidad: 3,
-    estado: "obsoleto",
-    inventor: "Dr. Hedo",
-    fechaCreacion: "2026-03-04",
-    fechaActualizacion: "2026-03-04",
-    tipoArtefacto: "2",
-  },
-]
-
 export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
-  const [artefactos, setArtefactos] = useState<Artefacto[]>(artefactosIniciales)
+  const [artefactos, setArtefactos] = useState<Artefacto[]>([])
 
   const loadArtefactos = useCallback(async () => {
     const data = mergeFotosFromStorage(await getArtefactos())
-    if (data.length === 0) return
 
-    setArtefactos((prev) => {
-      const merged = new Map<number, Artefacto>()
-
-      prev.forEach((item) => {
-        merged.set(item.id, item)
-      })
-
-      data.forEach((incoming: Artefacto) => {
-        const prevRow = merged.get(incoming.id)
-        merged.set(incoming.id, {
-          ...prevRow,
-          ...incoming,
-          fotoDataUrl: incoming.fotoDataUrl ?? prevRow?.fotoDataUrl,
+    setArtefactos((prev) =>
+      sortArtefactos(
+        data.map((incoming: Artefacto) => {
+          const prevRow = prev.find((item) => item.id === incoming.id)
+          return {
+            ...prevRow,
+            ...incoming,
+            fotoDataUrl: incoming.fotoDataUrl ?? prevRow?.fotoDataUrl,
+          }
         })
-      })
-
-      return sortArtefactos(Array.from(merged.values()))
-    })
+      )
+    )
   }, [])
 
   const addArtefacto = useCallback(async (a: Partial<Artefacto>) => {
@@ -172,6 +120,7 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
           })
         )
       )
+      void loadArtefactos()
     } catch {
       setArtefactos((prev) =>
         sortArtefactos(
@@ -186,8 +135,9 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
           )
         )
       )
+      void loadArtefactos()
     }
-  }, [])
+  }, [loadArtefactos])
 
   const toggleArtefactoEstado = useCallback(
     async (id: number) => {
@@ -195,7 +145,7 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
       if (!actual) return
 
       try {
-        const updated =
+      const updated =
           actual.estado === "obsoleto"
             ? await activateArtefactoRequest(id)
             : await deactivateArtefactoRequest(id)
@@ -203,18 +153,23 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
           sortArtefactos(
             prev.map((artefacto) =>
               artefacto.id === id
-                ? { ...updated, fotoDataUrl: artefacto.fotoDataUrl ?? updated.fotoDataUrl }
+                ? {
+                    ...artefacto,
+                    ...updated,
+                    fotoDataUrl: artefacto.fotoDataUrl ?? updated.fotoDataUrl,
+                  }
                 : artefacto
             )
           )
         )
+        void loadArtefactos()
       } catch {
         await updateArtefacto(id, {
           estado: actual.estado === "obsoleto" ? "activo" : "obsoleto",
         })
       }
     },
-    [artefactos, updateArtefacto]
+    [artefactos, loadArtefactos, updateArtefacto]
   )
 
   const deactivateArtefacto = useCallback(async (id: number | string) => {
@@ -228,16 +183,21 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
         sortArtefactos(
           prev.map((artefacto) =>
             artefacto.id === numericId
-              ? { ...updated, fotoDataUrl: artefacto.fotoDataUrl ?? updated.fotoDataUrl }
+              ? {
+                  ...artefacto,
+                  ...updated,
+                  fotoDataUrl: artefacto.fotoDataUrl ?? updated.fotoDataUrl,
+                }
               : artefacto
           )
         )
       )
+      void loadArtefactos()
       return
     } catch {
       await updateArtefacto(numericId, { estado: "obsoleto" })
     }
-  }, [artefactos, updateArtefacto])
+  }, [artefactos, loadArtefactos, updateArtefacto])
 
   const value = useMemo(
     () => ({

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useArtefactos } from "../../../context/ArtefactosContext"
-import { getStoredUserRole, isAdministrator } from "../../auth/utils/roles"
+import { canEditArtifacts, getStoredUserRole, isAdministrator } from "../../auth/utils/roles"
 import bg from "../../../assets/3.jpg"
 import esfera from "../../../assets/7.webp"
 import { gifPorIdTipo } from "../constants/artifactVisuals"
@@ -18,6 +18,14 @@ const ArtefactosList = () => {
   }, [loadArtefactos])
 
   useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      void loadArtefactos()
+    }, 3000)
+
+    return () => window.clearInterval(intervalId)
+  }, [loadArtefactos])
+
+  useEffect(() => {
     if (!lista.length) {
       setSelectedId(null)
       return
@@ -31,6 +39,7 @@ const ArtefactosList = () => {
 
   const selected = lista.find((artefacto) => artefacto.id === selectedId) ?? null
   const canManageArtifacts = isAdministrator()
+  const canEdit = canEditArtifacts()
   const roleLabel = getStoredUserRole()
 
   const imagenSeleccionada = selected
@@ -162,7 +171,7 @@ const ArtefactosList = () => {
                 ) : null}
               </div>
 
-              {canManageArtifacts ? (
+              {canEdit ? (
                 <button
                   type="button"
                   onClick={() => navigate(`/artefactos/edit/${String(selected.id)}`)}
@@ -200,8 +209,8 @@ const ArtefactosList = () => {
                 )
               ) : (
                 <p className="mt-4 text-sm text-orange-200/90 border border-orange-500/40 rounded-lg px-3 py-2 bg-black/20">
-                  Solo el rol <strong>Administrador</strong> puede crear, editar y cambiar el estado
-                  (activar/desactivar) de los artefactos.
+                  Solo el rol <strong>Administrador</strong> puede crear y cambiar el estado
+                  (activar/desactivar) de los artefactos. El rol <strong>Usuario</strong> ya puede editarlos.
                 </p>
               )}
             </>

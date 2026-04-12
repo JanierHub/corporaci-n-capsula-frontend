@@ -178,20 +178,6 @@ export const normalizeArtefacto = (item: ArtefactoApi): Artefacto => ({
   fotoDataUrl: item.fotoDataUrl,
 })
 
-const artefactosMock: Artefacto[] = [
-  normalizeArtefacto({
-    id_artefacto: 1,
-    nombre_artefacto: "Capsula Hoi Poi",
-    descripcion: "Permite almacenar objetos en miniatura",
-    id_categoria: 2,
-    origen: "TERRICOLA",
-    nivel_peligrosidad: 1,
-    estado: true,
-    fecha_creacion: "2026-01-12",
-    id_tipo: 1,
-  }),
-]
-
 const fetchWithTimeout = async (input: RequestInfo | URL, init?: RequestInit) => {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
@@ -273,8 +259,9 @@ export const getArtefactos = async () => {
             : []
 
     return payload.map(normalizeArtefacto).filter((item: Artefacto) => item.id > 0)
-  } catch {
-    return artefactosMock
+  } catch (error) {
+    console.error("Error loading artifacts from backend:", error)
+    return []
   }
 }
 
@@ -340,7 +327,8 @@ export const updateArtefactoRequest = async (id: number, data: Partial<Artefacto
       id_artefacto: id,
       ...inner,
     })
-  } catch {
+  } catch (error) {
+    console.error(`Error updating artifact ${String(id)}:`, error)
     return normalizeArtefacto({
       id_artefacto: id,
       nombre: data.nombre,
@@ -374,6 +362,13 @@ export const deactivateArtefactoRequest = async (id: number) => {
   const payload = (await parseJsonSafely(response)) as Record<string, unknown> | null
   const inner = unwrapArtifactBody(payload)
   return normalizeArtefacto({
+    nombre_artefacto: typeof inner.nombre_artefacto === "string" ? inner.nombre_artefacto : undefined,
+    descripcion: typeof inner.descripcion === "string" ? inner.descripcion : undefined,
+    id_categoria: inner.id_categoria,
+    origen: inner.origen,
+    nivel_peligrosidad: inner.nivel_peligrosidad,
+    id_tipo: inner.id_tipo,
+    fecha_creacion: inner.fecha_creacion,
     ...inner,
     id_artefacto: id,
     estado: false,
@@ -399,6 +394,13 @@ export const activateArtefactoRequest = async (id: number) => {
   const payload = (await parseJsonSafely(response)) as Record<string, unknown> | null
   const inner = unwrapArtifactBody(payload)
   return normalizeArtefacto({
+    nombre_artefacto: typeof inner.nombre_artefacto === "string" ? inner.nombre_artefacto : undefined,
+    descripcion: typeof inner.descripcion === "string" ? inner.descripcion : undefined,
+    id_categoria: inner.id_categoria,
+    origen: inner.origen,
+    nivel_peligrosidad: inner.nivel_peligrosidad,
+    id_tipo: inner.id_tipo,
+    fecha_creacion: inner.fecha_creacion,
     ...inner,
     id_artefacto: id,
     estado: true,

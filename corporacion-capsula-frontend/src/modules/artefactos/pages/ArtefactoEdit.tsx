@@ -4,7 +4,7 @@ import bg from "../../../assets/3.jpg"
 import ArtefactoForm from "../components/ArtefactoForm"
 import { useArtefactos } from "../../../context/ArtefactosContext"
 import { Artefacto } from "../types/artefacto.types"
-import { isAdministrator } from "../../auth/utils/roles"
+import { canEditArtifacts } from "../../auth/utils/roles"
 
 const ArtefactoEdit = () => {
   const navigate = useNavigate()
@@ -29,7 +29,7 @@ const ArtefactoEdit = () => {
     navigate("/artefactos")
   }
 
-  if (!isAdministrator()) {
+  if (!canEditArtifacts()) {
     return (
       <div
         className="min-h-screen text-white flex items-center justify-center relative overflow-y-auto py-10"
@@ -43,7 +43,7 @@ const ArtefactoEdit = () => {
         <div className="relative z-10 bg-black/80 p-6 rounded-xl border border-amber-500 max-w-md text-center px-6">
           <h2 className="text-amber-300 text-xl mb-3">Permiso denegado</h2>
           <p className="text-gray-300 text-sm mb-4">
-            Editar artefactos está reservado al rol <strong>Administrador</strong>.
+            Editar artefactos está reservado a los roles <strong>Administrador</strong> y <strong>Usuario</strong>.
           </p>
           <button
             type="button"

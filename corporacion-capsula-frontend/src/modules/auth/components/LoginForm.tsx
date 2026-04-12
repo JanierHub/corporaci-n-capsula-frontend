@@ -94,6 +94,10 @@ const LoginForm = () => {
             El backend valida usuario y contraseña; el token va en cookie y se envía solo en peticiones con credenciales.
           </p>
 
+          <p className="text-cyan-200/80 text-xs mb-5 leading-relaxed">
+            Si configuramos un acceso interno para administración en el backend, también podrás entrar aquí con esas credenciales sin exponerlas en el frontend.
+          </p>
+
           {error ? (
             <p className="mb-4 text-sm text-red-300">{error}</p>
           ) : null}

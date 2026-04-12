@@ -35,6 +35,12 @@ export const loginUser = async (data: LoginBody): Promise<LoginResponse> => {
   })
 }
 
+export const logoutUser = async () => {
+  return requestJson(`${API_URL}/auth/logout`, {
+    method: "DELETE",
+  })
+}
+
 /** POST `/user` — ver `CreateUserBody` en `api.types.ts`. */
 export const createUser = async (data: CreateUserBody) => {
   return requestJson(`${API_URL}/user`, {
