@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import ArtefactoForm from "../components/ArtefactoForm";
 import { useArtefactos } from "../../../context/ArtefactosContext";
+import { canManageArtifacts } from "../../auth/utils/roles";
 import bg from "../../../assets/3.jpg";
 import esfera from "../../../assets/7.webp";
 import SaiyanParticles from "../../../components/SaiyanParticles";
@@ -8,6 +9,11 @@ import SaiyanParticles from "../../../components/SaiyanParticles";
 const ArtefactoCreate = () => {
   const navigate = useNavigate();
   const { addArtefacto } = useArtefactos();
+
+  if (!canManageArtifacts()) {
+    navigate("/home");
+    return null;
+  }
 
   const handleCreate = async (data: Parameters<typeof addArtefacto>[0]) => {
     try {

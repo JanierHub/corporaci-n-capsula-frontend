@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useArtefactos } from "../../../context/ArtefactosContext"
-import { isAdministrator } from "../../auth/utils/roles"
+import { canDeleteArtifacts } from "../../auth/utils/roles"
 import bg from "../../../assets/3.jpg"
 import esfera from "../../../assets/7.webp"
 
@@ -49,7 +49,7 @@ const ArtefactoEliminar = () => {
     setProgreso(0)
   }
 
-  if (!isAdministrator()) {
+  if (!canDeleteArtifacts()) {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center text-white p-8"

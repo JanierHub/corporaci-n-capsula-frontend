@@ -25,6 +25,26 @@ export const isAuthenticated = (): boolean => {
 export const isAdministrator = () =>
   normalizeRole(getStoredUserRole()) === normalizeRole("Administrador")
 
+export const isProjectManager = () =>
+  normalizeRole(getStoredUserRole()) === normalizeRole("Gestor de proyectos")
+
+export const isUser = () =>
+  normalizeRole(getStoredUserRole()) === normalizeRole("Usuario")
+
+export const canViewArtifacts = () => {
+  const role = getStoredUserRole()
+  return role !== null && role !== undefined && role.trim() !== ""
+}
+
+export const canManageArtifacts = () => {
+  const role = normalizeRole(getStoredUserRole())
+  return role === normalizeRole("Administrador") || 
+         role === normalizeRole("Gestor de proyectos") || 
+         role === normalizeRole("Usuario")
+}
+
+export const canDeleteArtifacts = () => isAdministrator()
+
 export const clearStoredSession = () => {
   localStorage.removeItem(SESSION_ROLE_KEY)
   localStorage.removeItem(SESSION_USER_NAME_KEY)
@@ -118,4 +138,16 @@ export const getBearerAuthHeader = (): Record<string, string> | undefined => {
   const raw = getStoredAccessToken() ?? getStoredUserRole()?.trim()
   if (!raw || !looksLikeJwt(raw)) return undefined
   return { Authorization: `Bearer ${raw}` }
+}
+
+/** Para usuarios sin JWT, usar credenciales de cookies */
+export const getAuthCredentials = (): Record<string, string> | undefined => {
+  const jwt = getStoredAccessToken()
+  if (jwt && looksLikeJwt(jwt)) {
+    return { Authorization: `Bearer ${jwt}` }
+  }
+  
+  // Para usuarios sin JWT, confiar en las cookies de sesión
+  // El backend debería aceptar credenciales de cookies
+  return undefined // Esto hará que fetch use credentials: "include"
 }

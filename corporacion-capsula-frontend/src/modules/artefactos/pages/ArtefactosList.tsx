@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useArtefactos } from "../../../context/ArtefactosContext"
-import { isAdministrator } from "../../auth/utils/roles"
+import { isAdministrator, canViewArtifacts, canManageArtifacts, canDeleteArtifacts } from "../../auth/utils/roles"
 import bg from "../../../assets/3.jpg"
 import esfera from "../../../assets/7.webp"
 import capsuleIcon from "../../../assets/13.gif"
@@ -24,13 +24,31 @@ const getGif = (cat: string) => {
 const ArtefactosList = () => {
   const navigate = useNavigate()
 
+  // Check if user can view artifacts
+  if (!canViewArtifacts()) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center text-white">
+        <div className="text-center">
+          <h2 className="text-2xl text-red-400 mb-4">Acceso Restringido</h2>
+          <p className="text-gray-300">No tienes permisos para ver los artefactos.</p>
+          <button 
+            onClick={() => navigate("/home")}
+            className="mt-4 bg-cyan-400 text-black px-4 py-2 rounded"
+          >
+            Volver al inicio
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   const {
     artefactos,
     loadArtefactos,
     toggleArtefactoEstado,
   } = useArtefactos()
 
-  const canManageEstado = isAdministrator()
+  const canManageEstado = canDeleteArtifacts()
 
   const [selected, setSelected] = useState<any>(null)
 
@@ -43,7 +61,7 @@ const ArtefactosList = () => {
       setSelected(null)
       return
     }
-    setSelected((prev) => {
+    setSelected((prev: any) => {
       if (prev) {
         const fresh = artefactos.find((a) => a.id === prev.id)
         if (fresh) return fresh

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom"
 import videoBg from "../../../assets/14.mp4"
 import capsule from "../../../assets/13.gif"
 import logo from "../../../assets/5.gif"
-import { getStoredUserName, getStoredUserRole, isAdministrator } from "../../auth/utils/roles"
+import { getStoredUserName, getStoredUserRole, isAdministrator, canViewArtifacts } from "../../auth/utils/roles"
 
 const Home = () => {
   const navigate = useNavigate()
@@ -60,12 +60,14 @@ const Home = () => {
 
             <div className="flex flex-col gap-4">
 
-              <button
-                onClick={() => navigate("/artefactos")}
-                className="bg-cyan-400 text-black py-3 rounded-lg font-bold hover:scale-105 transition"
-              >
-                Ver Inventario
-              </button>
+              {canViewArtifacts() && (
+                <button
+                  onClick={() => navigate("/artefactos")}
+                  className="bg-cyan-400 text-black py-3 rounded-lg font-bold hover:scale-105 transition"
+                >
+                  Ver Inventario
+                </button>
+              )}
 
               {isAdmin ? (
                 <>

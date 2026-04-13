@@ -1,5 +1,5 @@
 import { API_URL } from "../../../config/api"
-import { getBearerAuthHeader } from "../../auth/utils/roles"
+import { getAuthCredentials } from "../../auth/utils/roles"
 import { Artefacto } from "../types/artefacto.types"
 import { enriquecerArtefactoConImagen } from "../utils/artefactoImagenes"
 
@@ -168,13 +168,35 @@ const artefactosMock: Artefacto[] = [
     inventor: "Bulma",
     createdAt: "2026-04-10",
   }),
+  normalizeArtefacto({
+    id: 2,
+    name: "Scouter",
+    description: "Dispositivo de detección de energía",
+    category: "defensa",
+    origin: "extraterrestre",
+    dangerLevel: "medium",
+    state: "activo",
+    inventor: "Freezer",
+    createdAt: "2026-04-11",
+  }),
+  normalizeArtefacto({
+    id: 3,
+    name: "Varita Mágica",
+    description: "Transforma objetos en conejos",
+    category: "domestico",
+    origin: "terrestre",
+    dangerLevel: "low",
+    state: "activo",
+    inventor: "Bulma",
+    createdAt: "2026-04-12",
+  }),
 ]
 
 const fetchWithTimeout = async (input: RequestInfo | URL, init?: RequestInit) => {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
   const headers = new Headers(init?.headers)
-  const auth = getBearerAuthHeader()
+  const auth = getAuthCredentials()
   if (auth) {
     Object.entries(auth).forEach(([k, v]) => headers.set(k, v))
   }
@@ -223,8 +245,6 @@ export const getArtefactos = async (): Promise<Artefacto[]> => {
 
     const data = await parseJsonSafely(response)
 
-    console.log("DATA API:", data)
-
     const extractPayload = (raw: unknown): unknown[] => {
       if (Array.isArray(raw)) return raw
       if (!raw || typeof raw !== "object") return []
@@ -254,15 +274,16 @@ export const getArtefactos = async (): Promise<Artefacto[]> => {
     const payload = extractPayload(data)
 
     if (!payload || payload.length === 0) {
-      console.warn("Usando mock porque API está vacía")
+      console.warn("Usando mock porque API está vacía o falló")
       return artefactosMock.map(enriquecerArtefactoConImagen)
     }
 
-    return payload.map(normalizeArtefacto).map(enriquecerArtefactoConImagen)
+    return (payload as any[]).map(normalizeArtefacto).map(enriquecerArtefactoConImagen)
 
   } catch (error) {
     console.error("Error API:", error)
-    return []
+    console.warn("Usando mock porque la API falló completamente")
+    return artefactosMock.map(enriquecerArtefactoConImagen)
   }
 }
 

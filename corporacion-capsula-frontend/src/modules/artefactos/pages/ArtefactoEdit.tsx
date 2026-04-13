@@ -4,6 +4,7 @@ import ArtefactoForm from "../components/ArtefactoForm"
 import { useArtefactos } from "../../../context/ArtefactosContext"
 import { fetchArtefactoById } from "../services/artefactoService"
 import type { Artefacto } from "../types/artefacto.types"
+import { canManageArtifacts } from "../../auth/utils/roles"
 import bg from "../../../assets/3.jpg"
 import esfera from "../../../assets/7.webp"
 
@@ -13,6 +14,12 @@ const ArtefactoEdit = () => {
   const { artefactos, updateArtefacto, loadArtefactos } = useArtefactos()
   const [fetched, setFetched] = useState<Artefacto | undefined>(undefined)
   const [fetchDone, setFetchDone] = useState(false)
+
+  // Check if user can manage artifacts
+  if (!canManageArtifacts()) {
+    navigate("/home");
+    return null;
+  }
 
   const pid = id ? Number(id) : NaN
 
