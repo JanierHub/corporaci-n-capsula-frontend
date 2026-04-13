@@ -85,36 +85,40 @@ const ArtefactosList = () => {
       </div>
 
       <div className="relative z-10 flex w-full h-full p-4 gap-4">
-        <div className="w-1/3 bg-orange-900/80 border-4 border-orange-400 rounded-xl p-4">
+        <div className="w-1/3 bg-orange-900/80 border-4 border-orange-400 rounded-xl p-4 flex flex-col h-full">
           <h2 className="text-yellow-300 font-bold mb-3">Inventario</h2>
 
-          {artefactos?.length === 0 ? (
-            <p>No hay artefactos 🚫</p>
-          ) : (
-            artefactos.map((a: any) => (
-              <div
-                key={a.id}
-                onClick={() => setSelected(a)}
-                className={`flex items-center gap-3 p-3 mb-2 cursor-pointer rounded ${
-                  selected?.id === a.id
-                    ? "bg-yellow-400 text-black"
-                    : "bg-orange-800 hover:bg-yellow-300 hover:text-black"
-                }`}
-              >
-                <div className="flex flex-col items-center shrink-0">
-                  <img
-                    src={a.imagenPersonalizada ?? getGif(a.categoria)}
-                    alt=""
-                    className={`w-12 h-12 rounded object-cover border border-orange-500/50 bg-black/40 ${a.estado === "obsoleto" ? "grayscale opacity-70" : ""}`}
-                  />
-                  <div className={`text-xs font-medium mt-1 ${a.estado === "obsoleto" ? "text-gray-400" : "text-green-400"}`}>
-                    {a.estado === "obsoleto" ? "Desactivado" : "Activado"}
+          <div className="flex-1 overflow-y-auto space-y-2">
+            {artefactos?.length === 0 ? (
+              <p>No hay artefactos 🚫</p>
+            ) : (
+              artefactos.map((a: any) => (
+                <div
+                  key={a.id}
+                  onClick={() => setSelected(a)}
+                  className={`flex items-center gap-3 p-3 cursor-pointer rounded transition-all ${
+                    selected?.id === a.id
+                      ? "bg-yellow-500 text-black shadow-lg shadow-yellow-500/50"
+                      : a.estado === "obsoleto"
+                      ? "bg-orange-950/60 hover:bg-orange-800/80"
+                      : "bg-orange-800 hover:bg-orange-700"
+                  }`}
+                >
+                  <div className="flex flex-col items-center shrink-0">
+                    <img
+                      src={a.imagenPersonalizada ?? getGif(a.categoria)}
+                      alt=""
+                      className={`w-12 h-12 rounded object-cover border border-orange-500/50 bg-black/40 ${a.estado === "obsoleto" ? "grayscale opacity-70" : ""}`}
+                    />
+                    <div className={`text-xs font-medium mt-1 ${a.estado === "obsoleto" ? "text-gray-400" : "text-green-400"}`}>
+                      {a.estado === "obsoleto" ? "Desactivado" : "Activado"}
+                    </div>
                   </div>
+                  <span className="font-medium"> {a.nombre}</span>
                 </div>
-                <span className="font-medium"> {a.nombre}</span>
-              </div>
-            ))
-          )}
+              ))
+            )}
+          </div>
         </div>
 
         <div className="w-2/3 bg-orange-900/80 border-4 border-orange-400 rounded-xl p-4">
