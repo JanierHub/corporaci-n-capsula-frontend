@@ -186,9 +186,20 @@ const artefactosMock: Artefacto[] = [
     categoria: "domestico",
     origen: "terrestre",
     nivel_peligrosidad: 1,
-    estado: "activo",
+    estado: "obsoleto",
     inventor: "Bulma",
     fecha_creacion: "2026-04-12",
+  }),
+  normalizeArtefacto({
+    id: 4,
+    nombre: "Espada Z",
+    descripcion: "Arma legendaria de los saiyajin",
+    categoria: "defensa",
+    origen: "extraterrestre",
+    nivel_peligrosidad: 3,
+    estado: "obsoleto",
+    inventor: "Kaioshin",
+    fecha_creacion: "2026-04-13",
   }),
 ]
 

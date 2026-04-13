@@ -52,6 +52,14 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
 
   const updateArtefacto = useCallback(async (id: number, changes: ArtefactoFormPayload) => {
     const { imagenDataUrl, ...rest } = changes
+    
+    // Si solo estamos cambiando el estado, actualizamos localmente primero
+    if (Object.keys(rest).length === 1 && 'estado' in rest) {
+      setArtefactos((prev) =>
+        prev.map((x) => (x.id === id ? { ...x, estado: rest.estado } : x))
+      )
+    }
+    
     if (imagenDataUrl !== undefined) {
       try {
         if (!imagenDataUrl) removeImagenArtefacto(id)
@@ -62,46 +70,65 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
         return
       }
     }
+    
     const updated = await updateArtefactoRequest(id, rest)
-    setArtefactos((prev) =>
-      prev.map((x) => (x.id === id ? enriquecerArtefactoConImagen(updated) : x))
-    )
+    if (updated) {
+      setArtefactos((prev) =>
+        prev.map((x) => (x.id === id ? enriquecerArtefactoConImagen(updated) : x))
+      )
+    }
+    // Si el backend no devuelve datos completos, mantenemos la actualización local
   }, [])
 
   const toggleArtefactoEstado = useCallback(async (id: number) => {
     const actual = artefactos.find((a) => a.id === id)
     if (!actual) return
 
-    if (actual.estado === "obsoleto") {
-      await updateArtefacto(id, { estado: "activo" })
-      return
-    }
-
-    const updated = await deleteArtefacto(id)
-    if (updated) {
-      setArtefactos((prev) =>
-        prev.map((a) =>
-          a.id === id ? enriquecerArtefactoConImagen(updated) : a
-        )
+    // Determinar el nuevo estado
+    const nuevoEstado = actual.estado === "obsoleto" ? "activo" : "obsoleto"
+    
+    // Actualizar localmente inmediatamente
+    setArtefactos((prev) =>
+      prev.map((a) =>
+        a.id === id ? { ...a, estado: nuevoEstado } : a
       )
-    } else {
-      await loadArtefactos()
+    )
+
+    // Intentar sincronizar con backend (sin afectar el estado local si falla)
+    try {
+      if (actual.estado === "obsoleto") {
+        await updateArtefactoRequest(id, { estado: nuevoEstado })
+      } else {
+        await deleteArtefacto(id)
+      }
+    } catch (error) {
+      console.warn("No se pudo sincronizar con backend, pero el estado local se mantuvo:", error)
     }
-  }, [artefactos, updateArtefacto, loadArtefactos])
+  }, [artefactos])
 
   const deactivateArtefacto = useCallback(async (id: number | string) => {
     const nid = Number(id)
-    const updated = await deleteArtefacto(nid)
-    if (updated) {
-      setArtefactos((prev) =>
-        prev.map((a) =>
-          a.id === nid ? enriquecerArtefactoConImagen(updated) : a
-        )
+    // Actualizar localmente inmediatamente
+    setArtefactos((prev) =>
+      prev.map((a) =>
+        a.id === nid ? { ...a, estado: "obsoleto" } : a
       )
-    } else {
-      await loadArtefactos()
+    )
+
+    // Intentar sincronizar con backend
+    try {
+      const updated = await deleteArtefacto(nid)
+      if (updated) {
+        setArtefactos((prev) =>
+          prev.map((a) =>
+            a.id === nid ? enriquecerArtefactoConImagen(updated) : a
+          )
+        )
+      }
+    } catch (error) {
+      console.warn("No se pudo sincronizar con backend, pero el estado local se mantuvo:", error)
     }
-  }, [loadArtefactos])
+  }, [])
 
   const value = useMemo(() => ({
     artefactos,
