@@ -101,12 +101,17 @@ const ArtefactosList = () => {
                     : "bg-orange-800 hover:bg-yellow-300 hover:text-black"
                 }`}
               >
-                <img
-                  src={a.imagenPersonalizada ?? getGif(a.categoria)}
-                  alt=""
-                  className="w-12 h-12 rounded object-cover border border-orange-500/50 shrink-0 bg-black/40"
-                />
-                <span className="font-medium">⚡ {a.nombre}</span>
+                <div className="flex flex-col items-center shrink-0">
+                  <img
+                    src={a.imagenPersonalizada ?? getGif(a.categoria)}
+                    alt=""
+                    className={`w-12 h-12 rounded object-cover border border-orange-500/50 bg-black/40 ${a.estado === "obsoleto" ? "grayscale opacity-70" : ""}`}
+                  />
+                  <div className={`text-xs font-medium mt-1 ${a.estado === "obsoleto" ? "text-gray-400" : "text-green-400"}`}>
+                    {a.estado === "obsoleto" ? "Desactivado" : "Activado"}
+                  </div>
+                </div>
+                <span className="font-medium"> {a.nombre}</span>
               </div>
             ))
           )}
@@ -117,12 +122,15 @@ const ArtefactosList = () => {
             <p>Selecciona un artefacto</p>
           ) : (
             <>
-              <div className="bg-orange-700 rounded mb-3 flex justify-center items-center h-52 overflow-hidden">
+              <div className="bg-orange-700 rounded mb-3 flex flex-col justify-center items-center h-52 overflow-hidden">
                 <img
                   src={selected.imagenPersonalizada ?? getGif(selected.categoria)}
                   alt=""
-                  className="max-h-full max-w-full object-contain"
+                  className={`max-h-full max-w-full object-contain ${selected.estado === "obsoleto" ? "grayscale opacity-70" : ""}`}
                 />
+                <div className={`mt-2 text-sm font-medium ${selected.estado === "obsoleto" ? "text-gray-400" : "text-green-400"}`}>
+                  {selected.estado === "obsoleto" ? "Desactivado" : "Activado"}
+                </div>
               </div>
 
               <h2 className="text-2xl text-yellow-300 font-bold mb-2">
