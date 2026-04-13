@@ -92,11 +92,17 @@ const normalizeOrigen = (value: unknown): Artefacto["origen"] => {
 }
 
 const normalizeEstado = (value: unknown): NonNullable<Artefacto["estado"]> => {
+  // Priorizar booleanos del backend
   if (value === false) return "obsoleto"
   if (value === true) return "activo"
+  
+  // Manejar strings
   const estado = String(value ?? "").toLowerCase()
   if (estado.includes("prueba")) return "en_pruebas"
-  if (estado.includes("obsoleto") || estado.includes("inactive")) return "obsoleto"
+  if (estado.includes("obsoleto") || estado.includes("inactive") || estado === "false") return "obsoleto"
+  if (estado.includes("activo") || estado.includes("active") || estado === "true") return "activo"
+  
+  // Default a activo si no se puede determinar
   return "activo"
 }
 
@@ -286,7 +292,8 @@ export const getArtefactos = async (): Promise<Artefacto[]> => {
 
     if (!payload || payload.length === 0) {
       console.warn("Usando mock porque API está vacía o falló")
-      return artefactosMock.map(enriquecerArtefactoConImagen)
+      // Crear copias profundas para evitar referencia compartida
+      return artefactosMock.map(a => enriquecerArtefactoConImagen({...a}))
     }
 
     return (payload as any[]).map(normalizeArtefacto).map(enriquecerArtefactoConImagen)
@@ -294,7 +301,8 @@ export const getArtefactos = async (): Promise<Artefacto[]> => {
   } catch (error) {
     console.error("Error API:", error)
     console.warn("Usando mock porque la API falló completamente")
-    return artefactosMock.map(enriquecerArtefactoConImagen)
+    // Crear copias profundas para evitar referencia compartida
+    return artefactosMock.map(a => enriquecerArtefactoConImagen({...a}))
   }
 }
 
@@ -401,7 +409,8 @@ type PatchBody = {
 
 const estadoToBool = (e: Artefacto["estado"] | undefined): boolean | undefined => {
   if (e === undefined) return undefined
-  return e !== "obsoleto"
+  // Convertir strings del frontend a booleanos del backend
+  return e === "activo" ? true : false
 }
 
 export const updateArtefactoRequest = async (

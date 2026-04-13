@@ -29,12 +29,46 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
 
   const loadArtefactos = useCallback(async () => {
     const data = await getArtefactos()
-    setArtefactos(data)
+    
+    // Restaurar estados desde localStorage con prioridad sobre el estado por defecto
+    const estadosGuardados = localStorage.getItem('artefactos_estados')
+    if (estadosGuardados) {
+      try {
+        const estados = JSON.parse(estadosGuardados)
+        const dataConEstados = data.map(artefacto => {
+          const estadoGuardado = estados[artefacto.id.toString()]
+          // Si hay estado guardado (desactivado), usarlo. Si no, usar "activo" por defecto
+          if (estadoGuardado) {
+            return { ...artefacto, estado: estadoGuardado as Artefacto["estado"] }
+          }
+          // Por defecto, todos están activos
+          return { ...artefacto, estado: "activo" as Artefacto["estado"] }
+        })
+        setArtefactos(dataConEstados)
+        console.log("Estados restaurados con prioridad localStorage:", dataConEstados.map(a => ({ id: a.id, estado: a.estado })))
+      } catch (error) {
+        console.warn("Error cargando estados guardados:", error)
+        // Si hay error, todos activos por defecto
+        const dataTodosActivos = data.map(artefacto => ({
+          ...artefacto,
+          estado: "activo" as Artefacto["estado"]
+        }))
+        setArtefactos(dataTodosActivos)
+      }
+    } else {
+      // Sin localStorage, todos activos por defecto
+      const dataTodosActivos = data.map(artefacto => ({
+        ...artefacto,
+        estado: "activo" as Artefacto["estado"]
+      }))
+      setArtefactos(dataTodosActivos)
+      console.log("Todos los artefactos establecidos como ACTIVOS por defecto:")
+    }
   }, [])
 
   useEffect(() => {
     loadArtefactos()
-  }, [loadArtefactos])
+  }, []) // Solo ejecutar una vez al montar el componente
 
   const addArtefacto = useCallback(async (a: ArtefactoFormPayload) => {
     const { imagenDataUrl, ...rest } = a
@@ -72,9 +106,12 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
     }
     
     const updated = await updateArtefactoRequest(id, rest)
-    if (updated) {
+    if (updated && Object.keys(rest).length > 1) {
+      // Solo sobrescribir si hay cambios que no sean solo el estado
       setArtefactos((prev) =>
-        prev.map((x) => (x.id === id ? enriquecerArtefactoConImagen(updated) : x))
+        prev.map((a) =>
+          a.id === id ? { ...a, ...enriquecerArtefactoConImagen(updated), estado: a.estado } : a
+        )
       )
     }
     // Si el backend no devuelve datos completos, mantenemos la actualización local
@@ -84,36 +121,62 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
     const actual = artefactos.find((a) => a.id === id)
     if (!actual) return
 
-    // Determinar el nuevo estado
-    const nuevoEstado = actual.estado === "obsoleto" ? "activo" : "obsoleto"
+    // Siempre activar (volver al estado inicial)
+    const nuevoEstado: Artefacto["estado"] = "activo"
+    
+    console.log(`Activando artefacto ${id} de ${actual.estado} a ${nuevoEstado}`)
     
     // Actualizar localmente inmediatamente
-    setArtefactos((prev) =>
-      prev.map((a) =>
+    setArtefactos((prev) => {
+      const nuevosArtefactos = prev.map((a) =>
         a.id === id ? { ...a, estado: nuevoEstado } : a
       )
-    )
-
-    // Intentar sincronizar con backend (sin afectar el estado local si falla)
-    try {
-      if (actual.estado === "obsoleto") {
-        await updateArtefactoRequest(id, { estado: nuevoEstado })
-      } else {
-        await deleteArtefacto(id)
+      
+      // Eliminar del localStorage los artefactos que se activan
+      const estadosGuardados = localStorage.getItem('artefactos_estados')
+      if (estadosGuardados) {
+        try {
+          const estados = JSON.parse(estadosGuardados)
+          delete estados[id.toString()] // Eliminar este artefacto del storage
+          localStorage.setItem('artefactos_estados', JSON.stringify(estados))
+          console.log("Artefacto eliminado de localStorage:", id, "Estados restantes:", estados)
+        } catch (error) {
+          console.warn("Error actualizando localStorage:", error)
+        }
       }
+      
+      return nuevosArtefactos
+    })
+
+    // Sincronizar con backend y mantener estado local
+    try {
+      await updateArtefactoRequest(id, { estado: nuevoEstado })
+      console.log("Estado guardado en backend correctamente")
     } catch (error) {
       console.warn("No se pudo sincronizar con backend, pero el estado local se mantuvo:", error)
     }
-  }, [artefactos])
+  }, [artefactos, loadArtefactos])
 
   const deactivateArtefacto = useCallback(async (id: number | string) => {
     const nid = Number(id)
     // Actualizar localmente inmediatamente
-    setArtefactos((prev) =>
-      prev.map((a) =>
-        a.id === nid ? { ...a, estado: "obsoleto" } : a
+    setArtefactos((prev) => {
+      const nuevosArtefactos = prev.map((a) =>
+        a.id === nid ? { ...a, estado: "obsoleto" as Artefacto["estado"] } : a
       )
-    )
+      
+      // Guardar estados en localStorage - usar string keys para evitar TypeScript errors
+      const estados: Record<string, string> = {}
+      nuevosArtefactos.forEach(a => {
+        if (a.estado !== "activo" && a.estado) { // Solo guardar estados no activos y no undefined
+          estados[a.id.toString()] = a.estado
+        }
+      })
+      localStorage.setItem('artefactos_estados', JSON.stringify(estados))
+      console.log("Deactivate - Estados guardados en localStorage:", estados)
+      
+      return nuevosArtefactos
+    })
 
     // Intentar sincronizar con backend
     try {
@@ -132,7 +195,7 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
 
   const value = useMemo(() => ({
     artefactos,
-    loadArtefactos, // 🔥 CLAVE (esto faltaba)
+    loadArtefactos,
     addArtefacto,
     updateArtefacto,
     toggleArtefactoEstado,

@@ -132,9 +132,6 @@ const ArtefactosList = () => {
                   alt=""
                   className={`max-h-full max-w-full object-contain ${selected.estado === "obsoleto" ? "grayscale opacity-70" : ""}`}
                 />
-                <div className={`mt-2 text-sm font-medium ${selected.estado === "obsoleto" ? "text-gray-400" : "text-green-400"}`}>
-                  {selected.estado === "obsoleto" ? "Desactivado" : "Activado"}
-                </div>
               </div>
 
               <h2 className="text-2xl text-yellow-300 font-bold mb-2">
