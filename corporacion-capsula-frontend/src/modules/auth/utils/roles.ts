@@ -31,6 +31,9 @@ export const isProjectManager = () =>
 export const isUser = () =>
   normalizeRole(getStoredUserRole()) === normalizeRole("Usuario")
 
+export const isInnovationDirector = () =>
+  normalizeRole(getStoredUserRole()) === normalizeRole("Directora de Innovacion")
+
 export const canViewArtifacts = () => {
   const role = getStoredUserRole()
   return role !== null && role !== undefined && role.trim() !== ""
@@ -40,6 +43,7 @@ export const canManageArtifacts = () => {
   const role = normalizeRole(getStoredUserRole())
   return role === normalizeRole("Administrador") || 
          role === normalizeRole("Gestor de proyectos") || 
+         role === normalizeRole("Directora de Innovacion") ||
          role === normalizeRole("Usuario")
 }
 

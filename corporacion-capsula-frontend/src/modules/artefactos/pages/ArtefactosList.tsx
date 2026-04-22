@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useArtefactos } from "../../../context/ArtefactosContext"
 import { isAdministrator, canViewArtifacts, canManageArtifacts, canDeleteArtifacts } from "../../auth/utils/roles"
 import bg from "../../../assets/3.jpg"
 import esfera from "../../../assets/7.webp"
 import capsuleIcon from "../../../assets/13.gif"
+import { Search, Filter, X } from "lucide-react"
 
 import transporteGif from "../../../assets/transporte.gif"
 import energiaGif from "../../../assets/energia.gif"
@@ -52,6 +53,60 @@ const ArtefactosList = () => {
 
   const [selected, setSelected] = useState<any>(null)
 
+  // ===== FILTROS Y BÚSQUEDA (DISPONIBLES PARA TODOS) =====
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterCategoria, setFilterCategoria] = useState<string>("todas")
+  const [filterOrigen, setFilterOrigen] = useState<string>("todos")
+  const [filterPeligrosidad, setFilterPeligrosidad] = useState<string>("todas")
+  const [showFilters, setShowFilters] = useState(false)
+
+  // Categorías y orígenes únicos para filtros
+  const categorias = useMemo(() => {
+    const cats = new Set(artefactos.map((a: any) => a.categoria))
+    return Array.from(cats)
+  }, [artefactos])
+
+  const origenes = useMemo(() => {
+    const ors = new Set(artefactos.map((a: any) => a.origen))
+    return Array.from(ors)
+  }, [artefactos])
+
+  // Niveles de peligrosidad
+  const nivelesPeligrosidad = ["Bajo", "Medio", "Alto", "Crítico"]
+
+  // Filtrar artefactos (PARA TODOS LOS USUARIOS)
+  const artefactosFiltrados = useMemo(() => {
+    return artefactos.filter((a: any) => {
+      // Búsqueda por nombre
+      const matchSearch = searchTerm === "" || 
+        a.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        a.descripcion?.toLowerCase().includes(searchTerm.toLowerCase())
+
+      // Filtro por categoría
+      const matchCategoria = filterCategoria === "todas" || a.categoria === filterCategoria
+
+      // Filtro por origen
+      const matchOrigen = filterOrigen === "todos" || a.origen === filterOrigen
+
+      // Filtro por peligrosidad
+      const matchPeligrosidad = filterPeligrosidad === "todas" || 
+        (filterPeligrosidad === "Bajo" && a.nivelPeligrosidad <= 3) ||
+        (filterPeligrosidad === "Medio" && a.nivelPeligrosidad > 3 && a.nivelPeligrosidad <= 6) ||
+        (filterPeligrosidad === "Alto" && a.nivelPeligrosidad > 6 && a.nivelPeligrosidad <= 8) ||
+        (filterPeligrosidad === "Crítico" && a.nivelPeligrosidad > 8)
+
+      return matchSearch && matchCategoria && matchOrigen && matchPeligrosidad
+    })
+  }, [artefactos, searchTerm, filterCategoria, filterOrigen, filterPeligrosidad])
+
+  // Limpiar filtros
+  const clearFilters = () => {
+    setSearchTerm("")
+    setFilterCategoria("todas")
+    setFilterOrigen("todos")
+    setFilterPeligrosidad("todas")
+  }
+
   useEffect(() => {
     loadArtefactos()
   }, [loadArtefactos])
@@ -88,11 +143,132 @@ const ArtefactosList = () => {
         <div className="w-1/3 bg-orange-900/80 border-4 border-orange-400 rounded-xl p-4 flex flex-col h-full">
           <h2 className="text-yellow-300 font-bold mb-3">Inventario</h2>
 
+          {/* ===== BARRA DE BÚSQUEDA (PARA TODOS) ===== */}
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-orange-300 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Buscar artefacto..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-black/40 border border-orange-400/50 rounded-lg py-2 pl-10 pr-8 text-white placeholder-orange-300/50 text-sm focus:border-orange-400 focus:outline-none"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-orange-300 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* ===== BOTÓN DE FILTROS (PARA TODOS) ===== */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 mb-2 py-2 px-3 rounded-lg text-sm font-medium transition ${
+              showFilters || filterCategoria !== "todas" || filterOrigen !== "todos" || filterPeligrosidad !== "todas"
+                ? "bg-orange-500 text-white"
+                : "bg-orange-800/60 text-orange-200 hover:bg-orange-700"
+            }`}
+          >
+            <Filter className="w-4 h-4" />
+            Filtros
+            {(filterCategoria !== "todas" || filterOrigen !== "todos" || filterPeligrosidad !== "todas") && (
+              <span className="bg-white text-orange-600 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                {[filterCategoria, filterOrigen, filterPeligrosidad].filter(f => f !== "todas" && f !== "todos").length}
+              </span>
+            )}
+          </button>
+
+          {/* ===== PANEL DE FILTROS (PARA TODOS) ===== */}
+          {showFilters && (
+            <div className="bg-black/40 border border-orange-400/30 rounded-lg p-3 mb-3 space-y-3">
+              {/* Filtro por Categoría */}
+              <div>
+                <label className="text-orange-300 text-xs font-medium mb-1 block">Categoría</label>
+                <select
+                  value={filterCategoria}
+                  onChange={(e) => setFilterCategoria(e.target.value)}
+                  className="w-full bg-orange-950/60 border border-orange-400/30 rounded py-1.5 px-2 text-white text-sm focus:border-orange-400 focus:outline-none"
+                >
+                  <option value="todas">Todas las categorías</option>
+                  {categorias.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Filtro por Origen */}
+              <div>
+                <label className="text-orange-300 text-xs font-medium mb-1 block">Origen</label>
+                <select
+                  value={filterOrigen}
+                  onChange={(e) => setFilterOrigen(e.target.value)}
+                  className="w-full bg-orange-950/60 border border-orange-400/30 rounded py-1.5 px-2 text-white text-sm focus:border-orange-400 focus:outline-none"
+                >
+                  <option value="todos">Todos los orígenes</option>
+                  {origenes.map(orig => (
+                    <option key={orig} value={orig}>{orig}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Filtro por Peligrosidad */}
+              <div>
+                <label className="text-orange-300 text-xs font-medium mb-1 block">Nivel de Peligrosidad</label>
+                <select
+                  value={filterPeligrosidad}
+                  onChange={(e) => setFilterPeligrosidad(e.target.value)}
+                  className="w-full bg-orange-950/60 border border-orange-400/30 rounded py-1.5 px-2 text-white text-sm focus:border-orange-400 focus:outline-none"
+                >
+                  <option value="todas">Todos los niveles</option>
+                  {nivelesPeligrosidad.map(nivel => (
+                    <option key={nivel} value={nivel}>{nivel}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Limpiar filtros */}
+              <button
+                onClick={clearFilters}
+                className="w-full py-1.5 text-xs text-orange-300 hover:text-white border border-orange-400/30 rounded hover:bg-orange-800/50 transition"
+              >
+                Limpiar filtros
+              </button>
+            </div>
+          )}
+
+          {/* Contador de resultados */}
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-orange-300/70 text-xs">
+              {artefactosFiltrados.length} de {artefactos.length} artefactos
+            </p>
+            {(searchTerm || filterCategoria !== "todas" || filterOrigen !== "todos" || filterPeligrosidad !== "todas") && (
+              <p className="text-orange-400 text-xs">Filtrado</p>
+            )}
+          </div>
+
           <div className="flex-1 overflow-y-auto space-y-2">
-            {artefactos?.length === 0 ? (
-              <p>No hay artefactos 🚫</p>
+            {artefactosFiltrados?.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-orange-300/50 mb-2">🔍</p>
+                <p className="text-orange-300/70 text-sm">
+                  {searchTerm || filterCategoria !== "todas" || filterOrigen !== "todos" || filterPeligrosidad !== "todas"
+                    ? "No se encontraron artefactos con esos filtros"
+                    : "No hay artefactos 🚫"}
+                </p>
+                {(searchTerm || filterCategoria !== "todas" || filterOrigen !== "todos" || filterPeligrosidad !== "todas") && (
+                  <button
+                    onClick={clearFilters}
+                    className="mt-3 text-xs text-cyan-400 hover:text-cyan-300 underline"
+                  >
+                    Limpiar búsqueda
+                  </button>
+                )}
+              </div>
             ) : (
-              artefactos.map((a: any) => (
+              artefactosFiltrados.map((a: any) => (
                 <div
                   key={a.id}
                   onClick={() => setSelected(a)}
