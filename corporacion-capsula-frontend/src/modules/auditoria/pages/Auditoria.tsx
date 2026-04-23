@@ -1,66 +1,27 @@
 /**
- * 📋 INSTRUCCIONES PARA CARLOS - MÓDULO DE AUDITORÍA
+ * 🚧 MÓDULO EN PROGRESO - DESARROLLADO POR CARLOS
  * 
- * Historia de Usuario: HU-?? - Auditoría del Sistema
+ * 📋 AUDITORÍA DE ARTEFACTOS - FRONTEND ONLY
  * 
- * 🎯 OBJETIVO:
- * Crear el sistema de auditoría completo para registrar y consultar
- * todas las acciones realizadas en el sistema.
+ * Estructura de tabla: id_registro, nombre_tabla, accion, id_usuario, id_artefacto, valor_anterior, valor_nuevo, fecha_operacion
  * 
- * 🔧 FUNCIONALIDADES REQUERIDAS:
+ * ✅ YA IMPLEMENTADO:
+ * - mockAuditLogs con datos de ejemplo (solo tabla "artefactos")
+ * - Tarjetas de estadísticas (stats cards visuales)
+ * - Estructura de tabla con columnas: Fecha, Usuario, Acción, Tabla, Cambios
+ * - Estilo púrpura/cyan de Capsule Corp
+ * - Badges de colores por acción (CREATE, UPDATE, DELETE)
+ * - Muestra valor_anterior y valor_nuevo en la descripción
  * 
- * 1. REGISTRO DE EVENTOS (requiere backend):
- *    - Creación de artefactos (quién, cuándo, qué datos)
- *    - Edición de artefactos (cambios realizados)
- *    - Activación/Desactivación de artefactos
- *    - Login/Logout de usuarios
- *    - Creación de usuarios
- *    - Cambios de permisos/roles
+ * 🔧 POR IMPLEMENTAR (SOLO FRONTEND):
+ * - Filtros funcionales por fecha, usuario, acción
+ * - Paginación real
+ * - Exportar a CSV
+ * - Gráficos con recharts
  * 
- * 2. VISUALIZACIÓN DE LOGS:
- *    - Tabla cronológica de eventos
- *    - Filtros por: fecha, usuario, tipo de acción, módulo
- *    - Detalle expandable de cada evento
- *    - Paginación (10/25/50 eventos por página)
+ * 💡 NOTA: Solo para auditoría de artefactos. NO requiere backend.
  * 
- * 3. EXPORTACIÓN:
- *    - Exportar a CSV
- *    - Exportar a PDF (con logo y formato institucional)
- *    - Rango de fechas seleccionable
- * 
- * 4. ESTADÍSTICAS:
- *    - Eventos por día/semana/mes
- *    - Usuarios más activos
- *    - Módulos más utilizados
- * 
- * 📂 RUTA: /auditoria
- * 
- * 🎨 DISEÑO:
- * - Tema oscuro con colores púrpura/cyan
- * - Estilo de logs de sistema (tipo terminal o tabla formal)
- * - Badges de colores según tipo de acción:
- *   - CREATE: verde
- *   - UPDATE: amarillo
- *   - DELETE: rojo
- *   - LOGIN: azul
- *   - LOGOUT: gris
- * 
- * 📡 BACKEND NECESARIO:
- * - Tabla `audit_logs` en PostgreSQL:
- *   id, user_id, user_name, action_type, module, 
- *   description, details (JSON), ip_address, created_at
- * - Endpoints:
- *   GET /api/v1/audit-logs (con filtros)
- *   POST /api/v1/audit-logs (para registrar)
- * 
- * 💡 IMPLEMENTACIÓN SUGERIDA:
- * Fase 1 (Frontend mock): Crear UI con datos de ejemplo
- * Fase 2 (Backend): Crear tabla y endpoints
- * Fase 3 (Integración): Conectar todo y capturar eventos reales
- * 
- * Estado: 🚧 ASIGNADO A CARLOS
- * Prioridad: Media
- * Fecha límite sugerida: Fin de semana
+ * 📂 Archivo: src/modules/auditoria/pages/Auditoria.tsx
  */
 
 import { useNavigate } from "react-router-dom"
@@ -88,43 +49,48 @@ import {
   Server
 } from "lucide-react"
 
-// Datos de ejemplo para demostración (reemplazar con backend real)
+// Datos de ejemplo para demostración// ===== MOCK DATA PARA AUDITORÍA DE ARTEFACTOS (Frontend Only) =====
+// Estructura de tabla: id_registro, nombre_tabla, accion, id_usuario, id_artefacto, valor_anterior, valor_nuevo, fecha_operacion
 const mockAuditLogs = [
   {
-    id: 1,
-    user: "Dr. Brief",
-    action: "CREATE",
-    module: "Artefactos",
-    description: "Creó artefacto 'Capsule Corp #1'",
-    timestamp: "2026-04-21 15:30:22",
-    details: { artefactoId: 1, nombre: "Capsule Corp #1" }
+    id_registro: 1,
+    nombre_tabla: "artefactos",
+    accion: "CREATE",
+    id_usuario: 101,
+    id_artefacto: 1,
+    valor_anterior: null,
+    valor_nuevo: '{"nombre": "Capsule Corp #1", "categoria": "tecnologia"}',
+    fecha_operacion: "2026-04-21 15:30:22"
   },
   {
-    id: 2,
-    user: "Bulma",
-    action: "UPDATE",
-    module: "Artefactos",
-    description: "Editó artefacto 'Radar del Dragón'",
-    timestamp: "2026-04-21 14:15:10",
-    details: { artefactoId: 5, campo: "descripcion" }
+    id_registro: 2,
+    nombre_tabla: "artefactos",
+    accion: "UPDATE",
+    id_usuario: 102,
+    id_artefacto: 5,
+    valor_anterior: '{"nivelPeligrosidad": 3}',
+    valor_nuevo: '{"nivelPeligrosidad": 6}',
+    fecha_operacion: "2026-04-21 14:15:10"
   },
   {
-    id: 3,
-    user: "Admin",
-    action: "DELETE",
-    module: "Usuarios",
-    description: "Desactivó usuario 'test_user'",
-    timestamp: "2026-04-21 12:00:00",
-    details: { userId: 99, razon: "Inactividad" }
+    id_registro: 3,
+    nombre_tabla: "artefactos",
+    accion: "UPDATE",
+    id_usuario: 103,
+    id_artefacto: 12,
+    valor_anterior: '{"estado": "activo"}',
+    valor_nuevo: '{"estado": "obsoleto"}',
+    fecha_operacion: "2026-04-21 11:22:45"
   },
   {
-    id: 4,
-    user: "Trunks",
-    action: "LOGIN",
-    module: "Auth",
-    description: "Inicio de sesión exitoso",
-    timestamp: "2026-04-21 09:45:33",
-    details: { ip: "192.168.1.1", dispositivo: "Chrome/Windows" }
+    id_registro: 4,
+    nombre_tabla: "artefactos",
+    accion: "DELETE",
+    id_usuario: 101,
+    id_artefacto: 8,
+    valor_anterior: '{"nombre": "Nube Voladora"}',
+    valor_nuevo: null,
+    fecha_operacion: "2026-04-20 09:45:33"
   }
 ]
 
@@ -136,14 +102,14 @@ const Auditoria = () => {
   const stats = useMemo(() => {
     return {
       totalEventos: mockAuditLogs.length + artefactos.length,
-      eventosHoy: mockAuditLogs.filter(l => l.timestamp.includes("2026-04-21")).length,
-      usuariosActivos: new Set(mockAuditLogs.map(l => l.user)).size,
-      accionesCriticas: mockAuditLogs.filter(l => l.action === "DELETE").length
+      eventosHoy: mockAuditLogs.filter(l => l.fecha_operacion.includes("2026-04-21")).length,
+      usuariosActivos: new Set(mockAuditLogs.map(l => l.id_usuario)).size,
+      accionesCriticas: mockAuditLogs.filter(l => l.accion === "DELETE").length
     }
   }, [artefactos])
   
-  const getActionColor = (action: string) => {
-    switch (action) {
+  const getActionColor = (accion: string) => {
+    switch (accion) {
       case "CREATE": return "bg-emerald-500/20 text-emerald-400 border-emerald-500/50"
       case "UPDATE": return "bg-amber-500/20 text-amber-400 border-amber-500/50"
       case "DELETE": return "bg-red-500/20 text-red-400 border-red-500/50"
@@ -153,8 +119,8 @@ const Auditoria = () => {
     }
   }
   
-  const getActionIcon = (action: string) => {
-    switch (action) {
+  const getActionIcon = (accion: string) => {
+    switch (accion) {
       case "CREATE": return <CheckCircle2 className="w-4 h-4" />
       case "UPDATE": return <FileText className="w-4 h-4" />
       case "DELETE": return <AlertTriangle className="w-4 h-4" />
@@ -229,13 +195,10 @@ const Auditoria = () => {
             <option>CREATE</option>
             <option>UPDATE</option>
             <option>DELETE</option>
-            <option>LOGIN</option>
           </select>
           <select className="bg-black/40 border border-purple-500/30 rounded-lg py-2 px-4 text-white">
-            <option>Todos los módulos</option>
-            <option>Artefactos</option>
-            <option>Usuarios</option>
-            <option>Auth</option>
+            <option>Todas las tablas</option>
+            <option>artefactos</option>
           </select>
           <button className="flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/30 rounded-lg hover:bg-purple-500/20 transition">
             <Calendar className="w-4 h-4" />
@@ -258,17 +221,21 @@ const Auditoria = () => {
           </thead>
           <tbody className="divide-y divide-purple-500/10">
             {mockAuditLogs.map((log) => (
-              <tr key={log.id} className="hover:bg-purple-500/5 transition">
-                <td className="py-3 px-4 text-gray-400 text-sm font-mono">{log.timestamp}</td>
-                <td className="py-3 px-4 text-cyan-300">{log.user}</td>
+              <tr key={log.id_registro} className="hover:bg-purple-500/5 transition">
+                <td className="py-3 px-4 text-gray-400 text-sm font-mono">{log.fecha_operacion}</td>
+                <td className="py-3 px-4 text-cyan-300">Usuario #{log.id_usuario}</td>
                 <td className="py-3 px-4">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium border ${getActionColor(log.action)}`}>
-                    {getActionIcon(log.action)}
-                    {log.action}
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium border ${getActionColor(log.accion)}`}>
+                    {getActionIcon(log.accion)}
+                    {log.accion}
                   </span>
                 </td>
-                <td className="py-3 px-4 text-purple-300">{log.module}</td>
-                <td className="py-3 px-4 text-gray-300">{log.description}</td>
+                <td className="py-3 px-4 text-purple-300">{log.nombre_tabla}</td>
+                <td className="py-3 px-4 text-gray-300 text-xs">
+                  Artefacto #{log.id_artefacto}
+                  {log.valor_anterior && <span className="block text-amber-400/70 mt-1">Antes: {log.valor_anterior}</span>}
+                  {log.valor_nuevo && <span className="block text-emerald-400/70">Después: {log.valor_nuevo}</span>}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -318,7 +285,6 @@ const Auditoria = () => {
               { tipo: "CREATE", count: 45, color: "text-emerald-400", bg: "bg-emerald-400/20" },
               { tipo: "UPDATE", count: 32, color: "text-amber-400", bg: "bg-amber-400/20" },
               { tipo: "DELETE", count: 8, color: "text-red-400", bg: "bg-red-400/20" },
-              { tipo: "LOGIN", count: 67, color: "text-blue-400", bg: "bg-blue-400/20" },
             ].map((item) => (
               <div key={item.tipo} className={`${item.bg} border border-gray-700 rounded-lg p-3`}>
                 <p className={`text-2xl font-bold ${item.color}`}>{item.count}</p>
@@ -329,97 +295,44 @@ const Auditoria = () => {
         </div>
       </div>
 
-      {/* ESTRUCTURA DE BASE DE DATOS EJEMPLO */}
-      <div className="mt-6 bg-gray-900/50 border border-gray-700 rounded-xl p-6">
-        <h3 className="text-lg font-bold text-cyan-400 mb-4 flex items-center gap-2">
-          <Database className="w-5 h-5" />
-          Estructura de Base de Datos (Ejemplo)
-        </h3>
-        <div className="bg-black/60 rounded-lg p-4 font-mono text-sm overflow-x-auto">
-          <p className="text-green-400 mb-2">-- Tabla audit_logs</p>
-          <p className="text-gray-300">
-            <span className="text-purple-400">CREATE TABLE</span> audit_logs (
-          </p>
-          <p className="text-gray-300 pl-4">
-            id <span className="text-cyan-400">SERIAL PRIMARY KEY</span>,
-          </p>
-          <p className="text-gray-300 pl-4">
-            user_id <span className="text-cyan-400">INTEGER REFERENCES</span> usuarios(id),
-          </p>
-          <p className="text-gray-300 pl-4">
-            user_name <span className="text-cyan-400">VARCHAR(100)</span>,
-          </p>
-          <p className="text-gray-300 pl-4">
-            action_type <span className="text-cyan-400">VARCHAR(50)</span>, <span className="text-gray-500">-- CREATE, UPDATE, DELETE, LOGIN</span>
-          </p>
-          <p className="text-gray-300 pl-4">
-            module <span className="text-cyan-400">VARCHAR(50)</span>, <span className="text-gray-500">-- Artefactos, Usuarios, Auth</span>
-          </p>
-          <p className="text-gray-300 pl-4">
-            description <span className="text-cyan-400">TEXT</span>,
-          </p>
-          <p className="text-gray-300 pl-4">
-            details <span className="text-cyan-400">JSONB</span>, <span className="text-gray-500">-- Datos adicionales</span>
-          </p>
-          <p className="text-gray-300 pl-4">
-            ip_address <span className="text-cyan-400">INET</span>,
-          </p>
-          <p className="text-gray-300 pl-4">
-            created_at <span className="text-cyan-400">TIMESTAMP DEFAULT NOW()</span>
-          </p>
-          <p className="text-gray-300">);</p>
-        </div>
-      </div>
-
-      {/* Instrucciones para Carlos */}
+      {/* Módulo en Progreso - Carlos */}
       <div className="mt-8 bg-purple-900/20 border border-purple-500/30 rounded-xl p-6">
-        <h3 className="text-lg font-bold text-purple-400 mb-4 flex items-center gap-2">
-          <Code className="w-5 h-5" />
-          📋 Tareas para Carlos - Implementación
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-purple-400 flex items-center gap-2">
+            <Code className="w-5 h-5" />
+            🚧 Módulo en Progreso - Carlos
+          </h3>
+          <span className="text-xs bg-green-500/20 text-green-300 px-3 py-1 rounded-full">
+            Frontend Only
+          </span>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-3">
-            <h4 className="text-cyan-400 font-medium text-sm">Fase 1: Backend</h4>
-            <ul className="space-y-2 text-gray-400 text-sm">
-              <li className="flex items-start gap-2">
-                <input type="checkbox" className="mt-1 rounded border-purple-500" />
-                <span>Crear tabla <code className="text-cyan-400">audit_logs</code> en PostgreSQL</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <input type="checkbox" className="mt-1 rounded border-purple-500" />
-                <span>Crear modelo <code className="text-cyan-400">AuditLog</code> en backend</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <input type="checkbox" className="mt-1 rounded border-purple-500" />
-                <span>Implementar <code className="text-cyan-400">GET /api/v1/audit-logs</code></span>
-              </li>
-              <li className="flex items-start gap-2">
-                <input type="checkbox" className="mt-1 rounded border-purple-500" />
-                <span>Implementar filtros (fecha, usuario, acción, módulo)</span>
-              </li>
+            <h4 className="text-cyan-400 font-medium text-sm flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4" />
+              ✅ Ya implementado
+            </h4>
+            <ul className="space-y-2 text-gray-500 text-sm">
+              <li>• mockAuditLogs con datos de ejemplo</li>
+              <li>• Tarjetas de estadísticas (stats cards)</li>
+              <li>• Estructura de tabla completa</li>
+              <li>• Diseño púrpura/cyan (estilo Capsule Corp)</li>
+              <li>• Badges de colores por tipo de acción</li>
             </ul>
           </div>
           
           <div className="space-y-3">
-            <h4 className="text-cyan-400 font-medium text-sm">Fase 2: Frontend</h4>
+            <h4 className="text-amber-400 font-medium text-sm flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              🔧 Por implementar
+            </h4>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li className="flex items-start gap-2">
-                <input type="checkbox" className="mt-1 rounded border-purple-500" />
-                <span>Conectar con endpoint real (reemplazar mock data)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <input type="checkbox" className="mt-1 rounded border-purple-500" />
-                <span>Hacer funcionales los filtros de la UI</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <input type="checkbox" className="mt-1 rounded border-purple-500" />
-                <span>Implementar exportación a CSV real</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <input type="checkbox" className="mt-1 rounded border-purple-500" />
-                <span>Agregar paginación</span>
-              </li>
+              <li>• Filtros funcionales (fecha, usuario, acción)</li>
+              <li>• Paginación real (cambiar de página)</li>
+              <li>• Exportar a CSV (descargar archivo)</li>
+              <li>• Gráficos con recharts (reemplazar mock)</li>
+              <li>• Vista detalle expandible por fila</li>
             </ul>
           </div>
         </div>
@@ -427,7 +340,7 @@ const Auditoria = () => {
         <div className="mt-4 p-3 bg-cyan-900/30 border border-cyan-500/30 rounded-lg">
           <p className="text-cyan-400 text-sm flex items-center gap-2">
             <Info className="w-4 h-4" />
-            <strong>Tip:</strong> Usa el middleware en Express para capturar automáticamente las acciones en cada endpoint
+            <strong>Referencia:</strong> Ver <code className="text-purple-400">AuditModule.tsx</code> en admin/components
           </p>
         </div>
       </div>

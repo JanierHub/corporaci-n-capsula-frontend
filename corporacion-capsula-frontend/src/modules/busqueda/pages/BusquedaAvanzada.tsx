@@ -1,63 +1,33 @@
 /**
- * 📋 INSTRUCCIONES PARA JUAN - BÚSQUEDA AVANZADA
+ * � MÓDULO EN PROGRESO - DESARROLLADO POR JUAN
  * 
- * Historia de Usuario: HU-14 - Búsqueda Avanzada de Artefactos
+ * 🔍 BÚSQUEDA AVANZADA - FRONTEND ONLY
  * 
- * 🎯 OBJETIVO:
- * Crear un sistema de búsqueda avanzada que permita encontrar
- * artefactos por múltiples criterios combinados.
+ * ✅ YA IMPLEMENTADO:
+ * - Consumo de datos con useArtefactos() (contexto)
+ * - Filtros: búsqueda por texto, categorías (checkbox), origen, inventor
+ * - Sliders de peligrosidad y confidencialidad (rango 1-10)
+ * - Ordenamiento por nombre, peligrosidad, confidencialidad, inventor
+ * - Vista lista y vista grid (toggle)
+ * - Paginación (10/25/50 resultados por página)
+ * - Estadísticas de resultados
+ * - Diseño azul/cyan con estilo Capsule Corp
  * 
- * 🔧 FUNCIONALIDADES REQUERIDAS:
+ * 🔧 POR IMPLEMENTAR:
+ * - Autocompletado mientras escribe (sugerencias dropdown)
+ * - Búsqueda difusa con fuse.js (encuentra similitudes: "caps" → "cápsula")
+ * - Filtro por rango de fechas (date picker desde/hasta)
+ * - Exportar resultados a CSV (generar archivo descargable)
+ * - Atajo de teclado Ctrl+K para buscar
  * 
- * 1. BÚSQUEDA POR TEXTO:
- *    - Búsqueda en nombre, descripción, código
- *    - Autocompletado mientras escribe
- *    - Búsqueda difusa (fuzzy search) - encuentra similares
+ * ⚠️ NOTA: Guardar búsquedas favoritas REQUIERE backend para persistir entre dispositivos.
+ * Por ahora, NO implementar guardar favoritos (solo local no sirve).
  * 
- * 2. FILTROS AVANZADOS:
- *    - Rango de fechas de creación (desde - hasta)
- *    - Inventor específico (dropdown dinámico)
- *    - Categoría múltiple (checkbox: transporte AND defensa)
- *    - Origen (terrestre, extraterrestre, ambos)
- *    - Rango de peligrosidad (slider 1-10)
- *    - Rango de confidencialidad (slider 1-10)
- *    - Estado (Activo, Obsoleto, En Pruebas, Todos)
+ * 💡 NOTA: Todo es frontend usando datos del contexto.
+ * NO requiere backend. NO crear nuevos endpoints.
  * 
- * 3. ORDENAMIENTO:
- *    - Por nombre (A-Z, Z-A)
- *    - Por fecha de creación (nuevos primero, antiguos primero)
- *    - Por nivel de peligrosidad (mayor a menor, menor a mayor)
- *    - Por inventor (alfabético)
- * 
- * 4. VISTAS DE RESULTADOS:
-    - Vista de lista (compacta, tipo tabla)
- *    - Vista de tarjetas (detallada, con imágenes)
- *    - Vista de mapa (opcional futuro - ubicación de artefactos)
- * 
- * 5. PAGINACIÓN:
- *    - Seleccionar 10, 25, 50 resultados por página
- *    - Navegación con números de página
- *    - Mostrar "Página X de Y"
- * 
- * 6. BÚSQUEDA GUARDADA (opcional):
- *    - Guardar filtros como "búsqueda favorita"
- *    - Acceso rápido a búsquedas frecuentes
- * 
- * 📂 RUTA: /busqueda-avanzada
- * 
- * 🎨 DISEÑO:
- * - Tema oscuro con colores azul/cyan
- * - Panel de filtros lateral (colapsable)
- * - Resultados en área principal
- * - Estilo moderno tipo "Google Advanced Search"
- * 
- * 💡 IMPLEMENTACIÓN:
- * Fase 1: Frontend con filtros sobre datos existentes (ArtefactosContext)
- * Fase 2: Mejorar con backend si hay muchos datos (search endpoint)
- * 
- * Estado: 🚧 ASIGNADO A JUAN
- * Prioridad: Media-Alta
- * Fecha límite sugerida: Fin de semana
+ * � Archivo: src/modules/busqueda/pages/BusquedaAvanzada.tsx
+ * 🎨 Colores: azul (#3b82f6) / cyan (#06b6d4)
  */
 
 import { useState, useMemo } from "react"
@@ -77,10 +47,11 @@ import {
   X,
   ChevronDown,
   ChevronUp,
-  Save,
+  Download,
   Lightbulb,
   Target,
   Code,
+  Save,
   Database
 } from "lucide-react"
 
@@ -366,16 +337,37 @@ const BusquedaAvanzada = () => {
               </div>
             </div>
 
-            {/* Instrucciones para Juan */}
+            {/* Info del Módulo */}
             <div className="mt-4 bg-blue-900/20 border border-blue-500/30 rounded-xl p-4">
-              <h4 className="text-sm font-bold text-blue-400 mb-2">📋 Tareas para Juan</h4>
-              <ul className="space-y-1 text-xs text-gray-400">
-                <li>• Implementar autocompletado</li>
-                <li>• Agregar búsqueda difusa (fuzzy)</li>
-                <li>• Filtro por rango de fechas</li>
-                <li>• Guardar búsquedas favoritas</li>
-                <li>• Exportar resultados a CSV</li>
-              </ul>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-bold text-blue-400">🚧 Módulo en Progreso - Juan</h4>
+                <span className="text-xs bg-green-500/20 text-green-300 px-2 py-0.5 rounded">Frontend Only</span>
+              </div>
+              
+              <div className="mb-3">
+                <p className="text-xs text-cyan-400 mb-1">✅ Ya implementado:</p>
+                <ul className="space-y-1 text-xs text-gray-500 ml-2">
+                  <li>• Filtros (categoría, origen, inventor)</li>
+                  <li>• Vista lista y grid</li>
+                  <li>• Paginación</li>
+                  <li>• Ordenamiento</li>
+                  <li>• Consumo de datos con useArtefactos()</li>
+                </ul>
+              </div>
+              
+              <div>
+                <p className="text-xs text-amber-400 mb-1">🔧 Por implementar:</p>
+                <ul className="space-y-1 text-xs text-gray-400 ml-2">
+                  <li>• Autocompletado</li>
+                  <li>• Búsqueda difusa (fuzzy)</li>
+                  <li>• Filtro por fechas</li>
+                  <li>• Exportar CSV</li>
+                </ul>
+              </div>
+              
+              <div className="mt-3 p-2 bg-amber-900/20 border border-amber-500/30 rounded">
+                <p className="text-xs text-amber-400">⚠️ Guardar favoritos REQUIERE backend para persistir entre dispositivos. No implementar aún.</p>
+              </div>
             </div>
           </div>
 
@@ -521,32 +513,22 @@ const BusquedaAvanzada = () => {
       
       {/* ===== SECCIÓN DE EJEMPLOS E INSTRUCCIONES ===== */}
       <div className="max-w-7xl mx-auto px-6 pb-8">
-        {/* Ejemplo de búsqueda guardada */}
+        {/* Ejemplo de exportar CSV */}
         <div className="mt-8 bg-blue-900/20 border border-blue-500/30 rounded-xl p-6">
           <h3 className="text-lg font-bold text-blue-400 mb-4 flex items-center gap-2">
             <Lightbulb className="w-5 h-5" />
-            Ejemplo: Búsquedas Guardadas (Mock)
+            Ejemplo: Exportar a CSV
           </h3>
           <p className="text-gray-400 text-sm mb-4">
-            Así se verán las búsquedas favoritas que el usuario pueda guardar:
+            Botón para descargar resultados actuales en archivo CSV:
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              { nombre: "Artefactos Críticos", filtros: "Peligrosidad > 8", color: "red" },
-              { nombre: "Capsules de Dr. Brief", filtros: "Inventor: Dr. Brief", color: "cyan" },
-              { nombre: "Pendientes de Revisión", filtros: "Estado: En Pruebas", color: "amber" },
-            ].map((busqueda, i) => (
-              <div key={i} className="bg-black/40 border border-gray-700 rounded-lg p-3 flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-white text-sm">{busqueda.nombre}</p>
-                  <p className="text-xs text-gray-500">{busqueda.filtros}</p>
-                </div>
-                <button className="text-blue-400 hover:text-blue-300">
-                  <Search className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
+          <button className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg hover:bg-emerald-500/20 transition text-emerald-400">
+            <Download className="w-4 h-4" />
+            Exportar {resultadosFiltrados.length} resultados a CSV
+          </button>
+          <p className="text-xs text-amber-400/70 mt-3">
+            ⚠️ Nota: Guardar búsquedas favoritas requiere backend. No implementar aún.
+          </p>
         </div>
         
         {/* Ejemplo de autocompletado */}
@@ -572,65 +554,69 @@ const BusquedaAvanzada = () => {
           </div>
         </div>
         
-        {/* Instrucciones para Juan */}
-        <div className="mt-6 bg-gray-900/50 border border-gray-700 rounded-xl p-6">
-          <h3 className="text-lg font-bold text-blue-400 mb-4 flex items-center gap-2">
-            <Code className="w-5 h-5" />
-            📋 Tareas para Juan - Implementación
-          </h3>
+        {/* Módulo en Progreso - Juan */}
+        <div className="mt-6 bg-blue-900/20 border border-blue-500/30 rounded-xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-blue-400 flex items-center gap-2">
+              <Code className="w-5 h-5" />
+              🚧 Módulo en Progreso - Desarrollado por Juan
+            </h3>
+            <span className="text-xs bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full">
+              Frontend Only
+            </span>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
               <h4 className="text-cyan-400 font-medium text-sm flex items-center gap-2">
                 <Target className="w-4 h-4" />
-                Funcionalidades Avanzadas
+                Funcionalidades a Implementar
               </h4>
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li className="flex items-start gap-2">
                   <input type="checkbox" className="mt-1 rounded border-blue-500" />
-                  <span>Implementar <strong>autocompletado</strong> con sugerencias en tiempo real</span>
+                  <span><strong>Autocompletado</strong> - Sugerencias al escribir</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <input type="checkbox" className="mt-1 rounded border-blue-500" />
-                  <span>Agregar <strong>búsqueda difusa</strong> (fuzzy search) - encuentra similitudes</span>
+                  <span><strong>Búsqueda difusa</strong> (fuse.js) - Encuentra similitudes</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <input type="checkbox" className="mt-1 rounded border-blue-500" />
-                  <span>Filtro por <strong>rango de fechas</strong> (desde/hasta) de creación</span>
+                  <span><strong>Date picker</strong> - Filtro por rango de fechas</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <input type="checkbox" className="mt-1 rounded border-blue-500" />
-                  <span>Guardar búsquedas como <strong>favoritas</strong> en localStorage</span>
+                  <span><strong>Exportar CSV</strong> - Descargar resultados</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <input type="checkbox" className="mt-1 rounded border-blue-500" />
+                  <span><strong>Atajos de teclado</strong> - Ctrl+K para buscar</span>
                 </li>
               </ul>
             </div>
             
             <div className="space-y-3">
-              <h4 className="text-cyan-400 font-medium text-sm flex items-center gap-2">
-                <Database className="w-4 h-4" />
-                Backend (Opcional Fase 2)
+              <h4 className="text-amber-400 font-medium text-sm flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                Requiere Backend
               </h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
+              <ul className="space-y-2 text-gray-500 text-sm">
                 <li className="flex items-start gap-2">
-                  <input type="checkbox" className="mt-1 rounded border-blue-500" />
-                  <span>Endpoint <code className="text-cyan-400">GET /api/v1/artefactos/search?q=term</code></span>
+                  <span>❌ <strong>Guardar favoritos</strong> - Necesita backend para persistir entre dispositivos</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <input type="checkbox" className="mt-1 rounded border-blue-500" />
-                  <span>Indexación de campos para búsqueda rápida</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <input type="checkbox" className="mt-1 rounded border-blue-500" />
-                  <span>Exportar resultados a CSV</span>
+                  <span>❌ <strong>Historial de búsquedas</strong> - Requiere guardar en servidor</span>
                 </li>
               </ul>
+              <p className="text-xs text-amber-400/70 mt-2">No implementar hasta tener backend listo</p>
             </div>
           </div>
           
-          <div className="mt-4 p-3 bg-blue-900/30 border border-blue-500/30 rounded-lg">
-            <p className="text-blue-400 text-sm flex items-center gap-2">
+          <div className="mt-4 p-3 bg-cyan-900/30 border border-cyan-500/30 rounded-lg">
+            <p className="text-cyan-400 text-sm flex items-center gap-2">
               <Lightbulb className="w-4 h-4" />
-              <strong>Tip:</strong> Usa bibliotecas como <code className="text-cyan-400">fuse.js</code> para búsqueda difusa o <code className="text-cyan-400">downshift</code> para autocompletado
+              <strong>Tip:</strong> Instala <code className="text-blue-400">fuse.js</code> para búsqueda difusa: <code className="text-gray-300">npm install fuse.js</code>
             </p>
           </div>
         </div>

@@ -1,89 +1,39 @@
 /**
- * 📋 INSTRUCCIONES PARA CARLOS Y JUAN - MÓDULO BIOMÉTRICO (COMPARTIDO)
+ * � MÓDULO EN PROGRESO - DESARROLLADO POR CARLOS Y JUAN
  * 
- * Historia de Usuario: HU-16 - Verificación Biométrica de Alta Seguridad
+ * 🔐 MÓDULO BIOMÉTRICO - FRONTEND ONLY (SIMULACIÓN VISUAL)
  * 
- * 🎯 OBJETIVO:
- * Crear un sistema de autenticación biométrica simulada para artefactos
- * de alta seguridad (peligrosidad > 8 o confidencialidad > 8).
+ * ✅ YA IMPLEMENTADO (Estructura base):
+ * - Layout de terminal de seguridad cyberpunk
+ * - Galería de artefactos de alta seguridad (peligrosidad > 8)
+ * - Indicadores visuales de nivel de seguridad
+ * - Sistema de tabs (Huella/Facial/ADN)
+ * - Diseño neon cyan/pink/purple
  * 
- * 🔧 FUNCIONALIDADES REQUERIDAS:
+ * 🔧 POR IMPLEMENTAR (SOLO FRONTEND * 💡 NOTA: SIMULACIÓN VISUAL PURA. NO requiere:
+ *    - Hardware biométrico
+ *    - Base de datos de ADN
+ *    - Backend ni APIs
+ * Usar: setTimeout(), Math.random(), CSS animations
  * 
- * 1. GALERÍA DE ARTEFACTOS BIOMÉTRICOS:
- *    - Listar solo artefactos que requieren verificación
- *    - Indicador visual de nivel de seguridad
- *    - Badge "Acceso Restringido" en cada uno
- *    - Filtro por tipo de verificación requerida
+ * ⚠️ PERSISTENCIA: Los logs de intentos son temporales (state/localStorage).
+ * Para persistir entre dispositivos se necesitaría backend.
  * 
- * 2. TIPOS DE VERIFICACIÓN (simulados):
- *    a) HUELLA DACTILAR:
- *       - Scanner visual con animación de escaneo
- *       - Progreso de 0-100%
- *       - Resultado aleatorio (90% éxito, 10% fallo)
- *       - Efectos visuales de huella (líneas, minucias)
- *    
- *    b) RECONOCIMIENTO FACIAL:
- *       - Simulación de cámara con overlay de puntos faciales
- *       - Animación de "reconociendo rostro"
- *       - Indicador de proximidad
- *       - Resultado con delay realista (2-3 segundos)
- *    
- *    c) ADN:
- *       - Input de "código genético" (simulado)
- *       - Procesamiento con barras de progreso
- *       - Validación contra "base de datos de ADN" (mock)
- *       - Resultado éxito/fallo con explicación
- * 
- * 3. NIVELES DE SEGURIDAD:
- *    - Nivel 1: Huella solamente
- *    - Nivel 2: Huella + Facial
- *    - Nivel 3: Huella + Facial + ADN (máxima seguridad)
- *    - Según peligrosidad/confidencialidad del artefacto
- * 
- * 4. PANEL DE ACCESO:
- *    - Mostrar datos del artefacto post-verificación
- *    - Log de intentos de acceso (éxitos y fallos)
- *    - Opción de revocar acceso manualmente
- *    - Temporizador de sesión (auto-cierre por inactividad)
- * 
- * 5. SEGURIDAD SIMULADA:
- *    - Alerta tras 3 intentos fallidos consecutivos
- *    - Bloqueo temporal (30 segundos) por seguridad
- *    - Registro de intentos sospechosos
- *    - Notificación a administradores
- * 
- * 📂 RUTA: /biometrico
- * 
- * 🎨 DISEÑO:
- * - Tema oscuro cyberpunk (neon cyan/pink/purple)
- * - Estilo "terminal de seguridad militar"
- * - Efectos de glitch, scanlines, glow
- * - Animaciones fluidas (framer-motion opcional)
- * - Sonidos de interfaz (beep, success, error)
- * 
- * 💡 IMPLEMENTACIÓN:
- * Esta es una SIMULACIÓN VISUAL, no requiere:
- * - Hardware biométrico real
- * - Conexión a sensores
- * - Base de datos de ADN real
- * 
- * Solo usar:
- * - setTimeout() para delays
- * - Math.random() para resultados
- * - CSS animations para efectos
- * - Canvas o SVG para gráficos de scanner
- * 
- * 📝 DIVISIÓN DE TAREAS SUGERIDA:
+ * 📂 Archivo: src/modules/biometrico/pages/Biometrico.tsx
+ * 🎨 Estilo: Terminal de seguridad militar cyberpunk
  * 
  * CARLOS:
- * - Galería de artefactos biométricos
- * - Sistema de niveles de seguridad
- * - Panel de acceso post-verificación
- * - Logs de intentos
+ * - Filtros funcionales por nivel de seguridad
+ * - Panel de acceso post-verificación (mostrar datos del artefacto)
+ * - Log de intentos (localStorage o state)
+ * - Alerta tras 3 intentos fallidos
  * 
  * JUAN:
- * - Scanner de huella (visual + animación)
- * - Reconocimiento facial (simulado)
+ * - Scanner de huella con animación CSS (progreso 0-100%)
+ * - Reconocimiento facial simulado (overlay de puntos, animación)
+ * - Verificación ADN con input y validación mock
+ * - Sonidos con Web Audio API (beeps, éxito, fallo)
+ * - Efectos: scanlines, glitch, glow, partículas
  * - Verificación ADN (input + procesamiento)
  * - Efectos visuales y sonidos
  * 
@@ -628,72 +578,33 @@ const Biometrico = () => {
           </div>
         </div>
         
-        {/* Instrucciones para Carlos y Juan */}
-        <div className="mt-8 bg-pink-900/20 border border-pink-500/30 rounded-xl p-6">
-          <h3 className="text-lg font-bold text-pink-400 mb-4 flex items-center gap-2">
-            <Code className="w-5 h-5" />
-            📋 Tareas del Equipo - Implementación
-          </h3>
+        {/* 🚧 MÓDULO EN PROGRESO */}
+        <div className="mt-8 bg-pink-900/20 border-2 border-pink-500/50 rounded-xl p-6">
+          <div className="text-center mb-6">
+            <h2 className="text-3xl font-bold text-pink-400 mb-2">🚧 MÓDULO EN PROGRESO</h2>
+            <p className="text-gray-400">Responsables: Carlos y Juan</p>
+            <p className="text-xs text-pink-300/70 mt-1">Modifíquenlo a su antojo</p>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Tareas de Carlos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-black/30 rounded-lg p-4 border border-cyan-500/30">
-              <h4 className="text-cyan-400 font-medium mb-3 flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                Carlos - Lógica y Acceso
-              </h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li className="flex items-start gap-2">
-                  <input type="checkbox" className="mt-1 rounded border-cyan-500" />
-                  <span>Agregar <strong>filtros</strong> a la galería (por nivel de seguridad)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <input type="checkbox" className="mt-1 rounded border-cyan-500" />
-                  <span>Crear <strong>logs de intentos</strong> (éxitos y fallos)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <input type="checkbox" className="mt-1 rounded border-cyan-500" />
-                  <span>Mostrar <strong>historial de accesos</strong> por artefacto</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <input type="checkbox" className="mt-1 rounded border-cyan-500" />
-                  <span>Implementar <strong>timeout de sesión</strong> (auto-cierre)</span>
-                </li>
-              </ul>
+              <h4 className="text-cyan-400 font-medium mb-2">Carlos - Lógica</h4>
+              <p className="text-sm text-gray-400">Filtros, logs de intentos, panel de acceso</p>
             </div>
-            
-            {/* Tareas de Juan */}
             <div className="bg-black/30 rounded-lg p-4 border border-purple-500/30">
-              <h4 className="text-purple-400 font-medium mb-3 flex items-center gap-2">
-                <Zap className="w-4 h-4" />
-                Juan - Efectos Visuales
-              </h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li className="flex items-start gap-2">
-                  <input type="checkbox" className="mt-1 rounded border-purple-500" />
-                  <span>Scanner de huella con <strong>Canvas</strong> (ondas, partículas)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <input type="checkbox" className="mt-1 rounded border-purple-500" />
-                  <span>Facial: <strong>puntos de reconocimiento</strong> animados</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <input type="checkbox" className="mt-1 rounded border-purple-500" />
-                  <span>ADN: <strong>secuencia genética</strong> animada (ATCG)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <input type="checkbox" className="mt-1 rounded border-purple-500" />
-                  <span>Agregar <strong>sonidos</strong> (usar Web Audio API)</span>
-                </li>
-              </ul>
+              <h4 className="text-purple-400 font-medium mb-2">Juan - Visual</h4>
+              <p className="text-sm text-gray-400">Scanner animado, efectos, sonidos</p>
             </div>
           </div>
           
-          <div className="mt-4 p-3 bg-cyan-900/30 border border-cyan-500/30 rounded-lg">
-            <p className="text-cyan-400 text-sm flex items-center gap-2">
-              <Lightbulb className="w-4 h-4" />
-              <strong>Nota:</strong> Esta es una <strong>SIMULACIÓN VISUAL</strong>. No requiere hardware real ni backend. Usa setTimeout() y Math.random() para los efectos.
-            </p>
+          {/* Ejemplo pequeño de escaneo */}
+          <div className="mt-4 bg-black/40 rounded-lg p-4 border border-pink-500/30">
+            <p className="text-pink-400 text-sm font-medium mb-2">Ejemplo: Scanner de Huella</p>
+            <div className="w-32 h-32 mx-auto rounded-full bg-black border-2 border-pink-500/50 flex items-center justify-center relative overflow-hidden">
+              <Fingerprint className="w-16 h-16 text-pink-400/50" />
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-pink-500/20 to-transparent animate-pulse" />
+            </div>
+            <p className="text-center text-xs text-gray-500 mt-2">Simulación con CSS/Canvas</p>
           </div>
         </div>
       </div>
