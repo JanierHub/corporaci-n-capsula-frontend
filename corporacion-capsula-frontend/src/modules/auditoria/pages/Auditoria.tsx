@@ -1,9 +1,5 @@
 /**
-<<<<<<< Updated upstream
  * 🚧 MÓDULO EN PROGRESO - DESARROLLADO POR CARLOS
-=======
- * 📋 INSTRUCCIONES PARA CARLOS - MÓDULO DE AUDITORÍA
->>>>>>> Stashed changes
  * 
  * 📋 AUDITORÍA DE ARTEFACTOS - FRONTEND ONLY
  * 
@@ -24,49 +20,9 @@
  * - Gráficos con recharts
  * 
  * 💡 NOTA: Solo para auditoría de artefactos. NO requiere backend.
+ * Los datos son temporales (mock). Para persistencia real se necesitaría backend.
  * 
-<<<<<<< Updated upstream
  * 📂 Archivo: src/modules/auditoria/pages/Auditoria.tsx
-=======
- * 3. EXPORTACIÓN:
- *    - Exportar a CSV
- *    - Exportar a PDF (con logo y formato institucional)
- *    - Rango de fechas seleccionable
- * 
- * 4. ESTADÍSTICAS:
- *    - Eventos por día/semana/mes
- *    - Usuarios más activos
- *    - Módulos más utilizados
- * 
- * 📂 RUTA: /auditoria
- * 
- * 🎨 DISEÑO:
- * - Tema oscuro con colores púrpura/cyan
- * - Estilo de logs de sistema (tipo terminal o tabla formal)
- * - Badges de colores según tipo de acción:
- *   - CREATE: verde
- *   - UPDATE: amarillo
- *   - DELETE: rojo
- *   - LOGIN: azul
- *   - LOGOUT: gris
- * 
- * 📡 BACKEND NECESARIO:
- * - Tabla `audit_logs` en PostgreSQL:
- *   id, user_id, user_name, action_type, module, 
- *   description, details (JSON), ip_address, created_at
- * - Endpoints:
- *   GET /api/v1/audit-logs (con filtros)
- *   POST /api/v1/audit-logs (para registrar)
- * 
- * 💡 IMPLEMENTACIÓN SUGERIDA:
- * Fase 1 (Frontend mock): Crear UI con datos de ejemplo
- * Fase 2 (Backend): Crear tabla y endpoints
- * Fase 3 (Integración): Conectar todo y capturar eventos reales
- * 
- * Estado: 🚧 ASIGNADO A CARLOS
- * Prioridad: Media
- * Fecha límite sugerida: Fin de semana
->>>>>>> Stashed changes
  */
 
 import { useNavigate } from "react-router-dom"
@@ -385,11 +341,7 @@ const Auditoria = () => {
         <div className="mt-4 p-3 bg-cyan-900/30 border border-cyan-500/30 rounded-lg">
           <p className="text-cyan-400 text-sm flex items-center gap-2">
             <Info className="w-4 h-4" />
-<<<<<<< Updated upstream
-            <strong>Referencia:</strong> Ver <code className="text-purple-400">AuditModule.tsx</code> en admin/components
-=======
-            <strong>Tip:</strong> Usa el middleware en Express para capturar automáticamente las acciones en cada endpoint
->>>>>>> Stashed changes
+            <strong>Nota:</strong> Para persistencia real entre dispositivos, se necesita backend.
           </p>
         </div>
       </div>
