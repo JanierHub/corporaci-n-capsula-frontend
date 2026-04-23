@@ -1,5 +1,9 @@
 /**
+<<<<<<< Updated upstream
  * � MÓDULO EN PROGRESO - DESARROLLADO POR JUAN
+=======
+ * 📋 INSTRUCCIONES PARA JUAN - BÚSQUEDA AVANZADA
+>>>>>>> Stashed changes
  * 
  * 🔍 BÚSQUEDA AVANZADA - FRONTEND ONLY
  * 
@@ -26,8 +30,46 @@
  * 💡 NOTA: Todo es frontend usando datos del contexto.
  * NO requiere backend. NO crear nuevos endpoints.
  * 
+<<<<<<< Updated upstream
  * � Archivo: src/modules/busqueda/pages/BusquedaAvanzada.tsx
  * 🎨 Colores: azul (#3b82f6) / cyan (#06b6d4)
+=======
+ * 3. ORDENAMIENTO:
+ *    - Por nombre (A-Z, Z-A)
+ *    - Por fecha de creación (nuevos primero, antiguos primero)
+ *    - Por nivel de peligrosidad (mayor a menor, menor a mayor)
+ *    - Por inventor (alfabético)
+ * 
+ * 4. VISTAS DE RESULTADOS:
+    - Vista de lista (compacta, tipo tabla)
+ *    - Vista de tarjetas (detallada, con imágenes)
+ *    - Vista de mapa (opcional futuro - ubicación de artefactos)
+ * 
+ * 5. PAGINACIÓN:
+ *    - Seleccionar 10, 25, 50 resultados por página
+ *    - Navegación con números de página
+ *    - Mostrar "Página X de Y"
+ * 
+ * 6. BÚSQUEDA GUARDADA (opcional):
+ *    - Guardar filtros como "búsqueda favorita"
+ *    - Acceso rápido a búsquedas frecuentes
+ * 
+ *  RUTA: /busqueda-avanzada
+ * 
+ * 🎨 DISEÑO:
+ * - Tema oscuro con colores azul/cyan
+ * - Panel de filtros lateral (colapsable)
+ * - Resultados en área principal
+ * - Estilo moderno tipo "Google Advanced Search"
+ * 
+ * 💡 IMPLEMENTACIÓN:
+ * Fase 1: Frontend con filtros sobre datos existentes (ArtefactosContext)
+ * Fase 2: Mejorar con backend si hay muchos datos (search endpoint)
+ * 
+ * Estado: 🚧 ASIGNADO A JUAN
+ * Prioridad: Media-Alta
+ * Fecha límite sugerida: Fin de semana
+>>>>>>> Stashed changes
  */
 
 import { useState, useMemo } from "react"
@@ -181,11 +223,11 @@ const BusquedaAvanzada = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => navigate("/admin")}
+                onClick={() => navigate("/home")}
                 className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition"
               >
                 <ArrowLeft className="w-5 h-5" />
-                Volver al Admin
+                Volver al inicio
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-blue-400 flex items-center gap-2">

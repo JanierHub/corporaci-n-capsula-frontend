@@ -15,7 +15,7 @@ import {
 type ContextType = {
   artefactos: Artefacto[]
   loadArtefactos: () => Promise<void>
-  addArtefacto: (a: ArtefactoFormPayload) => Promise<void>
+  addArtefacto: (a: ArtefactoFormPayload) => Promise<Artefacto | undefined>
   updateArtefacto: (id: number, changes: ArtefactoFormPayload) => Promise<void>
   toggleArtefactoEstado: (id: number) => Promise<void>
   deactivateArtefacto: (id: number | string) => Promise<void>
@@ -70,7 +70,7 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
     loadArtefactos()
   }, []) // Solo ejecutar una vez al montar el componente
 
-  const addArtefacto = useCallback(async (a: ArtefactoFormPayload) => {
+  const addArtefacto = useCallback(async (a: ArtefactoFormPayload): Promise<Artefacto | undefined> => {
     const { imagenDataUrl, ...rest } = a
     const newId = await createArtefacto(rest)
     if (newId != null && imagenDataUrl) {
@@ -82,7 +82,9 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     await loadArtefactos()
-  }, [loadArtefactos])
+    // Retornar el artefacto creado
+    return artefactos.find(art => art.id === newId) || { id: newId, ...rest } as Artefacto
+  }, [loadArtefactos, artefactos])
 
   const updateArtefacto = useCallback(async (id: number, changes: ArtefactoFormPayload) => {
     const { imagenDataUrl, ...rest } = changes

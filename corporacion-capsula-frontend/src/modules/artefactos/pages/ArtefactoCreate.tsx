@@ -17,11 +17,13 @@ const ArtefactoCreate = () => {
 
   const handleCreate = async (data: Parameters<typeof addArtefacto>[0]) => {
     try {
-      await addArtefacto(data)
-      navigate("/artefactos")
+      const nombreArtefacto = data.nombre || "Artefacto sin nombre";
+      await addArtefacto(data);
+      alert(`✅ "${nombreArtefacto}" creado con éxito.`);
+      navigate("/artefactos");
     } catch (e) {
-      console.error(e)
-      window.alert(e instanceof Error ? e.message : "No se pudo crear el artefacto.")
+      console.error(e);
+      window.alert(e instanceof Error ? e.message : "No se pudo crear el artefacto.");
     }
   }
 

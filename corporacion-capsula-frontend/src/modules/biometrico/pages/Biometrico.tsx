@@ -1,5 +1,9 @@
 /**
+<<<<<<< Updated upstream
  * � MÓDULO EN PROGRESO - DESARROLLADO POR CARLOS Y JUAN
+=======
+ * 📋 INSTRUCCIONES PARA CARLOS Y JUAN - MÓDULO BIOMÉTRICO (COMPARTIDO)
+>>>>>>> Stashed changes
  * 
  * 🔐 MÓDULO BIOMÉTRICO - FRONTEND ONLY (SIMULACIÓN VISUAL)
  * 
@@ -596,6 +600,7 @@ const Biometrico = () => {
               <p className="text-sm text-gray-400">Scanner animado, efectos, sonidos</p>
             </div>
           </div>
+<<<<<<< Updated upstream
           
           {/* Ejemplo pequeño de escaneo */}
           <div className="mt-4 bg-black/40 rounded-lg p-4 border border-pink-500/30">
@@ -606,6 +611,8 @@ const Biometrico = () => {
             </div>
             <p className="text-center text-xs text-gray-500 mt-2">Simulación con CSS/Canvas</p>
           </div>
+=======
+>>>>>>> Stashed changes
         </div>
       </div>
     </div>
