@@ -1,6 +1,7 @@
 export const SESSION_ROLE_KEY = "userRole"
 export const SESSION_USER_NAME_KEY = "userName"
 export const SESSION_ACCESS_TOKEN_KEY = "accessToken"
+export const PERSISTED_ROLE_KEY = "userRolePersisted" // No se borra al cerrar sesión
 
 const normalizeRole = (value: string | null) =>
   (value ?? "")
@@ -13,41 +14,62 @@ export const getStoredUserRole = () => localStorage.getItem(SESSION_ROLE_KEY)
 
 export const getStoredUserName = () => localStorage.getItem(SESSION_USER_NAME_KEY)
 
-/** Sesión iniciada en esta app: nombre + token o rol (no basta con manipular solo una clave). */
+export const getPersistedRole = () => localStorage.getItem(PERSISTED_ROLE_KEY)
+
+/** Sesión iniciada en esta app: nombre + token o rol (usa rol persistente como fallback). */
 export const isAuthenticated = (): boolean => {
   const user = getStoredUserName()?.trim()
-  if (!user) return false
+  if (!user) {
+    // Si no hay usuario, verificar si hay rol persistente (para sesiones restauradas)
+    const persistedRole = getPersistedRole()?.trim()
+    return Boolean(persistedRole)
+  }
   if (getStoredAccessToken()) return true
-  const role = getStoredUserRole()?.trim()
+  const role = getStoredUserRole()?.trim() ?? getPersistedRole()?.trim()
   return Boolean(role)
 }
 
 export const isAdministrator = () =>
-  normalizeRole(getStoredUserRole()) === normalizeRole("Administrador")
+  normalizeRole(getStoredUserRole() ?? getPersistedRole()) === normalizeRole("Administrador")
 
 export const isProjectManager = () =>
-  normalizeRole(getStoredUserRole()) === normalizeRole("Gestor de proyectos")
+  normalizeRole(getStoredUserRole() ?? getPersistedRole()) === normalizeRole("Gestor de proyectos")
 
 export const isUser = () =>
-  normalizeRole(getStoredUserRole()) === normalizeRole("Usuario")
+  normalizeRole(getStoredUserRole() ?? getPersistedRole()) === normalizeRole("Usuario")
 
 export const isInnovationDirector = () =>
-  normalizeRole(getStoredUserRole()) === normalizeRole("Directora de Innovacion")
+  normalizeRole(getStoredUserRole() ?? getPersistedRole()) === normalizeRole("Directora de Innovacion")
 
 export const canViewArtifacts = () => {
-  const role = getStoredUserRole()
+  const role = getStoredUserRole() ?? getPersistedRole()
   return role !== null && role !== undefined && role.trim() !== ""
 }
 
 export const canManageArtifacts = () => {
-  const role = normalizeRole(getStoredUserRole())
+  const role = normalizeRole(getStoredUserRole() ?? getPersistedRole())
   return role === normalizeRole("Administrador") || 
          role === normalizeRole("Gestor de proyectos") || 
          role === normalizeRole("Directora de Innovacion") ||
          role === normalizeRole("Usuario")
 }
 
-export const canDeleteArtifacts = () => isAdministrator()
+export const canDeleteArtifacts = () => 
+  normalizeRole(getStoredUserRole() ?? getPersistedRole()) === normalizeRole("Administrador")
+
+/** Admin tiene acceso a todo. Si no es admin, verifica el rol específico. */
+export const isAdminOrRole = (roleName: string): boolean => {
+  const currentRole = normalizeRole(getStoredUserRole() ?? getPersistedRole())
+  if (currentRole === normalizeRole("Administrador")) return true
+  return currentRole === normalizeRole(roleName)
+}
+
+/** Admin puede acceder a cualquier módulo. */
+export const canAccessModule = (allowedRoles: string[]): boolean => {
+  const currentRole = normalizeRole(getStoredUserRole() ?? getPersistedRole())
+  if (currentRole === normalizeRole("Administrador")) return true
+  return allowedRoles.some(r => normalizeRole(r) === currentRole)
+}
 
 export const clearStoredSession = () => {
   localStorage.removeItem(SESSION_ROLE_KEY)
@@ -126,16 +148,28 @@ export const persistSessionFromLoginResponse = (session: {
       roleLabelFromJwtPayload(decodeJwtPayload(jwt)) ||
       "Usuario"
     localStorage.setItem(SESSION_ROLE_KEY, label)
+    localStorage.setItem(PERSISTED_ROLE_KEY, label) // Persistir para siguiente sesión
     return
   }
 
   const plain = candidates[0] ?? session.data?.trim() ?? ""
   if (plain && !looksLikeJwt(plain)) {
     localStorage.setItem(SESSION_ROLE_KEY, plain)
+    localStorage.setItem(PERSISTED_ROLE_KEY, plain) // Persistir para siguiente sesión
   }
 }
 
 export const getStoredAccessToken = () => localStorage.getItem(SESSION_ACCESS_TOKEN_KEY)?.trim()
+
+/** Restaura el rol desde la clave persistente (para usar después de login). */
+export const restoreRoleFromPersistence = (): string | null => {
+  const persisted = localStorage.getItem(PERSISTED_ROLE_KEY)
+  if (persisted) {
+    localStorage.setItem(SESSION_ROLE_KEY, persisted)
+    return persisted
+  }
+  return null
+}
 
 /** Cabecera Bearer: token dedicado o JWT legado guardado en userRole. */
 export const getBearerAuthHeader = (): Record<string, string> | undefined => {

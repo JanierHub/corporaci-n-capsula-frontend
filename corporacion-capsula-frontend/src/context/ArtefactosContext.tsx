@@ -5,12 +5,69 @@ import {
   deleteArtefacto,
   getArtefactos,
   updateArtefactoRequest,
+  normalizeArtefacto,
 } from "../modules/artefactos/services/artefactoService"
 import {
   enriquecerArtefactoConImagen,
   removeImagenArtefacto,
   setImagenArtefacto,
 } from "../modules/artefactos/utils/artefactoImagenes"
+
+// 🔄 MOCKS LOCALES para fallback cuando API falla
+const mockArtefactosFallback: Artefacto[] = [
+  {
+    id: 1,
+    nombre: "Capsula Hoi Poi",
+    descripcion: "Permite almacenar objetos en miniatura",
+    categoria: "transporte" as const,
+    origen: "terrestre" as const,
+    nivelPeligrosidad: 1,
+    nivelConfidencialidad: 1,
+    estado: "activo" as const,
+    inventor: "Bulma",
+    fechaCreacion: "2026-04-10",
+    fechaActualizacion: "",
+  },
+  {
+    id: 2,
+    nombre: "Scouter",
+    descripcion: "Dispositivo de detección de energía",
+    categoria: "defensa" as const,
+    origen: "extraterrestre" as const,
+    nivelPeligrosidad: 2,
+    nivelConfidencialidad: 2,
+    estado: "activo" as const,
+    inventor: "Freezer",
+    fechaCreacion: "2026-04-11",
+    fechaActualizacion: "",
+  },
+  {
+    id: 3,
+    nombre: "Varita Mágica",
+    descripcion: "Transforma objetos en conejos",
+    categoria: "domestico" as const,
+    origen: "terrestre" as const,
+    nivelPeligrosidad: 1,
+    nivelConfidencialidad: 1,
+    estado: "obsoleto" as const,
+    inventor: "Bulma",
+    fechaCreacion: "2026-04-12",
+    fechaActualizacion: "",
+  },
+  {
+    id: 4,
+    nombre: "Espada Z",
+    descripcion: "Arma legendaria de los saiyajin",
+    categoria: "defensa" as const,
+    origen: "extraterrestre" as const,
+    nivelPeligrosidad: 3,
+    nivelConfidencialidad: 3,
+    estado: "obsoleto" as const,
+    inventor: "Kaioshin",
+    fechaCreacion: "2026-04-13",
+    fechaActualizacion: "",
+  },
+].map(a => enriquecerArtefactoConImagen(a))
 
 type ContextType = {
   artefactos: Artefacto[]
@@ -28,41 +85,40 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
   const [artefactos, setArtefactos] = useState<Artefacto[]>([])
 
   const loadArtefactos = useCallback(async () => {
-    const data = await getArtefactos()
-    
-    // Restaurar estados desde localStorage con prioridad sobre el estado por defecto
-    const estadosGuardados = localStorage.getItem('artefactos_estados')
-    if (estadosGuardados) {
-      try {
-        const estados = JSON.parse(estadosGuardados)
-        const dataConEstados = data.map(artefacto => {
-          const estadoGuardado = estados[artefacto.id.toString()]
-          // Si hay estado guardado (desactivado), usarlo. Si no, usar "activo" por defecto
-          if (estadoGuardado) {
-            return { ...artefacto, estado: estadoGuardado as Artefacto["estado"] }
-          }
-          // Por defecto, todos están activos
-          return { ...artefacto, estado: "activo" as Artefacto["estado"] }
-        })
-        setArtefactos(dataConEstados)
-        console.log("Estados restaurados con prioridad localStorage:", dataConEstados.map(a => ({ id: a.id, estado: a.estado })))
-      } catch (error) {
-        console.warn("Error cargando estados guardados:", error)
-        // Si hay error, todos activos por defecto
-        const dataTodosActivos = data.map(artefacto => ({
-          ...artefacto,
-          estado: "activo" as Artefacto["estado"]
-        }))
-        setArtefactos(dataTodosActivos)
+    try {
+      const data = await getArtefactos()
+      
+      // Si no hay datos, usar mocks locales como fallback
+      let artefactosData = data
+      if (!data || data.length === 0) {
+        console.warn("⚠️ No hay datos de API - usando mocks locales")
+        artefactosData = mockArtefactosFallback
       }
-    } else {
-      // Sin localStorage, todos activos por defecto
-      const dataTodosActivos = data.map(artefacto => ({
-        ...artefacto,
-        estado: "activo" as Artefacto["estado"]
-      }))
-      setArtefactos(dataTodosActivos)
-      console.log("Todos los artefactos establecidos como ACTIVOS por defecto:")
+      
+      // Restaurar estados desde localStorage con prioridad sobre el estado por defecto
+      const estadosGuardados = localStorage.getItem('artefactos_estados')
+      if (estadosGuardados) {
+        try {
+          const estados = JSON.parse(estadosGuardados)
+          const dataConEstados = artefactosData.map((artefacto: Artefacto) => {
+            const estadoGuardado = estados[artefacto.id.toString()]
+            if (estadoGuardado) {
+              return { ...artefacto, estado: estadoGuardado as Artefacto["estado"] }
+            }
+            return { ...artefacto, estado: "activo" as Artefacto["estado"] }
+          })
+          setArtefactos(dataConEstados)
+        } catch (error) {
+          console.warn("Error cargando estados guardados:", error)
+          setArtefactos(artefactosData.map((a: Artefacto) => ({...a, estado: "activo" as Artefacto["estado"]})))
+        }
+      } else {
+        setArtefactos(artefactosData.map((a: Artefacto) => ({...a, estado: "activo" as Artefacto["estado"]})))
+      }
+    } catch (error) {
+      console.error("❌ Error cargando artefactos:", error)
+      // Fallback final - usar mocks locales
+      setArtefactos(mockArtefactosFallback.map((a: Artefacto) => ({...a, estado: "activo" as Artefacto["estado"]})))
     }
   }, [])
 

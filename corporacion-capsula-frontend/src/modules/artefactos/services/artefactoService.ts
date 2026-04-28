@@ -249,7 +249,7 @@ const requestFirstAvailable = async () => {
   throw new Error("No API disponible")
 }
 
-// 🔥 CORREGIDO
+// 🔥 CORREGIDO - Siempre devuelve mocks si API falla
 export const getArtefactos = async (): Promise<Artefacto[]> => {
   try {
     const response = await requestFirstAvailable()
@@ -257,7 +257,8 @@ export const getArtefactos = async (): Promise<Artefacto[]> => {
     if (!response.ok) {
       const body = await parseJsonSafely(response)
       console.error("Error API:", response.status, body)
-      return []
+      console.warn("⚠️ Usando MOCK porque API respondió con error")
+      return artefactosMock.map(a => enriquecerArtefactoConImagen({...a}))
     }
 
     const data = await parseJsonSafely(response)
@@ -291,17 +292,16 @@ export const getArtefactos = async (): Promise<Artefacto[]> => {
     const payload = extractPayload(data)
 
     if (!payload || payload.length === 0) {
-      console.warn("Usando mock porque API está vacía o falló")
-      // Crear copias profundas para evitar referencia compartida
+      console.warn("⚠️ API vacía - Usando MOCK con 4 artefactos")
       return artefactosMock.map(a => enriquecerArtefactoConImagen({...a}))
     }
 
+    console.log("✅ Artefactos cargados desde API:", payload.length)
     return (payload as any[]).map(normalizeArtefacto).map(enriquecerArtefactoConImagen)
 
   } catch (error) {
-    console.error("Error API:", error)
-    console.warn("Usando mock porque la API falló completamente")
-    // Crear copias profundas para evitar referencia compartida
+    console.error("❌ Error API:", error)
+    console.warn("⚠️ Usando MOCK porque la API falló completamente")
     return artefactosMock.map(a => enriquecerArtefactoConImagen({...a}))
   }
 }

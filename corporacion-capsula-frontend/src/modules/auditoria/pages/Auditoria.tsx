@@ -38,10 +38,9 @@ interface LogEntry {
   valor_anterior: string | null
   valor_nuevo: string | null
   fecha_operacion: string
-  descripcion?: string
 }
 
-// ── Datos iniciales ────────────────────────────────────────────────────────
+// ── Datos iniciales (solo tabla artefactos) ────────────────────────────────
 const logsIniciales: LogEntry[] = [
   {
     id_registro: 1,
@@ -52,7 +51,6 @@ const logsIniciales: LogEntry[] = [
     valor_anterior: null,
     valor_nuevo: '{"nombre": "Capsule Corp #1", "categoria": "tecnologia"}',
     fecha_operacion: "2026-04-21 15:38:22",
-    descripcion: "Artefacto creado",
   },
   {
     id_registro: 2,
@@ -63,7 +61,6 @@ const logsIniciales: LogEntry[] = [
     valor_anterior: '{"nivelPeligrosidad": 3}',
     valor_nuevo: '{"nivelPeligrosidad": 6}',
     fecha_operacion: "2026-04-21 14:15:10",
-    descripcion: "Nivel de peligrosidad actualizado",
   },
   {
     id_registro: 3,
@@ -74,7 +71,6 @@ const logsIniciales: LogEntry[] = [
     valor_anterior: '{"estado": "activo"}',
     valor_nuevo: '{"estado": "obsoleto"}',
     fecha_operacion: "2026-04-21 11:22:45",
-    descripcion: "Estado cambiado a obsoleto",
   },
   {
     id_registro: 4,
@@ -85,51 +81,6 @@ const logsIniciales: LogEntry[] = [
     valor_anterior: '{"nombre": "Nube Voladora"}',
     valor_nuevo: null,
     fecha_operacion: "2026-04-20 09:45:33",
-    descripcion: "Artefacto eliminado",
-  },
-  {
-    id_registro: 5,
-    nombre_tabla: "usuarios",
-    accion: "CREATE",
-    id_usuario: 102,
-    id_artefacto: 110,
-    valor_anterior: null,
-    valor_nuevo: '{"usuario": "#110", "rol": "viewer"}',
-    fecha_operacion: "2026-04-20 08:10:00",
-    descripcion: "Nuevo usuario creado",
-  },
-  {
-    id_registro: 6,
-    nombre_tabla: "artefactos",
-    accion: "DELETE",
-    id_usuario: 103,
-    id_artefacto: 3,
-    valor_anterior: '{"nombre": "Prototipo Alpha"}',
-    valor_nuevo: null,
-    fecha_operacion: "2026-04-19 17:30:11",
-    descripcion: "Prototipo Alpha eliminado",
-  },
-  {
-    id_registro: 7,
-    nombre_tabla: "sesiones",
-    accion: "LOGIN",
-    id_usuario: 101,
-    id_artefacto: 0,
-    valor_anterior: null,
-    valor_nuevo: '{"ip": "192.168.1.5", "dispositivo": "Chrome/Linux"}',
-    fecha_operacion: "2026-04-21 08:00:00",
-    descripcion: "Inicio de sesión exitoso",
-  },
-  {
-    id_registro: 8,
-    nombre_tabla: "artefactos",
-    accion: "CREATE",
-    id_usuario: 103,
-    id_artefacto: 15,
-    valor_anterior: null,
-    valor_nuevo: '{"nombre": "Dragon Radar v2", "categoria": "navegacion"}',
-    fecha_operacion: "2026-04-22 10:05:00",
-    descripcion: "Nuevo artefacto registrado",
   },
 ]
 
@@ -153,14 +104,14 @@ const COLORES_USUARIO: Record<number, string> = {
   103: "#f472b6",
 }
 
-const ITEMS_POR_PAGINA = 4
+const ITEMS_POR_PAGINA = 10
 
-// ── Utilidades ─────────────────────────────────────────────────────────────
+// ── Utilidades de simulación ────────────────────────────────────────────────
 function ahora() {
   return new Date().toISOString().replace("T", " ").slice(0, 19)
 }
 
-let nextId = logsIniciales.length + 1
+let nextId = 100
 
 // ── Tooltip personalizado recharts ─────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -188,7 +139,7 @@ export default function Auditoria() {
   const navigate = useNavigate()
   const { artefactos } = useArtefactos()
 
-  // Estado de logs (mutable para simulación)
+  // Estado de logs (mutable para simulación desde Admin)
   const [logs, setLogs] = useState<LogEntry[]>(logsIniciales)
 
   // Filtros
@@ -204,8 +155,8 @@ export default function Auditoria() {
   const [expandido,    setExpandido]    = useState<number | null>(null)
   const [pagina,       setPagina]       = useState(1)
 
-  // ── Simulación de eventos ─────────────────────────────────────────────────
-  const agregarLog = useCallback((accion: Accion, tabla: string, usuario: number, desc: string, valAnterior?: string, valNuevo?: string) => {
+  // ── Simulación de eventos (desde Admin) ───────────────────────────────────
+  const agregarLog = useCallback((accion: Accion, tabla: string, usuario: number, valAnterior?: string, valNuevo?: string) => {
     const nuevo: LogEntry = {
       id_registro: nextId++,
       nombre_tabla: tabla,
@@ -215,44 +166,32 @@ export default function Auditoria() {
       valor_anterior: valAnterior ?? null,
       valor_nuevo: valNuevo ?? null,
       fecha_operacion: ahora(),
-      descripcion: desc,
     }
     setLogs(prev => [nuevo, ...prev])
     setPagina(1)
   }, [])
 
-  // Simulaciones rápidas para demo
   const usuariosDemo = [101, 102, 103]
   const randomUser = () => usuariosDemo[Math.floor(Math.random() * 3)]
 
-  const simularBusqueda = () => {
-    if (busqueda.trim()) {
-      agregarLog("LOGIN", "sesiones", randomUser(), `Búsqueda ejecutada: "${busqueda}"`, undefined, `{"query": "${busqueda}"}`)
-    }
-  }
-
-  const simularFiltro = (campo: string, valor: string) => {
-    if (valor !== "Todas las acciones" && valor !== "Todas las tablas" && valor !== "Todos los usuarios") {
-      agregarLog("UPDATE", "sesiones", randomUser(), `Filtro aplicado: ${campo} = ${valor}`, undefined, `{"filtro": "${campo}", "valor": "${valor}"}`)
-    }
-  }
-
   const simularCrear = () => agregarLog(
     "CREATE", "artefactos", randomUser(),
-    "Artefacto creado desde simulación",
-    undefined, `{"nombre": "Prototipo #${nextId}", "categoria": "tech"}`
+    undefined, `{"nombre": "Nuevo Artefacto #${nextId}", "categoria": "tech"}`
+  )
+
+  const simularActualizar = () => agregarLog(
+    "UPDATE", "artefactos", randomUser(),
+    `{"nivelPeligrosidad": 3}`, `{"nivelPeligrosidad": 7}`
   )
 
   const simularEliminar = () => agregarLog(
     "DELETE", "artefactos", randomUser(),
-    "Artefacto eliminado desde simulación",
-    `{"nombre": "Item #${Math.floor(Math.random() * 100)}"}`, undefined
+    `{"nombre": "Artefacto Eliminado #${Math.floor(Math.random() * 100)}"}`, undefined
   )
 
   const simularLogin = () => agregarLog(
     "LOGIN", "sesiones", randomUser(),
-    "Inicio de sesión simulado",
-    undefined, `{"ip": "10.0.${Math.floor(Math.random()*9)}.${Math.floor(Math.random()*254)}"}`
+    undefined, `{"ip": "192.168.1.${Math.floor(Math.random()*254)}", "navegador": "Chrome"}`
   )
 
   // ── Filtrado ──────────────────────────────────────────────────────────────
@@ -261,7 +200,6 @@ export default function Auditoria() {
       const matchBusqueda =
         busqueda === "" ||
         (log.valor_nuevo ?? "").toLowerCase().includes(busqueda.toLowerCase()) ||
-        (log.descripcion ?? "").toLowerCase().includes(busqueda.toLowerCase()) ||
         `usuario #${log.id_usuario}`.toLowerCase().includes(busqueda.toLowerCase())
 
       const matchAccion =
@@ -323,15 +261,14 @@ export default function Auditoria() {
 
   // ── Exportar CSV ──────────────────────────────────────────────────────────
   const exportarCSV = () => {
-    agregarLog("CREATE", "sesiones", 101, `CSV exportado (${logsFiltrados.length} registros)`)
-    const cab   = "Fecha,Usuario,Accion,Tabla,Descripcion,ValorAnterior,ValorNuevo\n"
+    const cab   = "Fecha,Usuario,Accion,Tabla,ArtfactoId,ValorAnterior,ValorNuevo\n"
     const filas = logsFiltrados
-      .map((l) => `${l.fecha_operacion},Usuario #${l.id_usuario},${l.accion},${l.nombre_tabla},"${l.descripcion ?? ""}","${l.valor_anterior ?? ""}","${l.valor_nuevo ?? ""}"`)
+      .map((l) => `${l.fecha_operacion},Usuario #${l.id_usuario},${l.accion},${l.nombre_tabla},${l.id_artefacto},"${l.valor_anterior ?? ""}","${l.valor_nuevo ?? ""}"`)
       .join("\n")
     const blob = new Blob([cab + filas], { type: "text/csv;charset=utf-8;" })
     const url  = URL.createObjectURL(blob)
     const a    = document.createElement("a")
-    a.href = url; a.download = "audit_logs.csv"; a.click()
+    a.href = url; a.download = "auditoria_artefactos.csv"; a.click()
     URL.revokeObjectURL(url)
   }
 
@@ -555,7 +492,7 @@ export default function Auditoria() {
           ))}
         </div>
 
-        {/* ── Simulación de eventos ── */}
+        {/* ── Simulación de Eventos (Atajo desde Admin) ── */}
         <div style={{
           background: "#0d0d1f",
           border: "1px solid #1e1e3a",
@@ -575,13 +512,14 @@ export default function Auditoria() {
               borderRadius: "12px",
               border: "1px solid #1e40af",
               marginLeft: "auto",
-            }}>Tiempo real</span>
+            }}>Admin Tool</span>
           </div>
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" as const }}>
             {[
-              { label: "⊕ Simular CREATE", fn: simularCrear, color: "#4ade80" },
-              { label: "⚠ Simular DELETE", fn: simularEliminar, color: "#f87171" },
-              { label: "→ Simular LOGIN",  fn: simularLogin,   color: "#60a5fa" },
+              { label: "⊕ Crear", fn: simularCrear, color: "#4ade80" },
+              { label: "⟳ Actualizar", fn: simularActualizar, color: "#c084fc" },
+              { label: "⚠ Eliminar", fn: simularEliminar, color: "#f87171" },
+              { label: "→ Login", fn: simularLogin, color: "#60a5fa" },
             ].map(({ label, fn, color }) => (
               <button
                 key={label}
@@ -594,7 +532,7 @@ export default function Auditoria() {
               </button>
             ))}
             <span style={{ fontSize: "11px", color: "#4b4b7a", alignSelf: "center", marginLeft: "4px" }}>
-              ← Los filtros y búsquedas también generan logs automáticamente
+              ← Click para generar eventos de prueba
             </span>
           </div>
         </div>
@@ -606,32 +544,28 @@ export default function Auditoria() {
             <input
               style={s.input}
               type="text"
-              placeholder="🔍 Buscar en logs (usuario, descripción, valores)..."
+              placeholder="🔍 Buscar en logs (usuario, valores)..."
               value={busqueda}
               onChange={(e) => {
                 setBusqueda(e.target.value)
                 setPagina(1)
               }}
-              onKeyDown={(e) => { if (e.key === "Enter") simularBusqueda() }}
             />
             <select style={s.select} value={filtroAccion} onChange={(e) => {
               setFiltroAccion(e.target.value)
               setPagina(1)
-              simularFiltro("accion", e.target.value)
             }}>
               {["Todas las acciones", "CREATE", "UPDATE", "DELETE", "LOGIN"].map(o => <option key={o}>{o}</option>)}
             </select>
             <select style={s.select} value={filtroTabla} onChange={(e) => {
               setFiltroTabla(e.target.value)
               setPagina(1)
-              simularFiltro("tabla", e.target.value)
             }}>
-              {["Todas las tablas", "artefactos", "usuarios", "sesiones"].map(o => <option key={o}>{o}</option>)}
+              {["Todas las tablas", "artefactos", "sesiones"].map(o => <option key={o}>{o}</option>)}
             </select>
             <select style={s.select} value={filtroUsuario} onChange={(e) => {
               setFiltroUsuario(e.target.value)
               setPagina(1)
-              simularFiltro("usuario", e.target.value)
             }}>
               {["Todos los usuarios", "#101", "#102", "#103"].map(o => <option key={o}>{o}</option>)}
             </select>
@@ -721,7 +655,7 @@ export default function Auditoria() {
                   </td>
                 </tr>
               ) : logsVisibles.map((log) => {
-                const badge = accionBadge[log.accion] ?? accionBadge["LOGIN"]
+                const badge = accionBadge[log.accion] ?? accionBadge["CREATE"]
                 let detalleObj: object = { log }
                 try {
                   detalleObj = {
@@ -730,7 +664,6 @@ export default function Auditoria() {
                     tabla: log.nombre_tabla,
                     usuario: `#${log.id_usuario}`,
                     artefacto: log.id_artefacto,
-                    descripcion: log.descripcion,
                     antes: log.valor_anterior ? JSON.parse(log.valor_anterior) : null,
                     después: log.valor_nuevo ? JSON.parse(log.valor_nuevo) : null,
                     fecha: log.fecha_operacion,
@@ -738,7 +671,7 @@ export default function Auditoria() {
                 } catch {}
 
                 const lineas: string[] = [
-                  log.descripcion ?? `Artefacto #${log.id_artefacto}`,
+                  `Artefacto #${log.id_artefacto}`,
                   ...(log.valor_anterior ? [`Antes: ${log.valor_anterior}`]  : []),
                   ...(log.valor_nuevo    ? [`Después: ${log.valor_nuevo}`]   : []),
                 ]
