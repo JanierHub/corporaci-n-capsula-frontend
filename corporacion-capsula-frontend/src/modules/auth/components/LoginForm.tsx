@@ -5,7 +5,10 @@ import bg from "../../../assets/3.jpg"
 import logo from "../../../assets/5.gif"
 import capsule from "../../../assets/13.gif"
 import { loginUser } from "../services/authService"
-import { persistSessionFromLoginResponse, SESSION_USER_NAME_KEY } from "../utils/roles"
+import { persistSessionFromLoginResponse, SESSION_USER_NAME_KEY, getStoredAccessToken } from "../utils/roles"
+import { prefetchCache } from "../../../services/optimisticCache"
+import { getArtefactos } from "../../artefactos/services/artefactoService"
+import { API_URL } from "../../../config/api"
 
 const LoginForm = () => {
   const navigate = useNavigate()
@@ -24,6 +27,24 @@ const LoginForm = () => {
 
       localStorage.setItem(SESSION_USER_NAME_KEY, userName.trim())
       persistSessionFromLoginResponse(session)
+      
+      // Pre-fetch: Cargar datos en caché después del login
+      // Esto permite que la navegación sea instantánea
+      const token = getStoredAccessToken()
+      if (token) {
+        // Cargar artefactos en background
+        prefetchCache("artefactos", getArtefactos).catch(console.error)
+        
+        // Cargar usuarios en background (si es admin)
+        prefetchCache("users", async () => {
+          const res = await fetch(`${API_URL}/user`, {
+            headers: { "Authorization": `Bearer ${token}` }
+          })
+          if (!res.ok) throw new Error("Error cargando usuarios")
+          return res.json()
+        }).catch(console.error)
+      }
+      
       setError("")
       const state = location.state as { from?: string } | undefined
       const raw = state?.from

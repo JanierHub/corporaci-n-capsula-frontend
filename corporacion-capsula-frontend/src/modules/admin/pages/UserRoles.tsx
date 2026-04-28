@@ -4,22 +4,28 @@ import { useState, useEffect } from "react"
 import { getStoredAccessToken } from "../../auth/utils/roles"
 import { API_URL } from "../../../config/api"
 
+// Roles exactos de PostgreSQL (tabla: rol)
+// id_rol | nombre_rol | nivel_seguridad
+const ROLES_DB = [
+  { id_rol: 1, nombre_rol: "Administrador", nivel_seguridad: "Nivel 5 - Acceso Total" },
+  { id_rol: 2, nombre_rol: "Directora de Innovacion", nivel_seguridad: "Nivel 4 - Estratégico" },
+  { id_rol: 3, nombre_rol: "Experto en tecnologia extraterrestre", nivel_seguridad: "Nivel 5 - Clasificado Especial" },
+  { id_rol: 4, nombre_rol: "Especialista en seguridad", nivel_seguridad: "Nivel 4 - Táctico" },
+  { id_rol: 5, nombre_rol: "Inventor/Tester", nivel_seguridad: "Nivel 3 - Operativo" },
+  { id_rol: 6, nombre_rol: "Gestor de proyectos", nivel_seguridad: "Nivel 3 - Operativo" },
+  { id_rol: 7, nombre_rol: "Usuario", nivel_seguridad: "Nivel 1 - Básico" },
+] as const
+
 interface User {
   id_usuario: number
   nombre: string
-  id_rol: number
-  rol_nombre?: string
+  edad?: number
+  biometria?: string
+  adn?: string
+  password?: string
+  estado?: boolean
+  id_rol: number  // FK a tabla rol
 }
-
-const ROLES = [
-  { id: 1, nombre: "Administrador" },
-  { id: 2, nombre: "Directora de Innovacion" },
-  { id: 3, nombre: "Experto en tecnologia extraterrestre" },
-  { id: 4, nombre: "Especialista en seguridad" },
-  { id: 5, nombre: "Inventor/Tester" },
-  { id: 6, nombre: "Gestor de proyectos" },
-  { id: 7, nombre: "Usuario" },
-]
 
 const UserRoles = () => {
   const navigate = useNavigate()
@@ -73,7 +79,11 @@ const UserRoles = () => {
   }
 
   const getRoleName = (roleId: number) => {
-    return ROLES.find(r => r.id === roleId)?.nombre || `Rol ${roleId}`
+    return ROLES_DB.find(r => r.id_rol === roleId)?.nombre_rol || `Rol ${roleId}`
+  }
+
+  const getRoleSecurityLevel = (roleId: number) => {
+    return ROLES_DB.find(r => r.id_rol === roleId)?.nivel_seguridad || ""
   }
 
   return (
@@ -113,12 +123,13 @@ const UserRoles = () => {
             Roles del Sistema
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {ROLES.map(rol => (
-              <div key={rol.id} className="flex items-center gap-2 text-sm">
+            {ROLES_DB.map(rol => (
+              <div key={rol.id_rol} className="flex items-center gap-2 text-sm">
                 <span className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400 text-xs font-bold">
-                  {rol.id}
+                  {rol.id_rol}
                 </span>
-                <span className="text-gray-400">{rol.nombre}</span>
+                <span className="text-gray-400">{rol.nombre_rol}</span>
+                <span className="text-xs text-gray-600">({rol.nivel_seguridad})</span>
               </div>
             ))}
           </div>
@@ -162,9 +173,12 @@ const UserRoles = () => {
                       onChange={(e) => updateUserRole(user.id_usuario, Number(e.target.value))}
                       disabled={updating === user.id_usuario}
                       className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400 disabled:opacity-50"
+                      title={getRoleSecurityLevel(user.id_rol)}
                     >
-                      {ROLES.map(rol => (
-                        <option key={rol.id} value={rol.id}>{rol.nombre}</option>
+                      {ROLES_DB.map(rol => (
+                        <option key={rol.id_rol} value={rol.id_rol}>
+                          {rol.nombre_rol} ({rol.nivel_seguridad})
+                        </option>
                       ))}
                     </select>
 
