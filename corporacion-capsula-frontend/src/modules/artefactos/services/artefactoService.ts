@@ -249,16 +249,15 @@ const requestFirstAvailable = async () => {
   throw new Error("No API disponible")
 }
 
-// 🔥 CORREGIDO - Siempre devuelve mocks si API falla
+// 🔥 SOLO USA API REAL - NO MOCKS
 export const getArtefactos = async (): Promise<Artefacto[]> => {
   try {
     const response = await requestFirstAvailable()
 
     if (!response.ok) {
       const body = await parseJsonSafely(response)
-      console.error("Error API:", response.status, body)
-      console.warn("⚠️ Usando MOCK porque API respondió con error")
-      return artefactosMock.map(a => enriquecerArtefactoConImagen({...a}))
+      console.error("❌ Error API:", response.status, body)
+      throw new Error(`API Error: ${response.status}`)
     }
 
     const data = await parseJsonSafely(response)
@@ -292,17 +291,16 @@ export const getArtefactos = async (): Promise<Artefacto[]> => {
     const payload = extractPayload(data)
 
     if (!payload || payload.length === 0) {
-      console.warn("⚠️ API vacía - Usando MOCK con 4 artefactos")
-      return artefactosMock.map(a => enriquecerArtefactoConImagen({...a}))
+      console.warn("⚠️ API devolvió lista vacía")
+      return []
     }
 
     console.log("✅ Artefactos cargados desde API:", payload.length)
     return (payload as any[]).map(normalizeArtefacto).map(enriquecerArtefactoConImagen)
 
   } catch (error) {
-    console.error("❌ Error API:", error)
-    console.warn("⚠️ Usando MOCK porque la API falló completamente")
-    return artefactosMock.map(a => enriquecerArtefactoConImagen({...a}))
+    console.error("❌ Error cargando artefactos:", error)
+    throw error
   }
 }
 

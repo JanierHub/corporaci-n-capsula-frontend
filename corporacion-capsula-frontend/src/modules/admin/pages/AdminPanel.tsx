@@ -269,32 +269,32 @@ const AdminPanel = () => {
           </div>
         )}
 
-        {/* ===== MÓDULOS DEL EQUIPO ===== */}
+        {/* ===== MÓDULOS DEL SISTEMA ===== */}
         <div className="bg-black/40 border border-gray-500/30 rounded-xl p-6 backdrop-blur-sm mb-6">
           <h3 className="text-xl font-bold text-gray-300 mb-4 flex items-center gap-2">
             <Users className="w-5 h-5" />
-            Módulos del Equipo (En Desarrollo)
+            Módulos del Sistema
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Auditoría - Carlos */}
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {/* Inventario / Artefactos */}
             <button
-              onClick={() => navigate("/auditoria")}
-              className="text-left p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl hover:bg-purple-500/20 transition group"
+              onClick={() => navigate("/artefactos")}
+              className="text-left p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-xl hover:bg-cyan-500/20 transition group"
             >
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                  <Bell className="w-5 h-5 text-purple-400" />
+                <div className="w-10 h-10 bg-cyan-500/20 rounded-lg flex items-center justify-center">
+                  <Package className="w-5 h-5 text-cyan-400" />
                 </div>
                 <div>
-                  <p className="font-medium text-white group-hover:text-purple-300 transition">Auditoría</p>
-                  <p className="text-xs text-purple-400">Responsable: Carlos</p>
+                  <p className="font-medium text-white group-hover:text-cyan-300 transition">Inventario</p>
+                  <p className="text-xs text-cyan-400">Módulo Artefactos</p>
                 </div>
               </div>
               <p className="text-sm text-gray-400">
-                Sistema de logs y registro de eventos del sistema
+                Gestión de artefactos tecnológicos
               </p>
             </button>
-            
+
             {/* Búsqueda Avanzada - Juan */}
             <button
               onClick={() => navigate("/busqueda-avanzada")}
@@ -313,7 +313,26 @@ const AdminPanel = () => {
                 Filtros complejos y búsqueda por múltiples criterios
               </p>
             </button>
-            
+
+            {/* Auditoría - Carlos */}
+            <button
+              onClick={() => navigate("/auditoria")}
+              className="text-left p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl hover:bg-purple-500/20 transition group"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                  <Bell className="w-5 h-5 text-purple-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-white group-hover:text-purple-300 transition">Auditoría</p>
+                  <p className="text-xs text-purple-400">Responsable: Carlos</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-400">
+                Logs y registro de eventos del sistema
+              </p>
+            </button>
+
             {/* Biométrico - Carlos & Juan */}
             <button
               onClick={() => navigate("/biometrico")}
@@ -329,7 +348,83 @@ const AdminPanel = () => {
                 </div>
               </div>
               <p className="text-sm text-gray-400">
-                Acceso seguro por huella, facial y ADN (simulado)
+                Acceso seguro por huella, facial y ADN
+              </p>
+            </button>
+
+            {/* Proyectos I+D */}
+            <button
+              onClick={() => navigate("/proyectos")}
+              className="text-left p-4 bg-indigo-500/10 border border-indigo-500/30 rounded-xl hover:bg-indigo-500/20 transition group"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-indigo-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-white group-hover:text-indigo-300 transition">Proyectos I+D</p>
+                  <p className="text-xs text-indigo-400">Módulo Proyectos</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-400">
+                Gestión de proyectos de investigación
+              </p>
+            </button>
+
+            {/* Gestión de Usuarios - Admin */}
+            <button
+              onClick={() => navigate("/admin/users")}
+              className="text-left p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl hover:bg-emerald-500/20 transition group"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                  <Users className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-white group-hover:text-emerald-300 transition">Gestión de Usuarios</p>
+                  <p className="text-xs text-emerald-400">Módulo Administración</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-400">
+                Usuarios, roles y permisos
+              </p>
+            </button>
+
+            {/* Seguridad - Incidentes */}
+            <button
+              onClick={() => navigate("/seguridad")}
+              className="text-left p-4 bg-red-500/10 border border-red-500/30 rounded-xl hover:bg-red-500/20 transition group"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-red-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-white group-hover:text-red-300 transition">Seguridad</p>
+                  <p className="text-xs text-red-400">Módulo Seguridad</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-400">
+                Incidentes y alertas de seguridad
+              </p>
+            </button>
+
+            {/* Tecnología - Fichas Técnicas */}
+            <button
+              onClick={() => navigate("/tecnologia")}
+              className="text-left p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl hover:bg-amber-500/20 transition group"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-amber-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-white group-hover:text-amber-300 transition">Tecnología</p>
+                  <p className="text-xs text-amber-400">Módulo Tecnología</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-400">
+                Fichas técnicas y versiones
               </p>
             </button>
           </div>
