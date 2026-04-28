@@ -3,6 +3,7 @@ import { ArrowLeft, Users, Shield, AlertCircle, Search, Filter, RefreshCw } from
 import { useState, useEffect } from "react"
 import { getAllUsers, updateUserRole, getAllRoles, type User, type Role } from "../../auth/services/userService"
 import { getStoredAccessToken, getStoredUserName } from "../../auth/utils/roles"
+import { triggerAuditRefresh } from "../../auditoria/services/auditService"
 
 const UserRoles = () => {
   const navigate = useNavigate()
@@ -69,6 +70,9 @@ const UserRoles = () => {
       setUsers(prev => prev.map(u => 
         u.id_usuario === userId ? { ...u, id_rol: newRoleId } : u
       ))
+      // 🔥 Trigger refresh de auditoría después de cambio de rol
+      console.log("🔄 [UserRoles] Rol actualizado, refrescando auditoría...")
+      triggerAuditRefresh()
     } catch (err) {
       console.error("Error actualizando rol:", err)
       const errorMsg = err instanceof Error ? err.message : "Error desconocido"

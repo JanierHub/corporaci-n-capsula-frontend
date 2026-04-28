@@ -11,6 +11,7 @@ import {
   removeImagenArtefacto,
   setImagenArtefacto,
 } from "../modules/artefactos/utils/artefactoImagenes"
+import { triggerAuditRefresh } from "../modules/auditoria/services/auditService"
 
 type ContextType = {
   artefactos: Artefacto[]
@@ -54,6 +55,8 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     await loadArtefactos()
+    console.log(" Artefacto creado, refrescando auditoría...")
+    triggerAuditRefresh()
     // Retornar el artefacto creado
     return artefactos.find(art => art.id === newId) || { id: newId, ...rest } as Artefacto
   }, [loadArtefactos, artefactos])
@@ -88,6 +91,11 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
         )
       )
     }
+    // 🔥 Trigger refresh de auditoría para UPDATE
+    if (Object.keys(rest).length > 0) {
+      console.log("🔄 [ArtefactosContext] Artefacto actualizado, refrescando auditoría...")
+      triggerAuditRefresh()
+    }
     // Si el backend no devuelve datos completos, mantenemos la actualización local
   }, [])
 
@@ -107,6 +115,9 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
     try {
       await updateArtefactoRequest(id, { estado: "activo" }) // El servicio convierte a boolean
       console.log("✅ Estado activado en backend correctamente")
+      // 🔥 Trigger refresh de auditoría
+      console.log("🔄 [ArtefactosContext] Artefacto activado, refrescando auditoría...")
+      triggerAuditRefresh()
     } catch (error) {
       console.error("❌ Error al activar en backend:", error)
       // Revertir en caso de error
@@ -126,6 +137,9 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
     try {
       await updateArtefactoRequest(nid, { estado: "obsoleto" }) // El servicio convierte a boolean
       console.log("✅ Estado desactivado en backend correctamente")
+      // 🔥 Trigger refresh de auditoría
+      console.log("🔄 [ArtefactosContext] Artefacto desactivado, refrescando auditoría...")
+      triggerAuditRefresh()
     } catch (error) {
       console.error("❌ Error al desactivar en backend:", error)
       // Revertir en caso de error

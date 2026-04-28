@@ -16,7 +16,7 @@
 import { useNavigate } from "react-router-dom"
 import { useMemo, useState, useCallback, useEffect } from "react"
 import { useArtefactos } from "../../../context/ArtefactosContext"
-import { getAllAuditLogs, type AuditLog } from "../services/auditService"
+import { getAllAuditLogs, type AuditLog, onAuditRefresh } from "../services/auditService"
 import {
   BarChart,
   Bar,
@@ -107,23 +107,39 @@ export default function Auditoria() {
   const [pagina,       setPagina]       = useState(1)
 
   // ── Cargar logs desde el backend ───────────────────────────────────────────
-  useEffect(() => {
-    const loadLogs = async () => {
-      try {
-        setLoading(true)
-        const data = await getAllAuditLogs()
-        setLogs(data)
-        setError(null)
-      } catch (err) {
-        console.error("Error cargando auditoría:", err)
-        setError("No se pudieron cargar los logs de auditoría. Verifica que el backend esté corriendo.")
-      } finally {
-        setLoading(false)
-      }
+  const loadLogs = useCallback(async () => {
+    console.log("🔄 [Auditoria] Cargando logs...");
+    try {
+      setLoading(true)
+      const data = await getAllAuditLogs()
+      console.log("✅ [Auditoria] Logs cargados:", data.length, "registros");
+      setLogs(data)
+      setError(null)
+    } catch (err) {
+      console.error("❌ Error cargando auditoría:", err)
+      setError("No se pudieron cargar los logs de auditoría. Verifica que el backend esté corriendo.")
+    } finally {
+      setLoading(false)
     }
-
-    loadLogs()
   }, [])
+
+  // Cargar al montar
+  useEffect(() => {
+    loadLogs()
+  }, [loadLogs])
+
+  // 🔥 Escuchar eventos de refresh desde otras partes de la app
+  useEffect(() => {
+    console.log("👂 [Auditoria] Registrando listener de refresh");
+    const unsubscribe = onAuditRefresh(() => {
+      console.log("🔄 [Auditoria] Evento de refresh recibido, recargando logs...");
+      loadLogs();
+    });
+    return () => {
+      console.log("👋 [Auditoria] Desregistrando listener");
+      unsubscribe();
+    };
+  }, [loadLogs])
 
   // ── Filtrado ──────────────────────────────────────────────────────────────
   const logsFiltrados = useMemo(() => {
@@ -389,6 +405,14 @@ export default function Auditoria() {
         </div>
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           <span style={{ fontSize: "11px", color: "#4b4b7a" }}>{logs.length} eventos</span>
+          <button 
+            style={{...s.csvBtn, opacity: loading ? 0.5 : 1}} 
+            onClick={loadLogs}
+            disabled={loading}
+            title="Recargar logs"
+          >
+            {loading ? "⟳ Cargando..." : "↻ Actualizar"}
+          </button>
           <button style={s.csvBtn} onClick={exportarCSV}>↓ Exportar CSV</button>
         </div>
       </div>
