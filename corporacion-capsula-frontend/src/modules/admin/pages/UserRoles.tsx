@@ -35,7 +35,7 @@ const UserRoles = () => {
   const fetchUsers = async () => {
     try {
       const token = getStoredAccessToken()
-      const res = await fetch(`${API_URL}/users`, {
+      const res = await fetch(`${API_URL}/user`, {
         headers: token ? { "Authorization": `Bearer ${token}` } : {}
       })
       if (!res.ok) throw new Error("Error cargando usuarios")
@@ -53,7 +53,7 @@ const UserRoles = () => {
     try {
       setUpdating(userId)
       const token = getStoredAccessToken()
-      const res = await fetch(`${API_URL}/users/${userId}/role`, {
+      const res = await fetch(`${API_URL}/user/${userId}/role`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
