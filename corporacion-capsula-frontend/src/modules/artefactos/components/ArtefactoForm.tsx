@@ -84,6 +84,10 @@ const ArtefactoForm = ({ onSubmit, initialData, mode = "create" }: Props) => {
   const [inventor, setInventor] = useState("")
   const [nivelPeligrosidad, setNivelPeligrosidad] = useState("1")
   const [previewImagen, setPreviewImagen] = useState<string | null>(null)
+  
+  // Estados de validación y feedback
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     if (!initialData) {
@@ -144,8 +148,38 @@ const ArtefactoForm = ({ onSubmit, initialData, mode = "create" }: Props) => {
     e.target.value = ""
   }
 
+  // Validaciones
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {}
+    
+    if (!nombre.trim()) {
+      newErrors.nombre = "El nombre es obligatorio"
+    }
+    if (!descripcion.trim()) {
+      newErrors.descripcion = "La descripción es obligatoria"
+    }
+    if (!fecha) {
+      newErrors.fecha = "La fecha de creación es obligatoria"
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Marcar todos los campos como tocados
+    setTouched({
+      nombre: true,
+      descripcion: true,
+      fecha: true,
+    })
+    
+    if (!validate()) {
+      return
+    }
+    
     const ic = Number(idCategoria)
     const tipo = Number(idTipo) || 1
     const np = Number(nivelPeligrosidad) || 1
@@ -232,21 +266,39 @@ const ArtefactoForm = ({ onSubmit, initialData, mode = "create" }: Props) => {
         </div>
 
         {/* Campos deshabilitados para usuarios normales en modo edición */}
-        <input
-          placeholder="Nombre"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          disabled={fieldsDisabled}
-          className={`p-2 bg-black border border-orange-400 rounded text-white col-span-2 ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-        />
+        <div className="col-span-2">
+          <input
+            placeholder="Nombre *"
+            value={nombre}
+            onChange={(e) => {
+              setNombre(e.target.value)
+              setTouched(prev => ({ ...prev, nombre: true }))
+              if (errors.nombre) validate()
+            }}
+            disabled={fieldsDisabled}
+            className={`w-full p-2 bg-black border rounded text-white ${errors.nombre && touched.nombre ? 'border-red-500' : 'border-orange-400'} ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          />
+          {errors.nombre && touched.nombre && (
+            <p className="text-red-400 text-xs mt-1">{errors.nombre}</p>
+          )}
+        </div>
 
-        <textarea
-          placeholder="Descripción"
-          value={descripcion}
-          onChange={(e) => setDescripcion(e.target.value)}
-          disabled={fieldsDisabled}
-          className={`col-span-2 p-2 bg-black border border-orange-400 rounded text-white min-h-[88px] ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-        />
+        <div className="col-span-2">
+          <textarea
+            placeholder="Descripción *"
+            value={descripcion}
+            onChange={(e) => {
+              setDescripcion(e.target.value)
+              setTouched(prev => ({ ...prev, descripcion: true }))
+              if (errors.descripcion) validate()
+            }}
+            disabled={fieldsDisabled}
+            className={`w-full p-2 bg-black border rounded text-white min-h-[88px] ${errors.descripcion && touched.descripcion ? 'border-red-500' : 'border-orange-400'} ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          />
+          {errors.descripcion && touched.descripcion && (
+            <p className="text-red-400 text-xs mt-1">{errors.descripcion}</p>
+          )}
+        </div>
 
         <input
           type="date"

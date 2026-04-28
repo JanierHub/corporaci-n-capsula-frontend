@@ -72,6 +72,64 @@ export const canAccessModule = (allowedRoles: string[]): boolean => {
   return allowedRoles.some(r => normalizeRole(r) === currentRole)
 }
 
+// HU-10: Restricción por nivel de seguridad
+// Niveles de seguridad según roles (del más alto al más bajo)
+const ROLE_SECURITY_LEVELS: Record<string, number> = {
+  "administrador": 5,
+  "experto en tecnologia extraterrestre": 5,
+  "directora de innovacion": 4,
+  "especialista en seguridad": 4,
+  "inventor/tester": 3,
+  "gestor de proyectos": 3,
+  "usuario": 1,
+}
+
+/**
+ * Obtiene el nivel de seguridad del usuario actual (1-5)
+ * HU-10: Restricción visual por nivel de seguridad
+ */
+export const getCurrentSecurityLevel = (): number => {
+  const currentRole = normalizeRole(getStoredUserRole() ?? getPersistedRole())
+  return ROLE_SECURITY_LEVELS[currentRole] ?? 1
+}
+
+/**
+ * Verifica si el usuario puede ver contenido de cierto nivel de seguridad
+ * @param contentLevel Nivel de seguridad del contenido (1-5)
+ * HU-10: Solo restricción visual, la validación real es backend
+ */
+export const canViewContentBySecurityLevel = (contentLevel: number): boolean => {
+  const userLevel = getCurrentSecurityLevel()
+  return userLevel >= contentLevel
+}
+
+/**
+ * Verifica si el usuario puede ver artefactos según su peligrosidad/confidencialidad
+ * @param dangerLevel Nivel de peligrosidad (1-10)
+ * @param confLevel Nivel de confidencialidad (1-10)
+ * HU-10: Solo restricción visual
+ */
+export const canViewArtifactByLevels = (dangerLevel: number, confLevel: number): boolean => {
+  const userLevel = getCurrentSecurityLevel()
+  // Mapeo: nivel de seguridad usuario -> máximo nivel artefacto visible
+  const maxArtifactLevel = userLevel * 2 // Nivel 5 puede ver hasta 10
+  return dangerLevel <= maxArtifactLevel && confLevel <= maxArtifactLevel
+}
+
+/**
+ * Obtiene etiqueta del nivel de seguridad actual
+ */
+export const getSecurityLevelLabel = (): string => {
+  const level = getCurrentSecurityLevel()
+  const labels: Record<number, string> = {
+    1: "Nivel 1 - Básico",
+    3: "Nivel 3 - Operativo",
+    4: "Nivel 4 - Táctico/Estratégico",
+    5: "Nivel 5 - Clasificado/Total",
+  }
+  return labels[level] || `Nivel ${level}`
+}
+
 export const clearStoredSession = () => {
   localStorage.removeItem(SESSION_ROLE_KEY)
   localStorage.removeItem(SESSION_USER_NAME_KEY)

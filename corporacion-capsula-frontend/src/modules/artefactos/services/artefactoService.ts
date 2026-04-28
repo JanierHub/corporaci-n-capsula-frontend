@@ -488,3 +488,75 @@ export const deleteArtefacto = async (id: number): Promise<Artefacto | null> => 
   }
   return null
 }
+
+// HU-08: Filtros de artefactos backend-driven
+export interface ArtefactoFilters {
+  categoria?: string
+  origen?: string
+  nivel_confidencialidad?: number
+  nivel_peligrosidad?: number
+  estado?: boolean
+  busqueda?: string
+}
+
+export const searchArtefactos = async (filters: ArtefactoFilters): Promise<Artefacto[]> => {
+  try {
+    // Construir query params
+    const params = new URLSearchParams()
+    if (filters.categoria && filters.categoria !== "todas") {
+      params.append("categoria", filters.categoria)
+    }
+    if (filters.origen && filters.origen !== "todos") {
+      params.append("origen", filters.origen)
+    }
+    if (filters.nivel_confidencialidad !== undefined) {
+      params.append("nivel_confidencialidad", String(filters.nivel_confidencialidad))
+    }
+    if (filters.nivel_peligrosidad !== undefined) {
+      params.append("nivel_peligrosidad", String(filters.nivel_peligrosidad))
+    }
+    if (filters.estado !== undefined) {
+      params.append("estado", String(filters.estado))
+    }
+    if (filters.busqueda) {
+      params.append("q", filters.busqueda)
+    }
+
+    const queryString = params.toString()
+    const url = `${API_URL}/artifacts${queryString ? `?${queryString}` : ""}`
+    
+    console.log("🔍 Buscando artefactos con filtros:", url)
+    
+    const res = await fetchWithTimeout(url)
+    
+    if (!res.ok) {
+      const body = await parseJsonSafely(res)
+      console.error("❌ Error API filtros:", res.status, body)
+      // Si el backend no soporta filtros, retornar todos y filtrar localmente
+      return getArtefactos()
+    }
+
+    const data = await parseJsonSafely(res)
+    
+    const extractPayload = (raw: unknown): unknown[] => {
+      if (Array.isArray(raw)) return raw
+      if (!raw || typeof raw !== "object") return []
+      const o = raw as Record<string, unknown>
+      const keys = ["data", "artifacts", "artefactos", "rows", "items", "results", "result", "records"]
+      for (const k of keys) {
+        const v = o[k]
+        if (Array.isArray(v)) return v
+      }
+      return []
+    }
+
+    const payload = extractPayload(data)
+    console.log("✅ Artefactos filtrados:", payload.length)
+    
+    return (payload as any[]).map(normalizeArtefacto).map(enriquecerArtefactoConImagen)
+  } catch (error) {
+    console.error("❌ Error en búsqueda con filtros:", error)
+    // Fallback: retornar todos los artefactos
+    return getArtefactos()
+  }
+}

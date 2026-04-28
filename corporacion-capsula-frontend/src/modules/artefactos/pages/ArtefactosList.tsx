@@ -1,11 +1,19 @@
 import { useEffect, useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useArtefactos } from "../../../context/ArtefactosContext"
-import { isAdministrator, canViewArtifacts, canManageArtifacts, canDeleteArtifacts } from "../../auth/utils/roles"
+import { 
+  isAdministrator, 
+  canViewArtifacts, 
+  canManageArtifacts, 
+  canDeleteArtifacts,
+  canViewArtifactByLevels,
+  getSecurityLevelLabel,
+  getCurrentSecurityLevel
+} from "../../auth/utils/roles"
 import bg from "../../../assets/3.jpg"
 import esfera from "../../../assets/7.webp"
 import capsuleIcon from "../../../assets/13.gif"
-import { Search, Filter, X } from "lucide-react"
+import { Search, Filter, X, Shield, Lock } from "lucide-react"
 
 import transporteGif from "../../../assets/transporte.gif"
 import energiaGif from "../../../assets/energia.gif"
@@ -74,9 +82,22 @@ const ArtefactosList = () => {
   // Niveles de peligrosidad
   const nivelesPeligrosidad = ["Bajo", "Medio", "Alto", "Crítico"]
 
-  // Filtrar artefactos (PARA TODOS LOS USUARIOS)
-  const artefactosFiltrados = useMemo(() => {
+  // HU-10: Filtrar artefactos por nivel de seguridad del usuario
+  const userSecurityLevel = getCurrentSecurityLevel()
+  const maxVisibleLevel = userSecurityLevel * 2 // Nivel 5 puede ver hasta 10
+  
+  const artefactosVisibles = useMemo(() => {
     return artefactos.filter((a: any) => {
+      const dangerLevel = a.nivelPeligrosidad ?? 1
+      const confLevel = a.nivelConfidencialidad ?? 1
+      // Solo mostrar artefactos que el usuario puede ver según su nivel
+      return dangerLevel <= maxVisibleLevel && confLevel <= maxVisibleLevel
+    })
+  }, [artefactos, maxVisibleLevel])
+
+  // Filtrar artefactos con filtros de UI (PARA TODOS LOS USUARIOS)
+  const artefactosFiltrados = useMemo(() => {
+    return artefactosVisibles.filter((a: any) => {
       // Búsqueda por nombre
       const matchSearch = searchTerm === "" || 
         a.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -97,7 +118,10 @@ const ArtefactosList = () => {
 
       return matchSearch && matchCategoria && matchOrigen && matchPeligrosidad
     })
-  }, [artefactos, searchTerm, filterCategoria, filterOrigen, filterPeligrosidad])
+  }, [artefactosVisibles, searchTerm, filterCategoria, filterOrigen, filterPeligrosidad])
+  
+  // Contar artefactos ocultos por seguridad
+  const hiddenCount = artefactos.length - artefactosVisibles.length
 
   // Limpiar filtros
   const clearFilters = () => {
