@@ -206,11 +206,11 @@ const Biometrico = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => navigate("/admin")}
+                onClick={() => navigate("/home")}
                 className="flex items-center gap-2 text-pink-400 hover:text-pink-300 transition"
               >
                 <ArrowLeft className="w-5 h-5" />
-                Volver al Admin
+                Volver al Home
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-pink-400 flex items-center gap-2">

@@ -30,27 +30,8 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
   const loadArtefactos = useCallback(async () => {
     try {
       const data = await getArtefactos()
-      
-      // Restaurar estados desde localStorage (solo el estado activo/obsoleto, no los datos)
-      const estadosGuardados = localStorage.getItem('artefactos_estados')
-      if (estadosGuardados && data.length > 0) {
-        try {
-          const estados = JSON.parse(estadosGuardados)
-          const dataConEstados = data.map((artefacto: Artefacto) => {
-            const estadoGuardado = estados[artefacto.id.toString()]
-            if (estadoGuardado) {
-              return { ...artefacto, estado: estadoGuardado as Artefacto["estado"] }
-            }
-            return { ...artefacto, estado: "activo" as Artefacto["estado"] }
-          })
-          setArtefactos(dataConEstados)
-        } catch (error) {
-          console.warn("Error cargando estados guardados:", error)
-          setArtefactos(data.map((a: Artefacto) => ({...a, estado: "activo" as Artefacto["estado"]})))
-        }
-      } else {
-        setArtefactos(data.map((a: Artefacto) => ({...a, estado: "activo" as Artefacto["estado"]})))
-      }
+      // Los estados vienen del backend - persistencia real
+      setArtefactos(data.map((a: Artefacto) => ({...a, estado: a.estado || "activo" as Artefacto["estado"]})))
     } catch (error) {
       console.error("❌ Error cargando artefactos desde API:", error)
       setArtefactos([]) // Array vacío si la API falla
@@ -119,72 +100,38 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
     
     console.log(`Activando artefacto ${id} de ${actual.estado} a ${nuevoEstado}`)
     
-    // Actualizar localmente inmediatamente
-    setArtefactos((prev) => {
-      const nuevosArtefactos = prev.map((a) =>
-        a.id === id ? { ...a, estado: nuevoEstado } : a
-      )
-      
-      // Eliminar del localStorage los artefactos que se activan
-      const estadosGuardados = localStorage.getItem('artefactos_estados')
-      if (estadosGuardados) {
-        try {
-          const estados = JSON.parse(estadosGuardados)
-          delete estados[id.toString()] // Eliminar este artefacto del storage
-          localStorage.setItem('artefactos_estados', JSON.stringify(estados))
-          console.log("Artefacto eliminado de localStorage:", id, "Estados restantes:", estados)
-        } catch (error) {
-          console.warn("Error actualizando localStorage:", error)
-        }
-      }
-      
-      return nuevosArtefactos
-    })
+    // Actualizar localmente inmediatamente (UI optimista)
+    setArtefactos((prev) => prev.map((a) => a.id === id ? { ...a, estado: nuevoEstado } : a))
 
-    // Sincronizar con backend y mantener estado local
+    // Sincronizar con backend - persistencia real
     try {
-      await updateArtefactoRequest(id, { estado: nuevoEstado })
-      console.log("Estado guardado en backend correctamente")
+      await updateArtefactoRequest(id, { estado: "activo" }) // El servicio convierte a boolean
+      console.log("✅ Estado activado en backend correctamente")
     } catch (error) {
-      console.warn("No se pudo sincronizar con backend, pero el estado local se mantuvo:", error)
+      console.error("❌ Error al activar en backend:", error)
+      // Revertir en caso de error
+      setArtefactos((prev) => prev.map((a) => a.id === id ? { ...a, estado: actual.estado } : a))
     }
   }, [artefactos, loadArtefactos])
 
   const deactivateArtefacto = useCallback(async (id: number | string) => {
     const nid = Number(id)
-    // Actualizar localmente inmediatamente
-    setArtefactos((prev) => {
-      const nuevosArtefactos = prev.map((a) =>
-        a.id === nid ? { ...a, estado: "obsoleto" as Artefacto["estado"] } : a
-      )
-      
-      // Guardar estados en localStorage - usar string keys para evitar TypeScript errors
-      const estados: Record<string, string> = {}
-      nuevosArtefactos.forEach(a => {
-        if (a.estado !== "activo" && a.estado) { // Solo guardar estados no activos y no undefined
-          estados[a.id.toString()] = a.estado
-        }
-      })
-      localStorage.setItem('artefactos_estados', JSON.stringify(estados))
-      console.log("Deactivate - Estados guardados en localStorage:", estados)
-      
-      return nuevosArtefactos
-    })
+    const actual = artefactos.find((a) => a.id === nid)
+    if (!actual) return
+    
+    // Actualizar localmente inmediatamente (UI optimista)
+    setArtefactos((prev) => prev.map((a) => a.id === nid ? { ...a, estado: "obsoleto" as Artefacto["estado"] } : a))
 
-    // Intentar sincronizar con backend
+    // Sincronizar con backend - persistencia real via PATCH
     try {
-      const updated = await deleteArtefacto(nid)
-      if (updated) {
-        setArtefactos((prev) =>
-          prev.map((a) =>
-            a.id === nid ? enriquecerArtefactoConImagen(updated) : a
-          )
-        )
-      }
+      await updateArtefactoRequest(nid, { estado: "obsoleto" }) // El servicio convierte a boolean
+      console.log("✅ Estado desactivado en backend correctamente")
     } catch (error) {
-      console.warn("No se pudo sincronizar con backend, pero el estado local se mantuvo:", error)
+      console.error("❌ Error al desactivar en backend:", error)
+      // Revertir en caso de error
+      setArtefactos((prev) => prev.map((a) => a.id === nid ? { ...a, estado: actual.estado } : a))
     }
-  }, [])
+  }, [artefactos])
 
   const value = useMemo(() => ({
     artefactos,

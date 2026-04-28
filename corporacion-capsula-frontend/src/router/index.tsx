@@ -15,6 +15,7 @@ import MiCapsula from "../modules/usuario/pages/MiCapsula"
 
 import MainLayout from "../layouts/MainLayout"
 import RequireAuth from "./RequireAuth"
+import RequireAdmin from "./RequireAdmin"
 
 export const AppRouter = () => {
   return (
@@ -37,8 +38,12 @@ export const AppRouter = () => {
           {/* Admin Panel - Outside MainLayout for full-screen experience */}
           <Route path="/admin" element={<AdminPanel />} />
           
+          {/* Admin-only modules */}
+          <Route element={<RequireAdmin />}>
+            <Route path="/auditoria" element={<Auditoria />} />
+          </Route>
+          
           {/* Team Modules - Outside MainLayout */}
-          <Route path="/auditoria" element={<Auditoria />} />
           <Route path="/busqueda-avanzada" element={<BusquedaAvanzada />} />
           <Route path="/biometrico" element={<Biometrico />} />
           
