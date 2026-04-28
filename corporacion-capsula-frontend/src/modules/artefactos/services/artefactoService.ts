@@ -252,7 +252,12 @@ const requestFirstAvailable = async () => {
 // 🔥 SOLO USA API REAL - NO MOCKS
 export const getArtefactos = async (): Promise<Artefacto[]> => {
   try {
+    console.log("🔍 Intentando cargar artefactos...")
+    console.log("🌐 API_URL:", API_URL)
+    console.log("🔗 Candidatos:", API_CANDIDATES)
+    
     const response = await requestFirstAvailable()
+    console.log("📡 Response status:", response.status, response.url)
 
     if (!response.ok) {
       const body = await parseJsonSafely(response)
@@ -261,6 +266,7 @@ export const getArtefactos = async (): Promise<Artefacto[]> => {
     }
 
     const data = await parseJsonSafely(response)
+    console.log("📦 Raw data:", data)
 
     const extractPayload = (raw: unknown): unknown[] => {
       if (Array.isArray(raw)) return raw
@@ -289,6 +295,7 @@ export const getArtefactos = async (): Promise<Artefacto[]> => {
     }
 
     const payload = extractPayload(data)
+    console.log("✅ Payload extraído:", payload.length, "items")
 
     if (!payload || payload.length === 0) {
       console.warn("⚠️ API devolvió lista vacía")

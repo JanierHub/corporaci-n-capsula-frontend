@@ -41,15 +41,49 @@ const UserRoles = () => {
   const fetchUsers = async () => {
     try {
       const token = getStoredAccessToken()
+      console.log("🔍 Fetching users from:", `${API_URL}/user`)
+      console.log("🔑 Token presente:", !!token)
+      
       const res = await fetch(`${API_URL}/user`, {
         headers: token ? { "Authorization": `Bearer ${token}` } : {}
       })
-      if (!res.ok) throw new Error("Error cargando usuarios")
-      const data = await res.json()
-      setUsers(data)
+      
+      console.log("📡 Response status:", res.status)
+      
+      if (!res.ok) {
+        const errorText = await res.text()
+        console.error("❌ Error response:", errorText)
+        throw new Error(`Error ${res.status}: ${errorText}`)
+      }
+      
+      const rawData = await res.json()
+      console.log("📦 Raw data received:", rawData)
+      
+      // Extraer array de la respuesta (puede ser {data: [...]} o directo [...])
+      const extractUsers = (raw: unknown): User[] => {
+        if (Array.isArray(raw)) return raw as User[]
+        if (raw && typeof raw === "object") {
+          const obj = raw as Record<string, unknown>
+          // Buscar propiedades comunes que contengan el array
+          const possibleArrays = ["data", "users", "usuarios", "rows", "items", "results"]
+          for (const key of possibleArrays) {
+            if (Array.isArray(obj[key])) return obj[key] as User[]
+          }
+        }
+        return []
+      }
+      
+      const users = extractUsers(rawData)
+      console.log("✅ Users extracted:", users.length)
+      
+      if (users.length === 0) {
+        console.warn("⚠️ No users found in response")
+      }
+      
+      setUsers(users)
     } catch (err) {
-      setError("No se pudieron cargar los usuarios")
-      console.error(err)
+      console.error("❌ Error cargando usuarios:", err)
+      setError(`No se pudieron cargar los usuarios: ${err instanceof Error ? err.message : "Error desconocido"}`)
     } finally {
       setLoading(false)
     }
