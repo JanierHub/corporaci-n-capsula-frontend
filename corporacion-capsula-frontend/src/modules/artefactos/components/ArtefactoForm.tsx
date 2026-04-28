@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import type { Artefacto, ArtefactoFormPayload } from "../types/artefacto.types"
+import { canManageArtifacts } from "../../auth/utils/roles"
 
 import transporteGif from "../../../assets/transporte.gif"
 import energiaGif from "../../../assets/energia.gif"
@@ -167,8 +168,18 @@ const ArtefactoForm = ({ onSubmit, initialData, mode = "create" }: Props) => {
     onSubmit(payload)
   }
 
-  const title = mode === "edit" ? "Editar artefacto" : "Registrar artefacto"
-  const cta = mode === "edit" ? "Guardar cambios" : "Guardar artefacto"
+  const canEditAll = canManageArtifacts()
+  const isEditMode = mode === "edit"
+  
+  const title = isEditMode 
+    ? (canEditAll ? "Editar artefacto" : "Cambiar imagen del artefacto") 
+    : "Registrar artefacto"
+  const cta = isEditMode 
+    ? (canEditAll ? "Guardar cambios" : "Guardar imagen") 
+    : "Guardar artefacto"
+    
+  // En modo edición, usuarios normales solo pueden cambiar la imagen
+  const fieldsDisabled = isEditMode && !canEditAll
 
   return (
     <form
@@ -220,25 +231,29 @@ const ArtefactoForm = ({ onSubmit, initialData, mode = "create" }: Props) => {
           </div>
         </div>
 
+        {/* Campos deshabilitados para usuarios normales en modo edición */}
         <input
           placeholder="Nombre"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          className="p-2 bg-black border border-orange-400 rounded text-white col-span-2"
+          disabled={fieldsDisabled}
+          className={`p-2 bg-black border border-orange-400 rounded text-white col-span-2 ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         />
 
         <textarea
           placeholder="Descripción"
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
-          className="col-span-2 p-2 bg-black border border-orange-400 rounded text-white min-h-[88px]"
+          disabled={fieldsDisabled}
+          className={`col-span-2 p-2 bg-black border border-orange-400 rounded text-white min-h-[88px] ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         />
 
         <input
           type="date"
           value={fecha}
           onChange={(e) => setFecha(e.target.value)}
-          className="p-2 bg-black border border-orange-400 rounded text-white"
+          disabled={fieldsDisabled}
+          className={`p-2 bg-black border border-orange-400 rounded text-white ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         />
 
         <input
@@ -247,13 +262,15 @@ const ArtefactoForm = ({ onSubmit, initialData, mode = "create" }: Props) => {
           min={1}
           value={idTipo}
           onChange={(e) => setIdTipo(e.target.value)}
-          className="p-2 bg-black border border-orange-400 rounded text-white"
+          disabled={fieldsDisabled}
+          className={`p-2 bg-black border border-orange-400 rounded text-white ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         />
 
         <select
           value={idCategoria}
           onChange={(e) => setIdCategoria(e.target.value)}
-          className="p-2 bg-black border border-orange-400 rounded text-white"
+          disabled={fieldsDisabled}
+          className={`p-2 bg-black border border-orange-400 rounded text-white ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <option value="1">Categoría: Transporte</option>
           <option value="2">Categoría: Doméstico</option>
@@ -264,7 +281,8 @@ const ArtefactoForm = ({ onSubmit, initialData, mode = "create" }: Props) => {
         <select
           value={origen}
           onChange={(e) => setOrigen(e.target.value)}
-          className="p-2 bg-black border border-orange-400 rounded text-white"
+          disabled={fieldsDisabled}
+          className={`p-2 bg-black border border-orange-400 rounded text-white ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <option value="TERRICOLA">Origen: Terrícola</option>
           <option value="SAIYAJIN">Origen: Saiyajin</option>
@@ -275,13 +293,15 @@ const ArtefactoForm = ({ onSubmit, initialData, mode = "create" }: Props) => {
           placeholder="Inventor (opcional)"
           value={inventor}
           onChange={(e) => setInventor(e.target.value)}
-          className="p-2 bg-black border border-orange-400 rounded text-white"
+          disabled={fieldsDisabled}
+          className={`p-2 bg-black border border-orange-400 rounded text-white ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         />
 
         <select
           value={nivelPeligrosidad}
           onChange={(e) => setNivelPeligrosidad(e.target.value)}
-          className="p-2 bg-black border border-orange-400 rounded text-white"
+          disabled={fieldsDisabled}
+          className={`p-2 bg-black border border-orange-400 rounded text-white ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <option value="1">Peligrosidad 1</option>
           <option value="2">Peligrosidad 2</option>
@@ -289,6 +309,12 @@ const ArtefactoForm = ({ onSubmit, initialData, mode = "create" }: Props) => {
           <option value="4">Peligrosidad 4</option>
           <option value="5">Peligrosidad 5</option>
         </select>
+        
+        {fieldsDisabled && (
+          <p className="col-span-2 text-xs text-orange-300 mt-2">
+            Solo los administradores pueden editar todos los campos. Los usuarios solo pueden cambiar la imagen.
+          </p>
+        )}
       </div>
 
       <button

@@ -259,12 +259,11 @@ const AdminPanel = () => {
           </div>
         )}
         
-        {/* Gestión - SOLO Admin */}
+        {/* Gestión - Solo visible para Admin */}
         {activeTab === "gestion" && isAdmin && (
           <div className="mb-8 bg-cyan-900/20 border border-cyan-500/30 rounded-xl p-4">
-            <h3 className="text-lg font-bold text-cyan-400 mb-2">⚠️ Funcionalidad Exclusiva de Administrador</h3>
             <p className="text-gray-400 text-sm">
-              La gestión completa de artefactos, activación/desactivación y control total del sistema es exclusiva del rol Administrador.
+              Panel de gestión avanzada de artefactos y sistema.
             </p>
           </div>
         )}
@@ -281,75 +280,79 @@ const AdminPanel = () => {
               onClick={() => navigate("/artefactos")}
               className="text-left p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-xl hover:bg-cyan-500/20 transition group"
             >
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-cyan-500/20 rounded-lg flex items-center justify-center">
                   <Package className="w-5 h-5 text-cyan-400" />
                 </div>
                 <div>
                   <p className="font-medium text-white group-hover:text-cyan-300 transition">Inventario</p>
-                  <p className="text-xs text-cyan-400">Módulo Artefactos</p>
+                  <p className="text-xs text-cyan-400">Artefactos</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-400">
-                Gestión de artefactos tecnológicos
-              </p>
             </button>
 
-            {/* Búsqueda Avanzada - Juan */}
+            {/* Búsqueda Avanzada */}
             <button
               onClick={() => navigate("/busqueda-avanzada")}
               className="text-left p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl hover:bg-blue-500/20 transition group"
             >
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
                   <Search className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
                   <p className="font-medium text-white group-hover:text-blue-300 transition">Búsqueda Avanzada</p>
-                  <p className="text-xs text-blue-400">Responsable: Juan</p>
+                  <p className="text-xs text-blue-400">Filtros complejos</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-400">
-                Filtros complejos y búsqueda por múltiples criterios
-              </p>
             </button>
 
-            {/* Auditoría - Carlos */}
+            {/* Auditoría */}
             <button
               onClick={() => navigate("/auditoria")}
               className="text-left p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl hover:bg-purple-500/20 transition group"
             >
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
                   <Bell className="w-5 h-5 text-purple-400" />
                 </div>
                 <div>
                   <p className="font-medium text-white group-hover:text-purple-300 transition">Auditoría</p>
-                  <p className="text-xs text-purple-400">Responsable: Carlos</p>
+                  <p className="text-xs text-purple-400">Logs del sistema</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-400">
-                Logs y registro de eventos del sistema
-              </p>
             </button>
 
-            {/* Biométrico - Carlos & Juan */}
+            {/* Biométrico */}
             <button
               onClick={() => navigate("/biometrico")}
               className="text-left p-4 bg-pink-500/10 border border-pink-500/30 rounded-xl hover:bg-pink-500/20 transition group"
             >
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center">
                   <Shield className="w-5 h-5 text-pink-400" />
                 </div>
                 <div>
                   <p className="font-medium text-white group-hover:text-pink-300 transition">Verificación Biométrica</p>
-                  <p className="text-xs text-pink-400">Responsables: Carlos & Juan</p>
+                  <p className="text-xs text-pink-400">Acceso seguro</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-400">
-                Acceso seguro por huella, facial y ADN
-              </p>
+            </button>
+
+            {/* Mi Cápsula */}
+            <button
+              onClick={() => navigate("/mi-capsula")}
+              className="text-left p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl hover:bg-rose-500/20 transition group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-rose-500/20 rounded-lg flex items-center justify-center">
+                  <Package className="w-5 h-5 text-rose-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-white group-hover:text-rose-300 transition">Mi Cápsula</p>
+                  <p className="text-xs text-rose-400">Perfil de usuario</p>
+                </div>
+              </div>
             </button>
 
             {/* Proyectos I+D */}
@@ -357,75 +360,63 @@ const AdminPanel = () => {
               onClick={() => navigate("/proyectos")}
               className="text-left p-4 bg-indigo-500/10 border border-indigo-500/30 rounded-xl hover:bg-indigo-500/20 transition group"
             >
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center">
                   <BarChart3 className="w-5 h-5 text-indigo-400" />
                 </div>
                 <div>
                   <p className="font-medium text-white group-hover:text-indigo-300 transition">Proyectos I+D</p>
-                  <p className="text-xs text-indigo-400">Módulo Proyectos</p>
+                  <p className="text-xs text-indigo-400">Investigación</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-400">
-                Gestión de proyectos de investigación
-              </p>
             </button>
 
-            {/* Gestión de Usuarios - Admin */}
+            {/* Gestión de Usuarios */}
             <button
               onClick={() => navigate("/admin/users")}
               className="text-left p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl hover:bg-emerald-500/20 transition group"
             >
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
                   <Users className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
                   <p className="font-medium text-white group-hover:text-emerald-300 transition">Gestión de Usuarios</p>
-                  <p className="text-xs text-emerald-400">Módulo Administración</p>
+                  <p className="text-xs text-emerald-400">Administración</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-400">
-                Usuarios, roles y permisos
-              </p>
             </button>
 
-            {/* Seguridad - Incidentes */}
+            {/* Seguridad */}
             <button
               onClick={() => navigate("/seguridad")}
               className="text-left p-4 bg-red-500/10 border border-red-500/30 rounded-xl hover:bg-red-500/20 transition group"
             >
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
                   <AlertTriangle className="w-5 h-5 text-red-400" />
                 </div>
                 <div>
                   <p className="font-medium text-white group-hover:text-red-300 transition">Seguridad</p>
-                  <p className="text-xs text-red-400">Módulo Seguridad</p>
+                  <p className="text-xs text-red-400">Incidentes</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-400">
-                Incidentes y alertas de seguridad
-              </p>
             </button>
 
-            {/* Tecnología - Fichas Técnicas */}
+            {/* Tecnología */}
             <button
               onClick={() => navigate("/tecnologia")}
               className="text-left p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl hover:bg-amber-500/20 transition group"
             >
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
                   <Zap className="w-5 h-5 text-amber-400" />
                 </div>
                 <div>
                   <p className="font-medium text-white group-hover:text-amber-300 transition">Tecnología</p>
-                  <p className="text-xs text-amber-400">Módulo Tecnología</p>
+                  <p className="text-xs text-amber-400">Fichas técnicas</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-400">
-                Fichas técnicas y versiones
-              </p>
             </button>
           </div>
         </div>
