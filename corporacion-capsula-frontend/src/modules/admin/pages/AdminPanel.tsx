@@ -323,61 +323,55 @@ const AdminPanel = () => {
               </div>
             </button>
 
-            {/* Auditoría - Solo Admin */}
-            {canAccessModule(["Administrador"]) && (
-              <button
-                onClick={() => navigate("/auditoria")}
-                className="text-left p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl hover:bg-purple-500/20 transition group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                    <Bell className="w-5 h-5 text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-white group-hover:text-purple-300 transition">Auditoría</p>
-                    <p className="text-xs text-purple-400">Logs del sistema</p>
-                  </div>
+            {/* Auditoría - Todos los roles (solo Admin puede ver logs reales por protección de ruta) */}
+            <button
+              onClick={() => navigate("/auditoria")}
+              className="text-left p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl hover:bg-purple-500/20 transition group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                  <Bell className="w-5 h-5 text-purple-400" />
                 </div>
-              </button>
-            )}
-
-            {/* Biométrico - Seguridad y Admin */}
-            {canAccessModule(["Especialista en seguridad", "Administrador"]) && (
-              <button
-                onClick={() => navigate("/biometrico")}
-                className="text-left p-4 bg-pink-500/10 border border-pink-500/30 rounded-xl hover:bg-pink-500/20 transition group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-pink-400" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-white group-hover:text-pink-300 transition">Verificación Biométrica</p>
-                    <p className="text-xs text-pink-400">Acceso seguro</p>
-                  </div>
-                </div>
-              </button>
-            )}
-
-            {/* Proyectos I+D - Directora de Innovación y Admin (en desarrollo) */}
-            {canAccessModule(["Directora de Innovacion", "Administrador"]) && (
-              <div
-                className="text-left p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-xl opacity-60 cursor-not-allowed relative"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center">
-                    <BarChart3 className="w-5 h-5 text-indigo-400" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-400">Proyectos I+D</p>
-                    <p className="text-xs text-indigo-400">En desarrollo</p>
-                  </div>
-                </div>
-                <div className="absolute top-2 right-2">
-                  <Lock className="w-3 h-3 text-gray-500" />
+                <div>
+                  <p className="font-medium text-white group-hover:text-purple-300 transition">Auditoría</p>
+                  <p className="text-xs text-purple-400">Logs del sistema</p>
                 </div>
               </div>
-            )}
+            </button>
+
+            {/* Biométrico - Todos los roles */}
+            <button
+              onClick={() => navigate("/biometrico")}
+              className="text-left p-4 bg-pink-500/10 border border-pink-500/30 rounded-xl hover:bg-pink-500/20 transition group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-pink-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-white group-hover:text-pink-300 transition">Verificación Biométrica</p>
+                  <p className="text-xs text-pink-400">Acceso seguro</p>
+                </div>
+              </div>
+            </button>
+
+            {/* Proyectos I+D - Todos los roles (en desarrollo) */}
+            <div
+              className="text-left p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-xl opacity-60 cursor-not-allowed relative"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-indigo-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-400">Proyectos I+D</p>
+                  <p className="text-xs text-indigo-400">En desarrollo</p>
+                </div>
+              </div>
+              <div className="absolute top-2 right-2">
+                <Lock className="w-3 h-3 text-gray-500" />
+              </div>
+            </div>
 
             {/* Gestión de Usuarios - Solo Admin (en desarrollo) */}
             {isAdmin && (
@@ -399,45 +393,41 @@ const AdminPanel = () => {
               </div>
             )}
 
-            {/* Seguridad - Especialista en Seguridad y Admin (en desarrollo) */}
-            {canAccessModule(["Especialista en seguridad", "Administrador"]) && (
-              <div
-                className="text-left p-4 bg-red-500/5 border border-red-500/20 rounded-xl opacity-60 cursor-not-allowed relative"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center">
-                    <AlertTriangle className="w-5 h-5 text-red-400" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-400">Seguridad</p>
-                    <p className="text-xs text-red-400">En desarrollo</p>
-                  </div>
+            {/* Seguridad - Todos los roles (en desarrollo) */}
+            <div
+              className="text-left p-4 bg-red-500/5 border border-red-500/20 rounded-xl opacity-60 cursor-not-allowed relative"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-red-400" />
                 </div>
-                <div className="absolute top-2 right-2">
-                  <Lock className="w-3 h-3 text-gray-500" />
+                <div>
+                  <p className="font-medium text-gray-400">Seguridad</p>
+                  <p className="text-xs text-red-400">En desarrollo</p>
                 </div>
               </div>
-            )}
+              <div className="absolute top-2 right-2">
+                <Lock className="w-3 h-3 text-gray-500" />
+              </div>
+            </div>
 
-            {/* Tecnología - Experto en Tecnología y Admin (en desarrollo) */}
-            {canAccessModule(["Experto en tecnologia extraterrestre", "Administrador"]) && (
-              <div
-                className="text-left p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl opacity-60 cursor-not-allowed relative"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-amber-500/10 rounded-lg flex items-center justify-center">
-                    <Zap className="w-5 h-5 text-amber-400" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-400">Tecnología</p>
-                    <p className="text-xs text-amber-400">En desarrollo</p>
-                  </div>
+            {/* Tecnología - Todos los roles (en desarrollo) */}
+            <div
+              className="text-left p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl opacity-60 cursor-not-allowed relative"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-500/10 rounded-lg flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-amber-400" />
                 </div>
-                <div className="absolute top-2 right-2">
-                  <Lock className="w-3 h-3 text-gray-500" />
+                <div>
+                  <p className="font-medium text-gray-400">Tecnología</p>
+                  <p className="text-xs text-amber-400">En desarrollo</p>
                 </div>
               </div>
-            )}
+              <div className="absolute top-2 right-2">
+                <Lock className="w-3 h-3 text-gray-500" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -454,21 +444,27 @@ const AdminPanel = () => {
             >
               Ver Inventario Completo
             </button>
+            {/* Todos los roles pueden crear artefactos y usuarios */}
+            <button
+              onClick={() => navigate("/create")}
+              className="bg-emerald-400/20 border border-emerald-400 text-emerald-300 py-2 px-6 rounded-lg hover:bg-emerald-400/30 transition"
+            >
+              Crear Artefacto
+            </button>
+            <button
+              onClick={() => navigate("/register")}
+              className="bg-purple-400/20 border border-purple-400 text-purple-300 py-2 px-6 rounded-lg hover:bg-purple-400/30 transition"
+            >
+              Crear Usuario
+            </button>
+            {/* Solo Admin puede gestionar roles */}
             {isAdmin && (
-              <>
-                <button
-                  onClick={() => navigate("/create")}
-                  className="bg-emerald-400/20 border border-emerald-400 text-emerald-300 py-2 px-6 rounded-lg hover:bg-emerald-400/30 transition"
-                >
-                  Crear Artefacto
-                </button>
-                <button
-                  onClick={() => navigate("/register")}
-                  className="bg-purple-400/20 border border-purple-400 text-purple-300 py-2 px-6 rounded-lg hover:bg-purple-400/30 transition"
-                >
-                  Crear Usuario
-                </button>
-              </>
+              <button
+                onClick={() => navigate("/admin/users")}
+                className="bg-amber-400/20 border border-amber-400 text-amber-300 py-2 px-6 rounded-lg hover:bg-amber-400/30 transition"
+              >
+                Gestionar Roles
+              </button>
             )}
           </div>
         </div>
