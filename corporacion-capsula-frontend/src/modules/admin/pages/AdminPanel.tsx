@@ -356,78 +356,70 @@ const AdminPanel = () => {
             </button>
 
             {/* Proyectos I+D - Todos los roles (en desarrollo) */}
-            <div
-              className="text-left p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-xl opacity-60 cursor-not-allowed relative"
+            <button
+              onClick={() => navigate("/proyectos")}
+              className="text-left p-4 bg-indigo-500/10 border border-indigo-500/30 rounded-xl hover:bg-indigo-500/20 transition group opacity-80"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center">
                   <BarChart3 className="w-5 h-5 text-indigo-400" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-400">Proyectos I+D</p>
+                  <p className="font-medium text-white group-hover:text-indigo-300 transition">Proyectos I+D</p>
                   <p className="text-xs text-indigo-400">En desarrollo</p>
                 </div>
               </div>
-              <div className="absolute top-2 right-2">
-                <Lock className="w-3 h-3 text-gray-500" />
-              </div>
-            </div>
+            </button>
 
-            {/* Gestión de Usuarios - Solo Admin (en desarrollo) */}
+            {/* Gestión de Usuarios - Solo Admin */}
             {isAdmin && (
-              <div
-                className="text-left p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl opacity-60 cursor-not-allowed relative"
+              <button
+                onClick={() => navigate("/admin/users")}
+                className="text-left p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl hover:bg-emerald-500/20 transition group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
                     <Users className="w-5 h-5 text-emerald-400" />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-400">Gestión de Usuarios</p>
-                    <p className="text-xs text-emerald-400">En desarrollo</p>
+                    <p className="font-medium text-white group-hover:text-emerald-300 transition">Gestión de Usuarios</p>
+                    <p className="text-xs text-emerald-400">Administrar roles</p>
                   </div>
                 </div>
-                <div className="absolute top-2 right-2">
-                  <Lock className="w-3 h-3 text-gray-500" />
-                </div>
-              </div>
+              </button>
             )}
 
             {/* Seguridad - Todos los roles (en desarrollo) */}
-            <div
-              className="text-left p-4 bg-red-500/5 border border-red-500/20 rounded-xl opacity-60 cursor-not-allowed relative"
+            <button
+              onClick={() => navigate("/seguridad")}
+              className="text-left p-4 bg-red-500/10 border border-red-500/30 rounded-xl hover:bg-red-500/20 transition group opacity-80"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
                   <AlertTriangle className="w-5 h-5 text-red-400" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-400">Seguridad</p>
+                  <p className="font-medium text-white group-hover:text-red-300 transition">Seguridad</p>
                   <p className="text-xs text-red-400">En desarrollo</p>
                 </div>
               </div>
-              <div className="absolute top-2 right-2">
-                <Lock className="w-3 h-3 text-gray-500" />
-              </div>
-            </div>
+            </button>
 
             {/* Tecnología - Todos los roles (en desarrollo) */}
-            <div
-              className="text-left p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl opacity-60 cursor-not-allowed relative"
+            <button
+              onClick={() => navigate("/tecnologia")}
+              className="text-left p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl hover:bg-amber-500/20 transition group opacity-80"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-500/10 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
                   <Zap className="w-5 h-5 text-amber-400" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-400">Tecnología</p>
+                  <p className="font-medium text-white group-hover:text-amber-300 transition">Tecnología</p>
                   <p className="text-xs text-amber-400">En desarrollo</p>
                 </div>
               </div>
-              <div className="absolute top-2 right-2">
-                <Lock className="w-3 h-3 text-gray-500" />
-              </div>
-            </div>
+            </button>
           </div>
         </div>
 

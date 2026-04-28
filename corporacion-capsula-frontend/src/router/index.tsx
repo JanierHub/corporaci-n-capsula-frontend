@@ -13,6 +13,9 @@ import Auditoria from "../modules/auditoria/pages/Auditoria"
 import BusquedaAvanzada from "../modules/busqueda/pages/BusquedaAvanzada"
 import Biometrico from "../modules/biometrico/pages/Biometrico"
 import MiCapsula from "../modules/usuario/pages/MiCapsula"
+import ProyectosID from "../modules/proyectos/pages/ProyectosID"
+import Seguridad from "../modules/seguridad/pages/Seguridad"
+import Tecnologia from "../modules/tecnologia/pages/Tecnologia"
 
 import MainLayout from "../layouts/MainLayout"
 import RequireAuth from "./RequireAuth"
@@ -54,6 +57,11 @@ export const AppRouter = () => {
           <Route path="/busqueda-avanzada" element={<BusquedaAvanzada />} />
           <Route path="/biometrico" element={<Biometrico />} />
           <Route path="/mi-capsula" element={<MiCapsula />} />
+          
+          {/* Módulos en desarrollo - placeholders */}
+          <Route path="/proyectos" element={<ProyectosID />} />
+          <Route path="/seguridad" element={<Seguridad />} />
+          <Route path="/tecnologia" element={<Tecnologia />} />
         </Route>
 
       </Routes>
