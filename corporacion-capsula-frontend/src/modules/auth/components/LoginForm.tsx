@@ -8,6 +8,7 @@ import { loginUser } from "../services/authService"
 import { persistSessionFromLoginResponse, SESSION_USER_NAME_KEY, getStoredAccessToken } from "../utils/roles"
 import { prefetchCache } from "../../../services/optimisticCache"
 import { getArtefactos } from "../../artefactos/services/artefactoService"
+import { getAllRoles, getAllUsers } from "../services/userService"
 import { API_URL } from "../../../config/api"
 
 const LoginForm = () => {
@@ -32,17 +33,22 @@ const LoginForm = () => {
       // Esto permite que la navegación sea instantánea
       const token = getStoredAccessToken()
       if (token) {
-        // Cargar artefactos en background
-        prefetchCache("artefactos", getArtefactos).catch(console.error)
+        console.log("🚀 Iniciando prefetch de datos...")
         
-        // Cargar usuarios en background (si es admin)
-        prefetchCache("users", async () => {
-          const res = await fetch(`${API_URL}/user`, {
-            headers: { "Authorization": `Bearer ${token}` }
-          })
-          if (!res.ok) throw new Error("Error cargando usuarios")
-          return res.json()
-        }).catch(console.error)
+        // Cargar artefactos en background
+        prefetchCache("artefactos", getArtefactos)
+          .then(() => console.log("✅ Artefactos precargados"))
+          .catch((e) => console.error("❌ Error precargando artefactos:", e))
+        
+        // Cargar roles en background
+        prefetchCache("roles", getAllRoles)
+          .then(() => console.log("✅ Roles precargados"))
+          .catch((e) => console.error("❌ Error precargando roles:", e))
+        
+        // Cargar usuarios en background
+        prefetchCache("users", getAllUsers)
+          .then(() => console.log("✅ Usuarios precargados"))
+          .catch((e) => console.error("❌ Error precargando usuarios:", e))
       }
       
       setError("")
