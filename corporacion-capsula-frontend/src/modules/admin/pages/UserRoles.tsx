@@ -70,8 +70,9 @@ const UserRoles = () => {
         u.id_usuario === userId ? { ...u, id_rol: newRoleId } : u
       ))
     } catch (err) {
-      console.error(err)
-      alert("Error al actualizar el rol")
+      console.error("Error actualizando rol:", err)
+      const errorMsg = err instanceof Error ? err.message : "Error desconocido"
+      alert(`Error al actualizar el rol:\n${errorMsg}`)
       // Recargar datos si falló
       await loadData()
     } finally {

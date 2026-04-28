@@ -90,18 +90,29 @@ export const createUser = async (userData: CreateUserData): Promise<User> => {
 
 // HU-04: Gestión de roles - Actualizar rol de usuario
 export const updateUserRole = async (userId: number, newRoleId: number): Promise<User> => {
-  const res = await fetch(`${API_URL}/user/${userId}/role`, {
+  const url = `${API_URL}/user/${userId}/role`;
+  const body = JSON.stringify({ id_rol: newRoleId });
+  const headers = getAuthHeaders();
+  
+  console.log("🔄 PATCH updateUserRole:", { url, body, headers });
+  
+  const res = await fetch(url, {
     method: "PATCH",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ id_rol: newRoleId }),
+    headers,
+    body,
   });
   
+  console.log("📡 Response status:", res.status, res.statusText);
+  
   if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`Error ${res.status}: ${error}`);
+    const errorText = await res.text();
+    console.error("❌ Error response:", errorText);
+    throw new Error(`Error ${res.status}: ${errorText || res.statusText}`);
   }
   
-  return res.json();
+  const data = await res.json();
+  console.log("✅ Success response:", data);
+  return data;
 };
 
 // Obtener todos los roles disponibles
