@@ -90,7 +90,8 @@ export const createUser = async (userData: CreateUserData): Promise<User> => {
 
 // HU-04: Gestión de roles - Actualizar rol de usuario
 export const updateUserRole = async (userId: number, newRoleId: number): Promise<User> => {
-  const url = `${API_URL}/user/${userId}/role`;
+  // CORREGIDO: Endpoint es /user/${id} no /user/${id}/role
+  const url = `${API_URL}/user/${userId}`;
   const body = JSON.stringify({ id_rol: newRoleId });
   const headers = getAuthHeaders();
   
