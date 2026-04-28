@@ -16,17 +16,18 @@ export const getStoredUserName = () => localStorage.getItem(SESSION_USER_NAME_KE
 
 export const getPersistedRole = () => localStorage.getItem(PERSISTED_ROLE_KEY)
 
-/** Sesión iniciada en esta app: nombre + token o rol (usa rol persistente como fallback). */
+/** Sesión iniciada en esta app: requiere nombre de usuario + token/rol activo.
+ * El rol persistente (PERSISTED_ROLE_KEY) solo se usa para recuperar el rol al iniciar sesión,
+ * NO para mantener la sesión activa después de logout.
+ */
 export const isAuthenticated = (): boolean => {
   const user = getStoredUserName()?.trim()
-  if (!user) {
-    // Si no hay usuario, verificar si hay rol persistente (para sesiones restauradas)
-    const persistedRole = getPersistedRole()?.trim()
-    return Boolean(persistedRole)
-  }
+  if (!user) return false // Se requiere nombre de usuario para sesión activa
+  
   if (getStoredAccessToken()) return true
-  const role = getStoredUserRole()?.trim() ?? getPersistedRole()?.trim()
-  return Boolean(role)
+  
+  const role = getStoredUserRole()?.trim()
+  return Boolean(role) // Solo rol de sesión activa, NO el persistido
 }
 
 export const isAdministrator = () =>

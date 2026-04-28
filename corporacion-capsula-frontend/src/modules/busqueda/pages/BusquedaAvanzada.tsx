@@ -1,43 +1,21 @@
 /**
- * 🚧 MÓDULO EN PROGRESO - DESARROLLADO POR JUAN
- * 
- * 🔍 BÚSQUEDA AVANZADA - FRONTEND ONLY
- * 
- * ✅ YA IMPLEMENTADO:
+ * � MÓDULO BÚSQUEDA AVANZADA - DESARROLLADO POR JUAN
+ * 📂 Archivo: src/modules/busqueda/pages/BusquedaAvanzada.tsx
+ * 🎨 Colores: azul (#3b82f6) / cyan (#06b6d4)
+ *
+ * ✅ FUNCIONALIDADES:
  * - Consumo de datos con useArtefactos() (contexto)
- * - Filtros: búsqueda por texto, categorías (checkbox), origen, inventor
+ * - Filtros: búsqueda por texto, categorías, origen, inventor
  * - Sliders de peligrosidad y confidencialidad (rango 1-10)
- * - Ordenamiento por nombre, peligrosidad, confidencialidad, inventor
- * - Vista lista y vista grid (toggle)
+ * - Ordenamiento por múltiples criterios
+ * - Vista lista y vista grid
  * - Paginación (10/25/50 resultados por página)
  * - Estadísticas de resultados
- * - Diseño azul/cyan con estilo Capsule Corp
- *  * - Autocompletado mientras escribe (sugerencias dropdown)
- * - Búsqueda difusa con fuse.js (encuentra similitudes: "caps" → "cápsula")
- * - Filtro por rango de fechas (date picker desde/hasta)
- * - Exportar resultados a CSV (generar archivo descargable)
+ * - Autocompletado mientras escribe
+ * - Búsqueda difusa con fuse.js
+ * - Filtro por rango de fechas
+ * - Exportar resultados a CSV
  * - Atajo de teclado Ctrl+K para buscar
- * 
- * ⚠️ NOTA: Guardar búsquedas favoritas REQUIERE backend para persistir entre dispositivos.
- * Por ahora, NO implementar guardar favoritos (solo local no sirve).
- * 
- * 💡 NOTA: Todo es frontend usando datos del contexto.
- * NO requiere backend. NO crear nuevos endpoints.
- * 
- * 📂 Archivo: src/modules/busqueda/pages/BusquedaAvanzada.tsx
- * 🎨 Colores: azul (#3b82f6) / cyan (#06b6d4)
- */
- /* 
- * 🔧 POR IMPLEMENTAR:
-
-
-/**
- * 🔍 BÚSQUEDA AVANZADA - FRONTEND ONLY
- * 📂 Archivo: src/modules/busqueda/pages/BusquedaAvanzada.tsx
- * 🎨 Colores: azul (#3b82f6) / cyan (#06b6d4)
- */
-/**YO creo que ya esta este modulo no se que mas faltariaaaa por el momento voy a dejar los comentarios por si algo 
- * y ya falta que me lo revises tu 
  */
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react"

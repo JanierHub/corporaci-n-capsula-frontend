@@ -1,14 +1,14 @@
 /**
- * 🚧 MÓDULO EN PROGRESO - DESARROLLADO POR CARLOS
+ * � MÓDULO AUDITORÍA - DESARROLLADO POR CARLOS
  * 📂 Archivo: src/modules/auditoria/pages/Auditoria.tsx
  *
- * ✅ COMPLETADO:
+ * ✅ FUNCIONALIDADES:
  *  - Filtros funcionales (usuario, acción, tabla, fecha)
  *  - Paginación real
  *  - Exportar CSV
  *  - Gráficos reales con recharts (BarChart)
  *  - Vista detalle expandible (JSON)
- *  - Simulación de eventos de auditoría en tiempo real
+ *  - Simulación de eventos de auditoría en tiempo real (Admin)
  *  - Filtro por rango de fechas funcional
  *  - Gráfico de actividad por usuario
  */
