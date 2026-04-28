@@ -1,21 +1,11 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 
 import bg from "../../../assets/4.webp"
 import logo from "../../../assets/7.webp"
 import capsule from "../../../assets/13.gif"
-import { createUser } from "../services/authService"
+import { createUser, getAllRoles, checkUserExists, type Role } from "../services/userService"
 import { getStoredUserRole, isAdministrator } from "../utils/roles"
-
-const ROLE_OPTIONS = [
-  { value: 1, label: "Administrador" },
-  { value: 2, label: "Directora de Innovacion" },
-  { value: 3, label: "Experto en tecnologia extraterrestre" },
-  { value: 4, label: "Especialista en seguridad" },
-  { value: 5, label: "Inventor/Tester" },
-  { value: 6, label: "Gestor de proyectos" },
-  { value: 7, label: "Usuario" },
-]
 
 const RegisterForm = () => {
   const navigate = useNavigate()
@@ -23,13 +13,70 @@ const RegisterForm = () => {
   const [name, setName] = useState("")
   const [age, setAge] = useState("")
   const [password, setPassword] = useState("")
+  const [biometria, setBiometria] = useState("")
+  const [adn, setAdn] = useState("")
   const [role, setRole] = useState("7")
+  const [roles, setRoles] = useState<Role[]>([])
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [checkingName, setCheckingName] = useState(false)
+  const [nameExists, setNameExists] = useState(false)
+
+  // Cargar roles dinámicamente desde la API (HU-01)
+  useEffect(() => {
+    const loadRoles = async () => {
+      try {
+        const rolesData = await getAllRoles()
+        setRoles(rolesData)
+        // Seleccionar el primer rol por defecto
+        if (rolesData.length > 0) {
+          setRole(String(rolesData[0].id_rol))
+        }
+      } catch (err) {
+        console.error("Error cargando roles:", err)
+      }
+    }
+    loadRoles()
+  }, [])
+
+  // Validar si el nombre ya existe (con debounce)
+  useEffect(() => {
+    if (!name.trim()) {
+      setNameExists(false)
+      return
+    }
+
+    const timeoutId = setTimeout(async () => {
+      setCheckingName(true)
+      try {
+        const exists = await checkUserExists(name.trim())
+        setNameExists(exists)
+        if (exists) {
+          setError("Este nombre de usuario ya existe")
+        } else {
+          setError("")
+        }
+      } catch (err) {
+        console.error("Error validando nombre:", err)
+      } finally {
+        setCheckingName(false)
+      }
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+  }, [name])
 
   const handleSubmit = async () => {
+    // Validaciones
     if (!name || !age || !password) {
-      setError("Debes completar todos los campos")
+      setError("Debes completar todos los campos obligatorios (nombre, edad, contraseña)")
+      setSuccess("")
+      return
+    }
+
+    if (nameExists) {
+      setError("Este nombre de usuario ya existe. Elige otro.")
       setSuccess("")
       return
     }
@@ -42,33 +89,41 @@ const RegisterForm = () => {
     }
 
     if (password.length < 8) {
-      setError("La contrasena debe tener minimo 8 caracteres.")
+      setError("La contraseña debe tener minimo 8 caracteres.")
       setSuccess("")
       return
     }
 
+    setLoading(true)
     try {
       await createUser({
         nombre: name.trim(),
         edad: parsedAge,
-        contraseña: password,
-        rol: Number(role),
+        password: password,
+        biometria: biometria.trim() || undefined,
+        adn: adn.trim() || undefined,
+        id_rol: Number(role),
       })
 
+      // Limpiar formulario
       setName("")
       setAge("")
       setPassword("")
-      setRole("7")
+      setBiometria("")
+      setAdn("")
+      setRole(roles.length > 0 ? String(roles[0].id_rol) : "7")
       setError("")
-      setSuccess("Usuario creado correctamente.")
+      setSuccess("Usuario creado exitosamente. Puedes crear otro o volver al panel.")
     } catch (err) {
       console.error("Error al crear usuario:", err)
       setSuccess("")
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudo crear el usuario."
+          : "No se pudo crear el usuario. Intente nuevamente."
       )
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -144,17 +199,25 @@ const RegisterForm = () => {
             El backend crea el usuario usando la cookie del administrador actual.
           </p>
 
-          <input
-            className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-            placeholder="Nombre"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            autoComplete="name"
-          />
+          <div className="relative">
+            <input
+              className={`w-full mb-1 p-3 bg-black/60 border ${nameExists ? 'border-red-400' : 'border-cyan-400'} text-white rounded-lg`}
+              placeholder="Nombre *"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoComplete="name"
+            />
+            {checkingName && (
+              <span className="absolute right-3 top-3 text-xs text-gray-400">Verificando...</span>
+            )}
+            {nameExists && (
+              <p className="text-red-400 text-xs mb-2">Este nombre ya existe</p>
+            )}
+          </div>
 
           <input
             className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-            placeholder="Edad"
+            placeholder="Edad *"
             value={age}
             onChange={(e) => setAge(e.target.value)}
             inputMode="numeric"
@@ -163,22 +226,41 @@ const RegisterForm = () => {
           <input
             type="password"
             className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
-            placeholder="Contrasena"
+            placeholder="Contraseña * (min. 8 caracteres)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="new-password"
           />
 
+          <input
+            className="w-full mb-4 p-3 bg-black/60 border border-gray-600 text-white rounded-lg text-sm"
+            placeholder="Biometría (opcional)"
+            value={biometria}
+            onChange={(e) => setBiometria(e.target.value)}
+          />
+
+          <input
+            className="w-full mb-4 p-3 bg-black/60 border border-gray-600 text-white rounded-lg text-sm"
+            placeholder="ADN (opcional)"
+            value={adn}
+            onChange={(e) => setAdn(e.target.value)}
+          />
+
+          <label className="text-gray-400 text-sm mb-1 block">Rol *</label>
           <select
             className="w-full mb-5 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
             value={role}
             onChange={(e) => setRole(e.target.value)}
           >
-            {ROLE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.value} - {option.label}
-              </option>
-            ))}
+            {roles.length === 0 ? (
+              <option value="7">Cargando roles...</option>
+            ) : (
+              roles.map((r) => (
+                <option key={r.id_rol} value={r.id_rol}>
+                  {r.nombre_rol} ({r.nivel_seguridad})
+                </option>
+              ))
+            )}
           </select>
 
           {error ? (
@@ -190,10 +272,11 @@ const RegisterForm = () => {
           ) : null}
 
           <button
-            className="w-full bg-cyan-400 text-black p-3 rounded-lg font-bold"
+            className="w-full bg-cyan-400 text-black p-3 rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleSubmit}
+            disabled={loading || nameExists}
           >
-            Crear usuario
+            {loading ? "Creando..." : "Crear usuario"}
           </button>
 
           <p className="text-gray-300 text-sm text-center mt-4">

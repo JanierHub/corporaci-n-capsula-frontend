@@ -1,123 +1,95 @@
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, Users, Shield, AlertCircle } from "lucide-react"
+import { ArrowLeft, Users, Shield, AlertCircle, Search, Filter, RefreshCw } from "lucide-react"
 import { useState, useEffect } from "react"
-import { getStoredAccessToken } from "../../auth/utils/roles"
-import { API_URL } from "../../../config/api"
-
-// Roles exactos de PostgreSQL (tabla: rol)
-// id_rol | nombre_rol | nivel_seguridad
-const ROLES_DB = [
-  { id_rol: 1, nombre_rol: "Administrador", nivel_seguridad: "Nivel 5 - Acceso Total" },
-  { id_rol: 2, nombre_rol: "Directora de Innovacion", nivel_seguridad: "Nivel 4 - Estratégico" },
-  { id_rol: 3, nombre_rol: "Experto en tecnologia extraterrestre", nivel_seguridad: "Nivel 5 - Clasificado Especial" },
-  { id_rol: 4, nombre_rol: "Especialista en seguridad", nivel_seguridad: "Nivel 4 - Táctico" },
-  { id_rol: 5, nombre_rol: "Inventor/Tester", nivel_seguridad: "Nivel 3 - Operativo" },
-  { id_rol: 6, nombre_rol: "Gestor de proyectos", nivel_seguridad: "Nivel 3 - Operativo" },
-  { id_rol: 7, nombre_rol: "Usuario", nivel_seguridad: "Nivel 1 - Básico" },
-] as const
-
-interface User {
-  id_usuario: number
-  nombre: string
-  edad?: number
-  biometria?: string
-  adn?: string
-  password?: string
-  estado?: boolean
-  id_rol: number  // FK a tabla rol
-}
+import { getAllUsers, updateUserRole, getAllRoles, type User, type Role } from "../../auth/services/userService"
+import { getStoredAccessToken, getStoredUserName } from "../../auth/utils/roles"
 
 const UserRoles = () => {
   const navigate = useNavigate()
   const [users, setUsers] = useState<User[]>([])
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([])
+  const [roles, setRoles] = useState<Role[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [updating, setUpdating] = useState<number | null>(null)
+  
+  // HU-05: Filtros
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedRole, setSelectedRole] = useState<number | "all">("all")
+  
+  // Obtener usuario actual para no permitir auto-modificación
+  const currentUserName = getStoredUserName()
 
   useEffect(() => {
-    fetchUsers()
+    loadData()
   }, [])
 
-  const fetchUsers = async () => {
+  // HU-05: Aplicar filtros cuando cambian
+  useEffect(() => {
+    let filtered = users
+    
+    // Filtro por nombre
+    if (searchTerm) {
+      filtered = filtered.filter(u => 
+        u.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+    
+    // Filtro por rol
+    if (selectedRole !== "all") {
+      filtered = filtered.filter(u => u.id_rol === selectedRole)
+    }
+    
+    setFilteredUsers(filtered)
+  }, [users, searchTerm, selectedRole])
+
+  const loadData = async () => {
     try {
-      const token = getStoredAccessToken()
-      console.log("🔍 Fetching users from:", `${API_URL}/user`)
-      console.log("🔑 Token presente:", !!token)
-      
-      const res = await fetch(`${API_URL}/user`, {
-        headers: token ? { "Authorization": `Bearer ${token}` } : {}
-      })
-      
-      console.log("📡 Response status:", res.status)
-      
-      if (!res.ok) {
-        const errorText = await res.text()
-        console.error("❌ Error response:", errorText)
-        throw new Error(`Error ${res.status}: ${errorText}`)
-      }
-      
-      const rawData = await res.json()
-      console.log("📦 Raw data received:", rawData)
-      
-      // Extraer array de la respuesta (puede ser {data: [...]} o directo [...])
-      const extractUsers = (raw: unknown): User[] => {
-        if (Array.isArray(raw)) return raw as User[]
-        if (raw && typeof raw === "object") {
-          const obj = raw as Record<string, unknown>
-          // Buscar propiedades comunes que contengan el array
-          const possibleArrays = ["data", "users", "usuarios", "rows", "items", "results"]
-          for (const key of possibleArrays) {
-            if (Array.isArray(obj[key])) return obj[key] as User[]
-          }
-        }
-        return []
-      }
-      
-      const users = extractUsers(rawData)
-      console.log("✅ Users extracted:", users.length)
-      
-      if (users.length === 0) {
-        console.warn("⚠️ No users found in response")
-      }
-      
-      setUsers(users)
+      setLoading(true)
+      const [usersData, rolesData] = await Promise.all([
+        getAllUsers(),
+        getAllRoles()
+      ])
+      setUsers(usersData)
+      setFilteredUsers(usersData)
+      setRoles(rolesData)
     } catch (err) {
-      console.error("❌ Error cargando usuarios:", err)
-      setError(`No se pudieron cargar los usuarios: ${err instanceof Error ? err.message : "Error desconocido"}`)
+      console.error("Error cargando datos:", err)
+      setError(`No se pudieron cargar los datos: ${err instanceof Error ? err.message : "Error desconocido"}`)
     } finally {
       setLoading(false)
     }
   }
 
-  const updateUserRole = async (userId: number, newRoleId: number) => {
+  const handleUpdateRole = async (userId: number, newRoleId: number) => {
     try {
       setUpdating(userId)
-      const token = getStoredAccessToken()
-      const res = await fetch(`${API_URL}/user/${userId}/role`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { "Authorization": `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({ role: newRoleId })
-      })
-      if (!res.ok) throw new Error("Error actualizando rol")
-      await fetchUsers()
-      alert("Rol actualizado correctamente")
+      await updateUserRole(userId, newRoleId)
+      // Actualización optimistica: actualizar localmente primero
+      setUsers(prev => prev.map(u => 
+        u.id_usuario === userId ? { ...u, id_rol: newRoleId } : u
+      ))
     } catch (err) {
-      alert("Error al actualizar el rol")
       console.error(err)
+      alert("Error al actualizar el rol")
+      // Recargar datos si falló
+      await loadData()
     } finally {
       setUpdating(null)
     }
   }
 
   const getRoleName = (roleId: number) => {
-    return ROLES_DB.find(r => r.id_rol === roleId)?.nombre_rol || `Rol ${roleId}`
+    return roles.find(r => r.id_rol === roleId)?.nombre_rol || `Rol ${roleId}`
   }
 
   const getRoleSecurityLevel = (roleId: number) => {
-    return ROLES_DB.find(r => r.id_rol === roleId)?.nivel_seguridad || ""
+    return roles.find(r => r.id_rol === roleId)?.nivel_seguridad || ""
+  }
+  
+  // HU-04: Verificar si el usuario puede modificar su propio rol
+  const canModifyOwnRole = (userName: string) => {
+    return userName.toLowerCase() !== currentUserName?.toLowerCase()
   }
 
   return (
@@ -157,7 +129,7 @@ const UserRoles = () => {
             Roles del Sistema
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {ROLES_DB.map(rol => (
+            {roles.map((rol: Role) => (
               <div key={rol.id_rol} className="flex items-center gap-2 text-sm">
                 <span className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400 text-xs font-bold">
                   {rol.id_rol}
@@ -169,21 +141,63 @@ const UserRoles = () => {
           </div>
         </div>
 
-        {/* Lista de usuarios */}
+        {/* HU-05: Filtros y búsqueda */}
+        <div className="bg-black/40 border border-gray-700 rounded-xl p-4 mb-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Buscar por nombre..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-cyan-400"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="w-5 h-5 text-gray-400" />
+              <select
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value === "all" ? "all" : Number(e.target.value))}
+                className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+              >
+                <option value="all">Todos los roles</option>
+                {roles.map(r => (
+                  <option key={r.id_rol} value={r.id_rol}>
+                    {r.nombre_rol}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              onClick={loadData}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-400 hover:bg-purple-500/30 transition"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Actualizar
+            </button>
+          </div>
+        </div>
+
+        {/* HU-05: Lista de usuarios con filtros */}
         <div className="bg-black/40 border border-gray-700 rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-gray-700 bg-gray-900/50">
-            <h3 className="text-lg font-semibold text-cyan-400">Usuarios</h3>
+          <div className="p-4 border-b border-gray-700 bg-gray-900/50 flex justify-between items-center">
+            <h3 className="text-lg font-semibold text-cyan-400">
+              Usuarios ({filteredUsers.length} de {users.length})
+            </h3>
           </div>
 
           {loading ? (
             <div className="p-8 text-center text-gray-500">Cargando usuarios...</div>
           ) : error ? (
             <div className="p-8 text-center text-red-400">{error}</div>
-          ) : users.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">No hay usuarios registrados</div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              {users.length === 0 ? "No hay usuarios registrados" : "No se encontraron usuarios con los filtros aplicados"}
+            </div>
           ) : (
             <div className="divide-y divide-gray-800">
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <div key={user.id_usuario} className="p-4 flex items-center justify-between hover:bg-white/5 transition">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center">
@@ -193,25 +207,28 @@ const UserRoles = () => {
                     </div>
                     <div>
                       <p className="font-medium text-white">{user.nombre}</p>
-                      <p className="text-xs text-gray-500">ID: {user.id_usuario}</p>
+                      <p className="text-xs text-gray-500">
+                        ID: {user.id_usuario} {user.edad && `• ${user.edad} años`}
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <span className="text-sm text-gray-400 hidden md:inline">
-                      Rol actual: <span className="text-purple-400">{getRoleName(user.id_rol)}</span>
+                      Rol: <span className="text-purple-400">{getRoleName(user.id_rol)}</span>
                     </span>
                     
+                    {/* HU-04: No permitir cambiar el propio rol */}
                     <select
                       value={user.id_rol}
-                      onChange={(e) => updateUserRole(user.id_usuario, Number(e.target.value))}
-                      disabled={updating === user.id_usuario}
-                      className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400 disabled:opacity-50"
-                      title={getRoleSecurityLevel(user.id_rol)}
+                      onChange={(e) => handleUpdateRole(user.id_usuario, Number(e.target.value))}
+                      disabled={updating === user.id_usuario || !canModifyOwnRole(user.nombre)}
+                      className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title={!canModifyOwnRole(user.nombre) ? "No puedes cambiar tu propio rol" : getRoleSecurityLevel(user.id_rol)}
                     >
-                      {ROLES_DB.map(rol => (
+                      {roles.map(rol => (
                         <option key={rol.id_rol} value={rol.id_rol}>
-                          {rol.nombre_rol} ({rol.nivel_seguridad})
+                          {rol.nombre_rol}
                         </option>
                       ))}
                     </select>
