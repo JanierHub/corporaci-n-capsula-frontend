@@ -8,6 +8,7 @@ import ArtefactoCreate from "../modules/artefactos/pages/ArtefactoCreate"
 import ArtefactoEdit from "../modules/artefactos/pages/ArtefactoEdit"
 import ArtefactoEliminar from "../modules/artefactos/pages/ArtefactoEliminar"
 import AdminPanel from "../modules/admin/pages/AdminPanel"
+import UserRoles from "../modules/admin/pages/UserRoles"
 import Auditoria from "../modules/auditoria/pages/Auditoria"
 import BusquedaAvanzada from "../modules/busqueda/pages/BusquedaAvanzada"
 import Biometrico from "../modules/biometrico/pages/Biometrico"
@@ -37,26 +38,21 @@ export const AppRouter = () => {
             <Route path="/artefactos/delete/:id" element={<ArtefactoEliminar />} />
           </Route>
           
-          {/* Admin Panel - Todos los usuarios autenticados pueden ver, pero con restricciones */}
+          {/* Admin Panel - Todos los usuarios autenticados pueden ver */}
           <Route path="/admin" element={<AdminPanel />} />
+          
+          {/* Gestión de Usuarios y Roles - Solo Admin */}
+          <Route element={<RequireAdmin />}>
+            <Route path="/admin/users" element={<UserRoles />} />
+          </Route>
           
           {/* Acceso denegado */}
           <Route path="/acceso-denegado" element={<AccesoDenegado />} />
           
-          {/* Auditoría - Solo Administrador */}
-          <Route element={<RequireRole allowedRoles={["Administrador"]} moduleName="Auditoría" />}>
-            <Route path="/auditoria" element={<Auditoria />} />
-          </Route>
-          
-          {/* Búsqueda Avanzada - Accesible para todos los roles (Innovación, Tecnología, etc.) */}
+          {/* TODOS los módulos funcionales accesibles para TODOS los roles */}
+          <Route path="/auditoria" element={<Auditoria />} />
           <Route path="/busqueda-avanzada" element={<BusquedaAvanzada />} />
-          
-          {/* Biométrico - Solo Especialista en Seguridad y Administrador */}
-          <Route element={<RequireRole allowedRoles={["Especialista en seguridad", "Administrador"]} moduleName="Verificación Biométrica" />}>
-            <Route path="/biometrico" element={<Biometrico />} />
-          </Route>
-          
-          {/* Mi Cápsula - Todos los usuarios autenticados */}
+          <Route path="/biometrico" element={<Biometrico />} />
           <Route path="/mi-capsula" element={<MiCapsula />} />
         </Route>
 

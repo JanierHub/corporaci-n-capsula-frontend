@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom"
 import videoBg from "../../../assets/14.mp4"
 import capsule from "../../../assets/13.gif"
 import logo from "../../../assets/5.gif"
-import { getStoredUserName, getStoredUserRole, isAdministrator, canViewArtifacts, isProjectManager, isInnovationDirector } from "../../auth/utils/roles"
+import { getStoredUserName, getStoredUserRole, isAdministrator, canViewArtifacts } from "../../auth/utils/roles"
 
 const Home = () => {
   const navigate = useNavigate()
@@ -10,8 +10,6 @@ const Home = () => {
   const userName = getStoredUserName()
   const userRole = getStoredUserRole()
   const isAdmin = isAdministrator()
-  const isManager = isProjectManager()
-  const isDirector = isInnovationDirector()
 
   return (
     <div className="relative w-full h-screen overflow-hidden text-white">
@@ -71,73 +69,70 @@ const Home = () => {
                 </button>
               )}
 
-              {(isAdmin || isManager || isDirector) && (
-                <button
-                  onClick={() => navigate("/admin")}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-lg font-bold hover:scale-105 transition shadow-lg shadow-purple-500/30"
-                >
-                  Panel de Administración
-                </button>
-              )}
+              <button
+                onClick={() => navigate("/admin")}
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-lg font-bold hover:scale-105 transition shadow-lg shadow-purple-500/30"
+              >
+                Panel de Administración
+              </button>
 
-              {isAdmin ? (
-                <>
-                  <button
-                    onClick={() => navigate("/create")}
-                    className="border border-cyan-400 py-3 rounded-lg hover:bg-cyan-400 hover:text-black transition"
-                  >
-                    Crear Artefacto
-                  </button>
+              <button
+                onClick={() => navigate("/create")}
+                className="border border-cyan-400 py-3 rounded-lg hover:bg-cyan-400 hover:text-black transition"
+              >
+                Crear Artefacto
+              </button>
 
-                  <button
-                    onClick={() => navigate("/register")}
-                    className="border border-emerald-400 py-3 rounded-lg hover:bg-emerald-400 hover:text-black transition"
-                  >
-                    Crear Usuario
-                  </button>
-                </>
-              ) : (
-                <div className="border border-cyan-400/40 py-3 px-4 rounded-lg text-sm text-gray-300 bg-black/20">
-                  Las acciones de crear artefactos y crear usuarios estan reservadas al rol Administrador.
-                </div>
-              )}
+              <button
+                onClick={() => navigate("/register")}
+                className="border border-emerald-400 py-3 rounded-lg hover:bg-emerald-400 hover:text-black transition"
+              >
+                Crear Usuario
+              </button>
 
-              {/* ===== MÓDULOS DEL EQUIPO ===== */}
+              {/* ===== MÓDULOS DEL SISTEMA ===== */}
               <div className="mt-4 pt-4 border-t border-gray-600/30">
-                <p className="text-gray-400 text-xs mb-3 text-center">Módulos en Desarrollo</p>
+                <p className="text-gray-400 text-xs mb-3 text-center">Módulos del Sistema</p>
                 
-                {/* Búsqueda Avanzada - Juan */}
+                {/* Búsqueda Avanzada - Funcional */}
                 <button
                   onClick={() => navigate("/busqueda-avanzada")}
                   className="w-full border border-blue-400 py-3 rounded-lg hover:bg-blue-400 hover:text-black transition mb-2 flex items-center justify-center gap-2"
                 >
                   <span>🔍</span>
                   <span>Búsqueda Avanzada</span>
-                  <span className="text-xs bg-blue-400/20 px-2 py-0.5 rounded text-blue-300">Juan</span>
+                  <span className="text-xs bg-blue-400/20 px-2 py-0.5 rounded text-blue-300">Funcional</span>
                 </button>
-                <p className="text-blue-400/50 text-xs text-center mb-3">Módulo en desarrollo por Juan</p>
                 
-                {/* Auditoría - Carlos */}
+                {/* Auditoría - Solo Admin ve los logs */}
                 <button
                   onClick={() => navigate("/auditoria")}
                   className="w-full border border-purple-400 py-3 rounded-lg hover:bg-purple-400 hover:text-black transition mb-2 flex items-center justify-center gap-2"
                 >
                   <span>📊</span>
                   <span>Auditoría del Sistema</span>
-                  <span className="text-xs bg-purple-400/20 px-2 py-0.5 rounded text-purple-300">Carlos</span>
+                  <span className="text-xs bg-purple-400/20 px-2 py-0.5 rounded text-purple-300">{isAdmin ? 'Admin' : 'Ver'}</span>
                 </button>
-                <p className="text-purple-400/50 text-xs text-center mb-3">Módulo en desarrollo por Carlos</p>
                 
-                {/* Biométrico - Carlos y Juan */}
+                {/* Biométrico - Funcional */}
                 <button
                   onClick={() => navigate("/biometrico")}
                   className="w-full border border-pink-400 py-3 rounded-lg hover:bg-pink-400 hover:text-black transition mb-2 flex items-center justify-center gap-2"
                 >
                   <span>🧬</span>
                   <span>Verificación Biométrica</span>
-                  <span className="text-xs bg-pink-400/20 px-2 py-0.5 rounded text-pink-300">Carlos & Juan</span>
+                  <span className="text-xs bg-pink-400/20 px-2 py-0.5 rounded text-pink-300">Funcional</span>
                 </button>
-                <p className="text-pink-400/50 text-xs text-center">Módulo en desarrollo por Carlos y Juan</p>
+                
+                {/* Mi Cápsula */}
+                <button
+                  onClick={() => navigate("/mi-capsula")}
+                  className="w-full border border-rose-400 py-3 rounded-lg hover:bg-rose-400 hover:text-black transition flex items-center justify-center gap-2"
+                >
+                  <span>🎒</span>
+                  <span>Mi Cápsula</span>
+                  <span className="text-xs bg-rose-400/20 px-2 py-0.5 rounded text-rose-300">Perfil</span>
+                </button>
               </div>
 
             </div>
