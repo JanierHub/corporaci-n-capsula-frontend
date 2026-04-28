@@ -63,9 +63,27 @@ const UserRoles = () => {
   }
 
   const handleUpdateRole = async (userId: number, newRoleId: number) => {
+    // 🔍 DEBUG: Validar datos antes del request
+    console.log("🔄 [handleUpdateRole] Datos recibidos:", { userId, newRoleId, typeUserId: typeof userId, typeNewRoleId: typeof newRoleId })
+    
+    // Validar que el ID no sea undefined o null
+    if (!userId || userId === undefined || Number.isNaN(userId)) {
+      console.error("❌ [handleUpdateRole] userId es inválido:", userId)
+      alert("Error: ID de usuario no válido")
+      return
+    }
+    
+    // Validar que el rol no sea undefined o null
+    if (!newRoleId || newRoleId === undefined || Number.isNaN(newRoleId)) {
+      console.error("❌ [handleUpdateRole] newRoleId es inválido:", newRoleId)
+      alert("Error: ID de rol no válido")
+      return
+    }
+    
     try {
       setUpdating(userId)
-      await updateUserRole(userId, newRoleId)
+      console.log("📡 [handleUpdateRole] Llamando updateUserRole con:", { userId: Number(userId), newRoleId: Number(newRoleId) })
+      await updateUserRole(Number(userId), Number(newRoleId))
       // Actualización optimistica: actualizar localmente primero
       setUsers(prev => prev.map(u => 
         u.id_usuario === userId ? { ...u, id_rol: newRoleId } : u
@@ -226,7 +244,16 @@ const UserRoles = () => {
                     {/* HU-04: No permitir cambiar el propio rol */}
                     <select
                       value={user.id_rol}
-                      onChange={(e) => handleUpdateRole(user.id_usuario, Number(e.target.value))}
+                      onChange={(e) => {
+                        const selectedRoleId = Number(e.target.value)
+                        console.log("📝 [onChange] Usuario:", user.nombre, "id_usuario:", user.id_usuario, "nuevo rol:", selectedRoleId)
+                        if (!user.id_usuario) {
+                          console.error("❌ [onChange] user.id_usuario es undefined!", user)
+                          alert("Error: No se pudo obtener el ID del usuario")
+                          return
+                        }
+                        handleUpdateRole(user.id_usuario, selectedRoleId)
+                      }}
                       disabled={updating === user.id_usuario || !canModifyOwnRole(user.nombre)}
                       className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400 disabled:opacity-50 disabled:cursor-not-allowed"
                       title={!canModifyOwnRole(user.nombre) ? "No puedes cambiar tu propio rol" : getRoleSecurityLevel(user.id_rol)}

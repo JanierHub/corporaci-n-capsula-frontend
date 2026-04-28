@@ -90,12 +90,20 @@ export const createUser = async (userData: CreateUserData): Promise<User> => {
 
 // HU-04: Gestión de roles - Actualizar rol de usuario
 export const updateUserRole = async (userId: number, newRoleId: number): Promise<User> => {
-  // CORREGIDO: Endpoint es /user/${id} no /user/${id}/role
-  const url = `${API_URL}/user/${userId}`;
-  const body = JSON.stringify({ id_rol: newRoleId });
+  // Validar que los IDs no sean undefined
+  if (userId === undefined || userId === null || Number.isNaN(userId)) {
+    throw new Error(`ID de usuario inválido: ${userId}`);
+  }
+  if (newRoleId === undefined || newRoleId === null || Number.isNaN(newRoleId)) {
+    throw new Error(`ID de rol inválido: ${newRoleId}`);
+  }
+  
+  // Endpoint: /api/v1/user/{id}/role
+  const url = `${API_URL}/user/${Number(userId)}/role`;
+  const body = JSON.stringify({ id_rol: Number(newRoleId) });
   const headers = getAuthHeaders();
   
-  console.log("🔄 PATCH updateUserRole:", { url, body, headers });
+  console.log("🔄 PATCH updateUserRole:", { url, body, userId, newRoleId });
   
   const res = await fetch(url, {
     method: "PATCH",
