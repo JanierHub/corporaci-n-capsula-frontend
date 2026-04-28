@@ -16,6 +16,8 @@ import MiCapsula from "../modules/usuario/pages/MiCapsula"
 import MainLayout from "../layouts/MainLayout"
 import RequireAuth from "./RequireAuth"
 import RequireAdmin from "./RequireAdmin"
+import RequireRole from "./RequireRole"
+import AccesoDenegado from "./AccesoDenegado"
 
 export const AppRouter = () => {
   return (
@@ -35,19 +37,26 @@ export const AppRouter = () => {
             <Route path="/artefactos/delete/:id" element={<ArtefactoEliminar />} />
           </Route>
           
-          {/* Admin Panel - Outside MainLayout for full-screen experience */}
+          {/* Admin Panel - Todos los usuarios autenticados pueden ver, pero con restricciones */}
           <Route path="/admin" element={<AdminPanel />} />
           
-          {/* Admin-only modules */}
-          <Route element={<RequireAdmin />}>
+          {/* Acceso denegado */}
+          <Route path="/acceso-denegado" element={<AccesoDenegado />} />
+          
+          {/* Auditoría - Solo Administrador */}
+          <Route element={<RequireRole allowedRoles={["Administrador"]} moduleName="Auditoría" />}>
             <Route path="/auditoria" element={<Auditoria />} />
           </Route>
           
-          {/* Team Modules - Outside MainLayout */}
+          {/* Búsqueda Avanzada - Accesible para todos los roles (Innovación, Tecnología, etc.) */}
           <Route path="/busqueda-avanzada" element={<BusquedaAvanzada />} />
-          <Route path="/biometrico" element={<Biometrico />} />
           
-          {/* User Personal Capsule - Outside MainLayout */}
+          {/* Biométrico - Solo Especialista en Seguridad y Administrador */}
+          <Route element={<RequireRole allowedRoles={["Especialista en seguridad", "Administrador"]} moduleName="Verificación Biométrica" />}>
+            <Route path="/biometrico" element={<Biometrico />} />
+          </Route>
+          
+          {/* Mi Cápsula - Todos los usuarios autenticados */}
           <Route path="/mi-capsula" element={<MiCapsula />} />
         </Route>
 

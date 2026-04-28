@@ -5,7 +5,8 @@ import {
   getStoredUserRole, 
   isAdministrator, 
   isProjectManager,
-  isInnovationDirector
+  isInnovationDirector,
+  normalizeRole
 } from "../../auth/utils/roles"
 import CategoryDashboard from "../components/CategoryDashboard"
 import AlertsPanel from "../components/AlertsPanel"
@@ -22,7 +23,8 @@ import {
   Bell,
   GitCompare,
   Search,
-  Shield
+  Shield,
+  Lock
 } from "lucide-react"
 
 const AdminPanel = () => {
@@ -32,27 +34,24 @@ const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState<"dashboard" | "gestion" | "alerts" | "compare">("gestion")
   
   const userName = getStoredUserName()
-  const userRole = getStoredUserRole()
+  const userRole = getStoredUserRole() || "Usuario"
   const isAdmin = isAdministrator()
   const isManager = isProjectManager()
   const isDirector = isInnovationDirector()
   
-  // Verificar acceso (Admin, Project Manager o Innovation Director)
-  if (!isAdmin && !isManager && !isDirector) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center text-white">
-        <div className="text-center">
-          <h2 className="text-2xl text-red-400 mb-4">Acceso Restringido</h2>
-          <p className="text-gray-400">Solo Administradores, Gestores y Directora de Innovación pueden acceder al panel.</p>
-          <button 
-            onClick={() => navigate("/home")}
-            className="mt-4 bg-cyan-400 text-black px-4 py-2 rounded"
-          >
-            Volver al inicio
-          </button>
-        </div>
-      </div>
-    )
+  // Normalizar rol para comparaciones
+  const normalizedRole = normalizeRole(userRole)
+  
+  // Función para verificar si un módulo está disponible para el rol actual
+  const canAccessModule = (allowedRoles: string[]) => {
+    if (isAdmin) return true // Admin accede a todo
+    return allowedRoles.some(r => normalizeRole(r) === normalizedRole)
+  }
+  
+  // Módulos que están implementados y funcionales
+  const isImplemented = (path: string) => {
+    const implemented = ["/artefactos", "/busqueda-avanzada", "/auditoria", "/biometrico", "/mi-capsula", "/create", "/register"]
+    return implemented.includes(path)
   }
   
   // ===== ESTADÍSTICAS REALES DE ARTEFACTOS =====
@@ -268,14 +267,15 @@ const AdminPanel = () => {
           </div>
         )}
 
-        {/* ===== MÓDULOS DEL SISTEMA ===== */}
+        {/* ===== MÓDULOS DEL SISTEMA - Filtrados por Rol ===== */}
         <div className="bg-black/40 border border-gray-500/30 rounded-xl p-6 backdrop-blur-sm mb-6">
           <h3 className="text-xl font-bold text-gray-300 mb-4 flex items-center gap-2">
             <Users className="w-5 h-5" />
             Módulos del Sistema
+            {isAdmin && <span className="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded ml-2">Admin - Acceso Total</span>}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {/* Inventario / Artefactos */}
+            {/* Inventario / Artefactos - Todos los roles */}
             <button
               onClick={() => navigate("/artefactos")}
               className="text-left p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-xl hover:bg-cyan-500/20 transition group"
@@ -291,7 +291,7 @@ const AdminPanel = () => {
               </div>
             </button>
 
-            {/* Búsqueda Avanzada */}
+            {/* Búsqueda Avanzada - Todos los roles */}
             <button
               onClick={() => navigate("/busqueda-avanzada")}
               className="text-left p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl hover:bg-blue-500/20 transition group"
@@ -307,39 +307,7 @@ const AdminPanel = () => {
               </div>
             </button>
 
-            {/* Auditoría */}
-            <button
-              onClick={() => navigate("/auditoria")}
-              className="text-left p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl hover:bg-purple-500/20 transition group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                  <Bell className="w-5 h-5 text-purple-400" />
-                </div>
-                <div>
-                  <p className="font-medium text-white group-hover:text-purple-300 transition">Auditoría</p>
-                  <p className="text-xs text-purple-400">Logs del sistema</p>
-                </div>
-              </div>
-            </button>
-
-            {/* Biométrico */}
-            <button
-              onClick={() => navigate("/biometrico")}
-              className="text-left p-4 bg-pink-500/10 border border-pink-500/30 rounded-xl hover:bg-pink-500/20 transition group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-pink-400" />
-                </div>
-                <div>
-                  <p className="font-medium text-white group-hover:text-pink-300 transition">Verificación Biométrica</p>
-                  <p className="text-xs text-pink-400">Acceso seguro</p>
-                </div>
-              </div>
-            </button>
-
-            {/* Mi Cápsula */}
+            {/* Mi Cápsula - Todos los usuarios autenticados */}
             <button
               onClick={() => navigate("/mi-capsula")}
               className="text-left p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl hover:bg-rose-500/20 transition group"
@@ -355,69 +323,121 @@ const AdminPanel = () => {
               </div>
             </button>
 
-            {/* Proyectos I+D */}
-            <button
-              onClick={() => navigate("/proyectos")}
-              className="text-left p-4 bg-indigo-500/10 border border-indigo-500/30 rounded-xl hover:bg-indigo-500/20 transition group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-indigo-400" />
+            {/* Auditoría - Solo Admin */}
+            {canAccessModule(["Administrador"]) && (
+              <button
+                onClick={() => navigate("/auditoria")}
+                className="text-left p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl hover:bg-purple-500/20 transition group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                    <Bell className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-white group-hover:text-purple-300 transition">Auditoría</p>
+                    <p className="text-xs text-purple-400">Logs del sistema</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-white group-hover:text-indigo-300 transition">Proyectos I+D</p>
-                  <p className="text-xs text-indigo-400">Investigación</p>
-                </div>
-              </div>
-            </button>
+              </button>
+            )}
 
-            {/* Gestión de Usuarios */}
-            <button
-              onClick={() => navigate("/admin/users")}
-              className="text-left p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl hover:bg-emerald-500/20 transition group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                  <Users className="w-5 h-5 text-emerald-400" />
+            {/* Biométrico - Seguridad y Admin */}
+            {canAccessModule(["Especialista en seguridad", "Administrador"]) && (
+              <button
+                onClick={() => navigate("/biometrico")}
+                className="text-left p-4 bg-pink-500/10 border border-pink-500/30 rounded-xl hover:bg-pink-500/20 transition group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-pink-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-white group-hover:text-pink-300 transition">Verificación Biométrica</p>
+                    <p className="text-xs text-pink-400">Acceso seguro</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-white group-hover:text-emerald-300 transition">Gestión de Usuarios</p>
-                  <p className="text-xs text-emerald-400">Administración</p>
-                </div>
-              </div>
-            </button>
+              </button>
+            )}
 
-            {/* Seguridad */}
-            <button
-              onClick={() => navigate("/seguridad")}
-              className="text-left p-4 bg-red-500/10 border border-red-500/30 rounded-xl hover:bg-red-500/20 transition group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-red-400" />
+            {/* Proyectos I+D - Directora de Innovación y Admin (en desarrollo) */}
+            {canAccessModule(["Directora de Innovacion", "Administrador"]) && (
+              <div
+                className="text-left p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-xl opacity-60 cursor-not-allowed relative"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center">
+                    <BarChart3 className="w-5 h-5 text-indigo-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-400">Proyectos I+D</p>
+                    <p className="text-xs text-indigo-400">En desarrollo</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-white group-hover:text-red-300 transition">Seguridad</p>
-                  <p className="text-xs text-red-400">Incidentes</p>
+                <div className="absolute top-2 right-2">
+                  <Lock className="w-3 h-3 text-gray-500" />
                 </div>
               </div>
-            </button>
+            )}
 
-            {/* Tecnología */}
-            <button
-              onClick={() => navigate("/tecnologia")}
-              className="text-left p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl hover:bg-amber-500/20 transition group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-amber-400" />
+            {/* Gestión de Usuarios - Solo Admin (en desarrollo) */}
+            {isAdmin && (
+              <div
+                className="text-left p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl opacity-60 cursor-not-allowed relative"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center">
+                    <Users className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-400">Gestión de Usuarios</p>
+                    <p className="text-xs text-emerald-400">En desarrollo</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-white group-hover:text-amber-300 transition">Tecnología</p>
-                  <p className="text-xs text-amber-400">Fichas técnicas</p>
+                <div className="absolute top-2 right-2">
+                  <Lock className="w-3 h-3 text-gray-500" />
                 </div>
               </div>
-            </button>
+            )}
+
+            {/* Seguridad - Especialista en Seguridad y Admin (en desarrollo) */}
+            {canAccessModule(["Especialista en seguridad", "Administrador"]) && (
+              <div
+                className="text-left p-4 bg-red-500/5 border border-red-500/20 rounded-xl opacity-60 cursor-not-allowed relative"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 text-red-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-400">Seguridad</p>
+                    <p className="text-xs text-red-400">En desarrollo</p>
+                  </div>
+                </div>
+                <div className="absolute top-2 right-2">
+                  <Lock className="w-3 h-3 text-gray-500" />
+                </div>
+              </div>
+            )}
+
+            {/* Tecnología - Experto en Tecnología y Admin (en desarrollo) */}
+            {canAccessModule(["Experto en tecnologia extraterrestre", "Administrador"]) && (
+              <div
+                className="text-left p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl opacity-60 cursor-not-allowed relative"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-amber-500/10 rounded-lg flex items-center justify-center">
+                    <Zap className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-400">Tecnología</p>
+                    <p className="text-xs text-amber-400">En desarrollo</p>
+                  </div>
+                </div>
+                <div className="absolute top-2 right-2">
+                  <Lock className="w-3 h-3 text-gray-500" />
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

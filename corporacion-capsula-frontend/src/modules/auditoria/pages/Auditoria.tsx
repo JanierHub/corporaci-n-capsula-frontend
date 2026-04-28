@@ -1,21 +1,22 @@
 /**
- * � MÓDULO AUDITORÍA - DESARROLLADO POR CARLOS
+ * MÓDULO AUDITORÍA - DESARROLLADO POR CARLOS
  * 📂 Archivo: src/modules/auditoria/pages/Auditoria.tsx
  *
  * ✅ FUNCIONALIDADES:
+ *  - Conexión real con backend API
  *  - Filtros funcionales (usuario, acción, tabla, fecha)
  *  - Paginación real
  *  - Exportar CSV
  *  - Gráficos reales con recharts (BarChart)
  *  - Vista detalle expandible (JSON)
- *  - Simulación de eventos de auditoría en tiempo real (Admin)
  *  - Filtro por rango de fechas funcional
  *  - Gráfico de actividad por usuario
  */
 
 import { useNavigate } from "react-router-dom"
-import { useMemo, useState, useCallback, useRef } from "react"
+import { useMemo, useState, useCallback, useEffect } from "react"
 import { useArtefactos } from "../../../context/ArtefactosContext"
+import { getAllAuditLogs, type AuditLog } from "../services/auditService"
 import {
   BarChart,
   Bar,
@@ -29,60 +30,10 @@ import {
 // ── Tipos ──────────────────────────────────────────────────────────────────
 type Accion = "CREATE" | "UPDATE" | "DELETE" | "LOGIN"
 
-interface LogEntry {
-  id_registro: number
-  nombre_tabla: string
-  accion: Accion
-  id_usuario: number
-  id_artefacto: number
-  valor_anterior: string | null
-  valor_nuevo: string | null
-  fecha_operacion: string
-}
+interface LogEntry extends AuditLog {}
 
-// ── Datos iniciales (solo tabla artefactos) ────────────────────────────────
-const logsIniciales: LogEntry[] = [
-  {
-    id_registro: 1,
-    nombre_tabla: "artefactos",
-    accion: "CREATE",
-    id_usuario: 101,
-    id_artefacto: 1,
-    valor_anterior: null,
-    valor_nuevo: '{"nombre": "Capsule Corp #1", "categoria": "tecnologia"}',
-    fecha_operacion: "2026-04-21 15:38:22",
-  },
-  {
-    id_registro: 2,
-    nombre_tabla: "artefactos",
-    accion: "UPDATE",
-    id_usuario: 102,
-    id_artefacto: 5,
-    valor_anterior: '{"nivelPeligrosidad": 3}',
-    valor_nuevo: '{"nivelPeligrosidad": 6}',
-    fecha_operacion: "2026-04-21 14:15:10",
-  },
-  {
-    id_registro: 3,
-    nombre_tabla: "artefactos",
-    accion: "UPDATE",
-    id_usuario: 103,
-    id_artefacto: 12,
-    valor_anterior: '{"estado": "activo"}',
-    valor_nuevo: '{"estado": "obsoleto"}',
-    fecha_operacion: "2026-04-21 11:22:45",
-  },
-  {
-    id_registro: 4,
-    nombre_tabla: "artefactos",
-    accion: "DELETE",
-    id_usuario: 101,
-    id_artefacto: 8,
-    valor_anterior: '{"nombre": "Nube Voladora"}',
-    valor_nuevo: null,
-    fecha_operacion: "2026-04-20 09:45:33",
-  },
-]
+// Datos vacíos iniciales - se cargan desde el backend
+const logsIniciales: LogEntry[] = []
 
 const accionBadge: Record<Accion, { bg: string; text: string; border: string; icon: string }> = {
   CREATE: { bg: "#0d2e1a", text: "#4ade80", border: "#166534",  icon: "⊕" },
@@ -106,12 +57,10 @@ const COLORES_USUARIO: Record<number, string> = {
 
 const ITEMS_POR_PAGINA = 10
 
-// ── Utilidades de simulación ────────────────────────────────────────────────
+// ── Utilidades de fecha ────────────────────────────────────────────────
 function ahora() {
   return new Date().toISOString().replace("T", " ").slice(0, 19)
 }
-
-let nextId = 100
 
 // ── Tooltip personalizado recharts ─────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -139,8 +88,10 @@ export default function Auditoria() {
   const navigate = useNavigate()
   const { artefactos } = useArtefactos()
 
-  // Estado de logs (mutable para simulación desde Admin)
+  // Estado de logs desde el backend
   const [logs, setLogs] = useState<LogEntry[]>(logsIniciales)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   // Filtros
   const [busqueda,     setBusqueda]     = useState("")
@@ -155,44 +106,24 @@ export default function Auditoria() {
   const [expandido,    setExpandido]    = useState<number | null>(null)
   const [pagina,       setPagina]       = useState(1)
 
-  // ── Simulación de eventos (desde Admin) ───────────────────────────────────
-  const agregarLog = useCallback((accion: Accion, tabla: string, usuario: number, valAnterior?: string, valNuevo?: string) => {
-    const nuevo: LogEntry = {
-      id_registro: nextId++,
-      nombre_tabla: tabla,
-      accion,
-      id_usuario: usuario,
-      id_artefacto: Math.floor(Math.random() * 200),
-      valor_anterior: valAnterior ?? null,
-      valor_nuevo: valNuevo ?? null,
-      fecha_operacion: ahora(),
+  // ── Cargar logs desde el backend ───────────────────────────────────────────
+  useEffect(() => {
+    const loadLogs = async () => {
+      try {
+        setLoading(true)
+        const data = await getAllAuditLogs()
+        setLogs(data)
+        setError(null)
+      } catch (err) {
+        console.error("Error cargando auditoría:", err)
+        setError("No se pudieron cargar los logs de auditoría. Verifica que el backend esté corriendo.")
+      } finally {
+        setLoading(false)
+      }
     }
-    setLogs(prev => [nuevo, ...prev])
-    setPagina(1)
+
+    loadLogs()
   }, [])
-
-  const usuariosDemo = [101, 102, 103]
-  const randomUser = () => usuariosDemo[Math.floor(Math.random() * 3)]
-
-  const simularCrear = () => agregarLog(
-    "CREATE", "artefactos", randomUser(),
-    undefined, `{"nombre": "Nuevo Artefacto #${nextId}", "categoria": "tech"}`
-  )
-
-  const simularActualizar = () => agregarLog(
-    "UPDATE", "artefactos", randomUser(),
-    `{"nivelPeligrosidad": 3}`, `{"nivelPeligrosidad": 7}`
-  )
-
-  const simularEliminar = () => agregarLog(
-    "DELETE", "artefactos", randomUser(),
-    `{"nombre": "Artefacto Eliminado #${Math.floor(Math.random() * 100)}"}`, undefined
-  )
-
-  const simularLogin = () => agregarLog(
-    "LOGIN", "sesiones", randomUser(),
-    undefined, `{"ip": "192.168.1.${Math.floor(Math.random()*254)}", "navegador": "Chrome"}`
-  )
 
   // ── Filtrado ──────────────────────────────────────────────────────────────
   const logsFiltrados = useMemo(() => {
@@ -211,9 +142,9 @@ export default function Auditoria() {
       const matchUsuario =
         filtroUsuario === "Todos los usuarios" || log.id_usuario === Number(filtroUsuario.replace("#", ""))
 
-      const fechaLog = log.fecha_operacion.slice(0, 10)
-      const matchDesde = !fechaDesde || fechaLog >= fechaDesde
-      const matchHasta = !fechaHasta || fechaLog <= fechaHasta
+      const fechaLog = log.fecha_operacion?.slice(0, 10) || ""
+      const matchDesde = !fechaDesde || !fechaLog || fechaLog >= fechaDesde
+      const matchHasta = !fechaHasta || !fechaLog || fechaLog <= fechaHasta
 
       return matchBusqueda && matchAccion && matchTabla && matchUsuario && matchDesde && matchHasta
     })
@@ -228,21 +159,29 @@ export default function Auditoria() {
   // ── Estadísticas ──────────────────────────────────────────────────────────
   const stats = useMemo(() => ({
     totalEventos:     logs.length,
-    eventosHoy:       logs.filter(l => l.fecha_operacion.startsWith(new Date().toISOString().slice(0,10))).length,
-    usuariosActivos:  new Set(logs.map(l => l.id_usuario)).size,
+    eventosHoy:       logs.filter(l => l.fecha_operacion?.startsWith(new Date().toISOString().slice(0,10))).length,
+    usuariosActivos:  new Set(logs.map(l => l.id_usuario).filter(Boolean)).size,
     accionesCriticas: logs.filter(l => l.accion === "DELETE").length,
   }), [logs])
 
   // ── Datos para gráficos recharts ──────────────────────────────────────────
   const datosAccionTipo = useMemo(() => {
     const conteo: Record<string, number> = {}
-    logs.forEach(l => { conteo[l.accion] = (conteo[l.accion] ?? 0) + 1 })
+    logs.forEach(l => { 
+      if (l.accion) {
+        conteo[l.accion] = (conteo[l.accion] ?? 0) + 1 
+      }
+    })
     return Object.entries(conteo).map(([tipo, val]) => ({ tipo, val }))
   }, [logs])
 
   const datosActividadUsuario = useMemo(() => {
     const conteo: Record<number, number> = {}
-    logs.forEach(l => { conteo[l.id_usuario] = (conteo[l.id_usuario] ?? 0) + 1 })
+    logs.forEach(l => { 
+      if (l.id_usuario) {
+        conteo[l.id_usuario] = (conteo[l.id_usuario] ?? 0) + 1 
+      }
+    })
     return Object.entries(conteo)
       .map(([usuario, val]) => ({ usuario: `#${usuario}`, val, id: Number(usuario) }))
       .sort((a, b) => b.val - a.val)
@@ -252,9 +191,11 @@ export default function Auditoria() {
     const dias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"]
     const conteo: Record<string, number> = {}
     logs.forEach(l => {
-      const d = new Date(l.fecha_operacion.replace(" ", "T"))
-      const dia = dias[d.getDay()]
-      conteo[dia] = (conteo[dia] ?? 0) + 1
+      if (l.fecha_operacion) {
+        const d = new Date(l.fecha_operacion.replace(" ", "T"))
+        const dia = dias[d.getDay()]
+        conteo[dia] = (conteo[dia] ?? 0) + 1
+      }
     })
     return dias.filter(d => conteo[d]).map(dia => ({ dia, val: conteo[dia] ?? 0 }))
   }, [logs])
@@ -263,7 +204,7 @@ export default function Auditoria() {
   const exportarCSV = () => {
     const cab   = "Fecha,Usuario,Accion,Tabla,ArtfactoId,ValorAnterior,ValorNuevo\n"
     const filas = logsFiltrados
-      .map((l) => `${l.fecha_operacion},Usuario #${l.id_usuario},${l.accion},${l.nombre_tabla},${l.id_artefacto},"${l.valor_anterior ?? ""}","${l.valor_nuevo ?? ""}"`)
+      .map((l) => `${l.fecha_operacion || ""},Usuario #${l.id_usuario || ""},${l.accion || ""},${l.nombre_tabla || ""},${l.id_artefacto || ""},"${l.valor_anterior ?? ""}","${l.valor_nuevo ?? ""}"`)
       .join("\n")
     const blob = new Blob([cab + filas], { type: "text/csv;charset=utf-8;" })
     const url  = URL.createObjectURL(blob)
@@ -444,7 +385,7 @@ export default function Auditoria() {
       <div style={s.topbar}>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <span style={s.logo}>Capsule Corp</span>
-          <button style={s.backBtn} onClick={() => navigate("/admin")}>← Volver al Admin</button>
+          <button style={s.backBtn} onClick={() => navigate("/admin")}>← Volver al Panel</button>
         </div>
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           <span style={{ fontSize: "11px", color: "#4b4b7a" }}>{logs.length} eventos</span>
@@ -492,50 +433,28 @@ export default function Auditoria() {
           ))}
         </div>
 
-        {/* ── Simulación de Eventos (Atajo desde Admin) ── */}
-        <div style={{
-          background: "#0d0d1f",
-          border: "1px solid #1e1e3a",
-          borderTop: "2px solid rgba(0,229,204,0.4)",
-          borderRadius: "8px",
-          padding: "12px 16px",
-          marginBottom: "16px",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
-            <span style={{ color: "#00e5cc", fontSize: "13px" }}>⚡</span>
-            <span style={{ fontSize: "12px", color: "#e2e2f0", fontWeight: 500 }}>Simulación de Eventos</span>
-            <span style={{
-              background: "#0d1f3a",
-              color: "#60a5fa",
-              fontSize: "10px",
-              padding: "2px 8px",
-              borderRadius: "12px",
-              border: "1px solid #1e40af",
-              marginLeft: "auto",
-            }}>Admin Tool</span>
+        {/* ── Estado de carga / error ── */}
+        {loading && (
+          <div style={{ textAlign: "center", padding: "40px", color: "#6b6b9a" }}>
+            Cargando logs de auditoría...
           </div>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" as const }}>
-            {[
-              { label: "⊕ Crear", fn: simularCrear, color: "#4ade80" },
-              { label: "⟳ Actualizar", fn: simularActualizar, color: "#c084fc" },
-              { label: "⚠ Eliminar", fn: simularEliminar, color: "#f87171" },
-              { label: "→ Login", fn: simularLogin, color: "#60a5fa" },
-            ].map(({ label, fn, color }) => (
-              <button
-                key={label}
-                style={{ ...s.simBtn, borderColor: color + "44", color }}
-                onClick={fn}
-                onMouseEnter={e => { (e.target as HTMLButtonElement).style.background = color + "18" }}
-                onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = "#07071a" }}
-              >
-                {label}
-              </button>
-            ))}
-            <span style={{ fontSize: "11px", color: "#4b4b7a", alignSelf: "center", marginLeft: "4px" }}>
-              ← Click para generar eventos de prueba
-            </span>
+        )}
+        
+        {error && (
+          <div style={{ 
+            background: "#2e0f0f", 
+            border: "1px solid #7f1d1d", 
+            borderRadius: "8px", 
+            padding: "16px", 
+            marginBottom: "16px",
+            color: "#f87171" 
+          }}>
+            <p style={{ margin: 0 }}>{error}</p>
+            <p style={{ margin: "8px 0 0 0", fontSize: "12px", color: "#9ca3af" }}>
+              Los datos mostrados son de demostración.
+            </p>
           </div>
-        </div>
+        )}
 
         {/* ── Filtros ── */}
         <div style={s.filterWrap}>

@@ -3,7 +3,7 @@ export const SESSION_USER_NAME_KEY = "userName"
 export const SESSION_ACCESS_TOKEN_KEY = "accessToken"
 export const PERSISTED_ROLE_KEY = "userRolePersisted" // No se borra al cerrar sesión
 
-const normalizeRole = (value: string | null) =>
+export const normalizeRole = (value: string | null) =>
   (value ?? "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
