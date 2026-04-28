@@ -51,6 +51,9 @@ const UserRoles = () => {
         getAllUsers(),
         getAllRoles()
       ])
+      console.log("📥 [UserRoles] Usuarios cargados:", usersData)
+      console.log("📥 [UserRoles] Primer usuario:", usersData[0])
+      console.log("📥 [UserRoles] ¿Tiene id_usuario?", usersData.map(u => ({ nombre: u.nombre, id_usuario: u.id_usuario, id: (u as any).id })))
       setUsers(usersData)
       setFilteredUsers(usersData)
       setRoles(rolesData)

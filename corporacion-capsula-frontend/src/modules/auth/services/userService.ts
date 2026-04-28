@@ -52,14 +52,27 @@ export const getAllUsers = async (): Promise<User[]> => {
   }
   
   const data = await res.json();
+  console.log("📥 [userService] Raw data from /user:", data);
+  
   // Normalizar respuesta (puede ser array directo o {data: [...]})
-  if (Array.isArray(data)) return data;
-  if (data && typeof data === "object") {
-    if (Array.isArray(data.data)) return data.data;
-    if (Array.isArray(data.users)) return data.users;
-    if (Array.isArray(data.usuarios)) return data.usuarios;
+  let users: any[] = [];
+  if (Array.isArray(data)) users = data;
+  else if (data && typeof data === "object") {
+    if (Array.isArray(data.data)) users = data.data;
+    else if (Array.isArray(data.users)) users = data.users;
+    else if (Array.isArray(data.usuarios)) users = data.usuarios;
   }
-  return [];
+  
+  // 🔧 Normalizar: si el backend devuelve 'id' en lugar de 'id_usuario'
+  const normalizedUsers = users.map(u => ({
+    ...u,
+    id_usuario: u.id_usuario ?? u.id ?? undefined,
+    id_rol: u.id_rol ?? u.rol_id ?? u.role_id ?? undefined,
+  }));
+  
+  console.log("📥 [userService] Normalized users:", normalizedUsers.map(u => ({ nombre: u.nombre, id_usuario: u.id_usuario })));
+  
+  return normalizedUsers;
 };
 
 // HU-05: Consultar usuarios - Obtener usuario por ID
