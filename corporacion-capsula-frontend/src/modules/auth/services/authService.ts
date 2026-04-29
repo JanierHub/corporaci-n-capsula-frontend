@@ -1,4 +1,5 @@
 import { API_URL } from "../../../config/api"
+import { getStoredAccessToken } from "../utils/roles"
 
 export type LoginBody = {
   userName: string
@@ -67,12 +68,20 @@ const extractErrorMessage = (payload: unknown, fallback: string) => {
 }
 
 const requestJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
+  const token = getStoredAccessToken()
+  
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    ...(init?.headers ?? {}),
+  }
+  
+  // Agregar Authorization header si hay token (y no es login)
+  if (token && !url.endsWith('/session')) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
   const response = await fetch(url, {
-    credentials: "include", // Enviar cookies para autenticación (backend usa req.cookies.token)
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
+    headers,
     ...init,
   })
 

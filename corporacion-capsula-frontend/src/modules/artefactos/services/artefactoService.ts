@@ -1,5 +1,5 @@
 import { API_URL } from "../../../config/api"
-import { getAuthCredentials } from "../../auth/utils/roles"
+import { getStoredAccessToken } from "../../auth/utils/roles"
 import { Artefacto } from "../types/artefacto.types"
 import { enriquecerArtefactoConImagen } from "../utils/artefactoImagenes"
 
@@ -214,13 +214,15 @@ const fetchWithTimeout = async (input: RequestInfo | URL, init?: RequestInit) =>
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
   const headers = new Headers(init?.headers)
   
-  // La autenticación se maneja por cookies, no por headers
-  // El backend lee el token desde req.cookies.token
+  // Autenticación con Authorization header (Bearer token)
+  const token = getStoredAccessToken()
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
+  }
 
   try {
     return await fetch(input, {
       ...init,
-      credentials: "include", // Enviar cookies para autenticación (backend usa req.cookies.token)
       headers,
       signal: controller.signal,
     })
