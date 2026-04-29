@@ -32,12 +32,10 @@ export interface CreateUserData {
   rol: number;  // Backend espera "rol", no "id_rol"
 }
 
+// Headers básicos - la autenticación se maneja por cookies (backend lee req.cookies.token)
 const getAuthHeaders = () => {
-  const token = getStoredAccessToken();
-  console.log("🔐 [userService] Token:", token ? "✅ Presente" : "❌ Ausente", token?.substring(0, 30) + "...")
   return {
     "Content-Type": "application/json",
-    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
   };
 };
 
@@ -48,6 +46,7 @@ export const getAllUsers = async (): Promise<User[]> => {
   
   const res = await fetch(url, {
     headers: getAuthHeaders(),
+    credentials: "include", // Enviar cookies para autenticación (backend usa req.cookies.token)
   });
   
   if (!res.ok) {
@@ -125,6 +124,7 @@ export const getAllUsers = async (): Promise<User[]> => {
 export const getUserById = async (id: number): Promise<User | null> => {
   const res = await fetch(`${API_URL}/user/${id}`, {
     headers: getAuthHeaders(),
+    credentials: "include",
   });
   
   if (!res.ok) return null;
@@ -136,6 +136,7 @@ export const createUser = async (userData: CreateUserData): Promise<User> => {
   const res = await fetch(`${API_URL}/user`, {
     method: "POST",
     headers: getAuthHeaders(),
+    credentials: "include",
     body: JSON.stringify(userData),
   });
   
@@ -167,6 +168,7 @@ export const updateUserRole = async (userId: number, newRoleId: number): Promise
   const res = await fetch(url, {
     method: "PATCH",
     headers,
+    credentials: "include",
     body,
   });
   
@@ -187,6 +189,7 @@ export const updateUserRole = async (userId: number, newRoleId: number): Promise
 export const getAllRoles = async (): Promise<Role[]> => {
   const res = await fetch(`${API_URL}/rol`, {
     headers: getAuthHeaders(),
+    credentials: "include",
   });
   
   if (!res.ok) {

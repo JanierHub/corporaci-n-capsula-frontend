@@ -200,7 +200,12 @@ export const persistSessionFromLoginResponse = (session: {
 
   const jwt = candidates.find((c) => looksLikeJwt(c))
   if (jwt) {
+    // Guardar en localStorage para el frontend
     localStorage.setItem(SESSION_ACCESS_TOKEN_KEY, jwt)
+    
+    // Guardar como cookie para el backend (que espera req.cookies.token)
+    document.cookie = `token=${jwt}; path=/; SameSite=None; Secure`
+    
     const label =
       (typeof session.rol === "string" && session.rol.trim()) ||
       (typeof session.nombreRol === "string" && session.nombreRol.trim()) ||
