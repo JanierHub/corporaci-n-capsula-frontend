@@ -34,6 +34,7 @@ export interface CreateUserData {
 
 const getAuthHeaders = () => {
   const token = getStoredAccessToken();
+  console.log("🔐 [userService] Token:", token ? "✅ Presente" : "❌ Ausente", token?.substring(0, 30) + "...")
   return {
     "Content-Type": "application/json",
     ...(token ? { "Authorization": `Bearer ${token}` } : {}),

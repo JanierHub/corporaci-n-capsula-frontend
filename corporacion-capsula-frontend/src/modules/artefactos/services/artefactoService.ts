@@ -214,8 +214,13 @@ const fetchWithTimeout = async (input: RequestInfo | URL, init?: RequestInit) =>
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
   const headers = new Headers(init?.headers)
   const auth = getAuthCredentials()
+  
+  console.log("🔐 [artefactoService] Auth credentials:", auth ? "✅ Presente" : "❌ Ausente")
   if (auth) {
     Object.entries(auth).forEach(([k, v]) => headers.set(k, v))
+    console.log("🔐 [artefactoService] Headers Authorization:", headers.get("Authorization")?.substring(0, 50) + "...")
+  } else {
+    console.warn("🔐 [artefactoService] No hay token JWT - puede dar error 401")
   }
 
   try {

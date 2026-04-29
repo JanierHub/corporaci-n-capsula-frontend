@@ -12,6 +12,7 @@ import {
   setImagenArtefacto,
 } from "../modules/artefactos/utils/artefactoImagenes"
 import { triggerAuditRefresh } from "../modules/auditoria/services/auditService"
+import { isAuthenticated, getStoredAccessToken } from "../modules/auth/utils/roles"
 
 type ContextType = {
   artefactos: Artefacto[]
@@ -29,6 +30,15 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
   const [artefactos, setArtefactos] = useState<Artefacto[]>([])
 
   const loadArtefactos = useCallback(async () => {
+    console.log("🔐 [ArtefactosContext] isAuthenticated:", isAuthenticated())
+    console.log("🔐 [ArtefactosContext] Token:", getStoredAccessToken()?.substring(0, 30) + "...")
+    
+    if (!isAuthenticated()) {
+      console.error("❌ [ArtefactosContext] Usuario no autenticado - no se cargarán artefactos")
+      setArtefactos([])
+      return
+    }
+    
     try {
       const data = await getArtefactos()
       // Los estados vienen del backend - persistencia real
