@@ -62,12 +62,11 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   return data;
 };
 
-// 🔧 CORREGIDO: Endpoint es /auditoria (español) no /audit-logs (inglés)
-// Basado en patrón del backend: /user, /rol, /artifacts
+// Endpoint /audit según el backend real (inglés)
 export const getAllAuditLogs = async (): Promise<AuditLog[]> => {
   console.log("🔄 [Audit] Getting all audit logs...");
   try {
-    const data = await fetchWithAuth(`${API_URL}/auditoria`);
+    const data = await fetchWithAuth(`${API_URL}/audit`);
     console.log("✅ [Audit] Logs loaded:", data.length || 0, "records");
     return data;
   } catch (error) {
@@ -77,26 +76,26 @@ export const getAllAuditLogs = async (): Promise<AuditLog[]> => {
 };
 
 export const getAuditLogsByTable = async (table: string): Promise<AuditLog[]> => {
-  return fetchWithAuth(`${API_URL}/auditoria/table/${table}`);
+  return fetchWithAuth(`${API_URL}/audit/table/${table}`);
 };
 
 export const getAuditLogsByUser = async (userId: number): Promise<AuditLog[]> => {
-  return fetchWithAuth(`${API_URL}/auditoria/user/${userId}`);
+  return fetchWithAuth(`${API_URL}/audit/user/${userId}`);
 };
 
 export const getAuditLogsByAction = async (action: string): Promise<AuditLog[]> => {
-  return fetchWithAuth(`${API_URL}/auditoria/action/${action}`);
+  return fetchWithAuth(`${API_URL}/audit/action/${action}`);
 };
 
 export const createAuditLog = async (log: Omit<AuditLog, "id_auditoria" | "fecha_operacion">): Promise<AuditLog> => {
-  return fetchWithAuth(`${API_URL}/auditoria`, {
+  return fetchWithAuth(`${API_URL}/audit`, {
     method: "POST",
     body: JSON.stringify(log),
   });
 };
 
 export const clearOldAuditLogs = async (days: number): Promise<void> => {
-  return fetchWithAuth(`${API_URL}/auditoria/clear/${days}`, {
+  return fetchWithAuth(`${API_URL}/audit/clear/${days}`, {
     method: "DELETE",
   });
 };

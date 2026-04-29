@@ -187,7 +187,7 @@ export const updateUserRole = async (userId: number, newRoleId: number): Promise
 
 // Obtener todos los roles disponibles
 export const getAllRoles = async (): Promise<Role[]> => {
-  const res = await fetch(`${API_URL}/rol`, {
+  const res = await fetch(`${API_URL}/roles`, {
     headers: getAuthHeaders(),
     credentials: "include",
   });
