@@ -237,14 +237,20 @@ export const getBearerAuthHeader = (): Record<string, string> | undefined => {
   return { Authorization: `Bearer ${raw}` }
 }
 
-/** Para usuarios sin JWT, no hay credenciales */
+/** Obtener credenciales de autenticación para headers */
 export const getAuthCredentials = (): Record<string, string> | undefined => {
-  const jwt = getStoredAccessToken()
-  if (jwt && looksLikeJwt(jwt)) {
-    return { Authorization: `Bearer ${jwt}` }
+  // Primero intentar con el token JWT dedicado
+  const token = getStoredAccessToken()
+  if (token && token.trim()) {
+    return { Authorization: `Bearer ${token}` }
   }
   
-  // Sin JWT, no hay credenciales para enviar
-  // CORS usa credentials: "omit" para evitar errores
+  // Fallback: intentar con el rol guardado (podría ser un JWT legacy)
+  const role = getStoredUserRole()
+  if (role && looksLikeJwt(role)) {
+    return { Authorization: `Bearer ${role}` }
+  }
+  
+  // Sin credenciales disponibles
   return undefined
 }
