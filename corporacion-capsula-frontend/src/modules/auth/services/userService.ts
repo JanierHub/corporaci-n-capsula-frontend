@@ -26,10 +26,10 @@ export interface Role {
 export interface CreateUserData {
   nombre: string;
   edad: number;
-  password: string;
+  contraseña: string;  // Backend espera español, no "password"
   biometria?: string;
   adn?: string;
-  id_rol: number;
+  rol: number;  // Backend espera "rol", no "id_rol"
 }
 
 const getAuthHeaders = () => {

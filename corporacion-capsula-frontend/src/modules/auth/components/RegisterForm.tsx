@@ -99,10 +99,10 @@ const RegisterForm = () => {
       await createUser({
         nombre: name.trim(),
         edad: parsedAge,
-        password: password,
+        contraseña: password,  // Backend espera "contraseña", no "password"
         biometria: biometria.trim() || undefined,
         adn: adn.trim() || undefined,
-        id_rol: Number(role),
+        rol: Number(role),  // Backend espera "rol", no "id_rol"
       })
 
       // Limpiar formulario
