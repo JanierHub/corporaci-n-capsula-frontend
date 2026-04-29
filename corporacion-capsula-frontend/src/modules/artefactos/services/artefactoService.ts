@@ -226,7 +226,7 @@ const fetchWithTimeout = async (input: RequestInfo | URL, init?: RequestInit) =>
   try {
     return await fetch(input, {
       ...init,
-      credentials: "include",
+      credentials: "omit", // CORS: No enviar cookies para evitar error con '*' Access-Control-Allow-Origin
       headers,
       signal: controller.signal,
     })

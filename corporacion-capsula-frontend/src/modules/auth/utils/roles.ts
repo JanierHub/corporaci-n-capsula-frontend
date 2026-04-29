@@ -237,14 +237,14 @@ export const getBearerAuthHeader = (): Record<string, string> | undefined => {
   return { Authorization: `Bearer ${raw}` }
 }
 
-/** Para usuarios sin JWT, usar credenciales de cookies */
+/** Para usuarios sin JWT, no hay credenciales */
 export const getAuthCredentials = (): Record<string, string> | undefined => {
   const jwt = getStoredAccessToken()
   if (jwt && looksLikeJwt(jwt)) {
     return { Authorization: `Bearer ${jwt}` }
   }
   
-  // Para usuarios sin JWT, confiar en las cookies de sesión
-  // El backend debería aceptar credenciales de cookies
-  return undefined // Esto hará que fetch use credentials: "include"
+  // Sin JWT, no hay credenciales para enviar
+  // CORS usa credentials: "omit" para evitar errores
+  return undefined
 }

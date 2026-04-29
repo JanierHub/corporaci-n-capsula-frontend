@@ -68,7 +68,7 @@ const extractErrorMessage = (payload: unknown, fallback: string) => {
 
 const requestJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
   const response = await fetch(url, {
-    credentials: "include",
+    credentials: "omit", // CORS: No enviar cookies para evitar error con '*' Access-Control-Allow-Origin
     headers: {
       "Content-Type": "application/json",
       ...(init?.headers ?? {}),

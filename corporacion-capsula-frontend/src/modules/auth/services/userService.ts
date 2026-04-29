@@ -43,7 +43,10 @@ const getAuthHeaders = () => {
 
 // HU-05: Consultar usuarios - Listar todos los usuarios
 export const getAllUsers = async (): Promise<User[]> => {
-  const res = await fetch(`${API_URL}/user`, {
+  const url = `${API_URL}/user`;
+  console.log("📡 [userService] Fetching users from:", url);
+  
+  const res = await fetch(url, {
     headers: getAuthHeaders(),
   });
   
