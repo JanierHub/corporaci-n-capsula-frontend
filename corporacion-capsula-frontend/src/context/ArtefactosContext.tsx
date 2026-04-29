@@ -30,11 +30,11 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
   const [artefactos, setArtefactos] = useState<Artefacto[]>([])
 
   const loadArtefactos = useCallback(async () => {
-    console.log("🔐 [ArtefactosContext] isAuthenticated:", isAuthenticated())
-    console.log("🔐 [ArtefactosContext] Token:", getStoredAccessToken()?.substring(0, 30) + "...")
+    const token = getStoredAccessToken()
+    console.log("🔐 [ArtefactosContext] Token exists:", !!token)
     
-    if (!isAuthenticated()) {
-      console.error("❌ [ArtefactosContext] Usuario no autenticado - no se cargarán artefactos")
+    if (!token) {
+      console.log("⚠️ [ArtefactosContext] No hay token - no se cargarán artefactos")
       setArtefactos([])
       return
     }
@@ -52,6 +52,23 @@ export const ArtefactosProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     loadArtefactos()
   }, []) // Solo ejecutar una vez al montar el componente
+
+  // Recargar artefactos cuando el usuario hace login (token cambia)
+  useEffect(() => {
+    const handleAuthChange = () => {
+      console.log("🔄 [ArtefactosContext] Auth change detected, reloading artefactos")
+      loadArtefactos()
+    }
+
+    // Escuchar evento personalizado de login
+    window.addEventListener('auth-login', handleAuthChange)
+    window.addEventListener('auth-logout', handleAuthChange)
+
+    return () => {
+      window.removeEventListener('auth-login', handleAuthChange)
+      window.removeEventListener('auth-logout', handleAuthChange)
+    }
+  }, [loadArtefactos])
 
   const addArtefacto = useCallback(async (a: ArtefactoFormPayload): Promise<Artefacto | undefined> => {
     const { imagenDataUrl, ...rest } = a

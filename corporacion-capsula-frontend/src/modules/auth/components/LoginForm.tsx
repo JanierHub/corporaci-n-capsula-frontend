@@ -40,6 +40,9 @@ const LoginForm = () => {
       const savedToken = getStoredAccessToken()
       console.log("🔐 [LoginForm] Token guardado en localStorage:", savedToken ? "✅ SÍ" : "❌ NO")
       
+      // Disparar evento para que ArtefactosContext recargue
+      window.dispatchEvent(new Event('auth-login'))
+      
       // Pre-fetch: Cargar datos en caché después del login
       // Esto permite que la navegación sea instantánea
       const token = getStoredAccessToken()

@@ -16,18 +16,11 @@ export const getStoredUserName = () => localStorage.getItem(SESSION_USER_NAME_KE
 
 export const getPersistedRole = () => localStorage.getItem(PERSISTED_ROLE_KEY)
 
-/** Sesión iniciada en esta app: requiere nombre de usuario + token/rol activo.
- * El rol persistente (PERSISTED_ROLE_KEY) solo se usa para recuperar el rol al iniciar sesión,
- * NO para mantener la sesión activa después de logout.
+/** Sesión iniciada en esta app: requiere token en localStorage.
+ * Ya no depende de cookies ni de nombre de usuario.
  */
 export const isAuthenticated = (): boolean => {
-  const user = getStoredUserName()?.trim()
-  if (!user) return false // Se requiere nombre de usuario para sesión activa
-  
-  if (getStoredAccessToken()) return true
-  
-  const role = getStoredUserRole()?.trim()
-  return Boolean(role) // Solo rol de sesión activa, NO el persistido
+  return Boolean(getStoredAccessToken()?.trim())
 }
 
 export const isAdministrator = () =>
@@ -202,9 +195,6 @@ export const persistSessionFromLoginResponse = (session: {
   if (jwt) {
     // Guardar en localStorage para el frontend
     localStorage.setItem(SESSION_ACCESS_TOKEN_KEY, jwt)
-    
-    // Guardar como cookie para el backend (que espera req.cookies.token)
-    document.cookie = `token=${jwt}; path=/; SameSite=None; Secure`
     
     const label =
       (typeof session.rol === "string" && session.rol.trim()) ||

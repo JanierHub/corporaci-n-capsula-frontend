@@ -14,6 +14,8 @@ const Navbar = () => {
       console.error("No se pudo cerrar sesion en backend:", error)
     } finally {
       clearStoredSession()
+      // Disparar evento para que ArtefactosContext limpie
+      window.dispatchEvent(new Event('auth-logout'))
       navigate("/")
     }
   }

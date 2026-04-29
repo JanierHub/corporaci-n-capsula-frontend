@@ -32,21 +32,21 @@ export interface CreateUserData {
   rol: number;  // Backend espera "rol", no "id_rol"
 }
 
-// Headers con Authorization Bearer token
-const getAuthHeaders = () => {
+// Helper function to get auth headers with Authorization Bearer token
+const getAuthHeaders = (): HeadersInit => {
   const token = getStoredAccessToken();
-  return {
+  const headers: HeadersInit = {
     "Content-Type": "application/json",
-    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
   };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
 };
 
-// HU-05: Consultar usuarios - Listar todos los usuarios
+// HU-05: Consultar usuarios - Obtener todos los usuarios
 export const getAllUsers = async (): Promise<User[]> => {
-  const url = `${API_URL}/user`;
-  console.log("📡 [userService] Fetching users from:", url);
-  
-  const res = await fetch(url, {
+  const res = await fetch(`${API_URL}/user`, {
     headers: getAuthHeaders(),
   });
   
@@ -157,8 +157,8 @@ export const updateUserRole = async (userId: number, newRoleId: number): Promise
     throw new Error(`ID de rol inválido: ${newRoleId}`);
   }
   
-  // Endpoint: /api/v1/user/{id} (PATCH)
-  const url = `${API_URL}/user/${Number(userId)}`;
+  // Endpoint: /api/v1/users/{id}/role (PATCH)
+  const url = `${API_URL}/users/${Number(userId)}/role`;
   const body = JSON.stringify({ id_rol: Number(newRoleId) });
   const headers = getAuthHeaders();
   
@@ -184,32 +184,17 @@ export const updateUserRole = async (userId: number, newRoleId: number): Promise
 };
 
 // Obtener todos los roles disponibles
+// El backend no tiene endpoint /roles, usar lista local
 export const getAllRoles = async (): Promise<Role[]> => {
-  const res = await fetch(`${API_URL}/roles`, {
-    headers: getAuthHeaders(),
-  });
-  
-  if (!res.ok) {
-    // Si el endpoint no existe, retornar roles hardcodeados temporalmente
-    console.warn("Endpoint /rol no disponible, usando roles locales");
-    return [
-      { id_rol: 1, nombre_rol: "Administrador", nivel_seguridad: "Nivel 5 - Acceso Total" },
-      { id_rol: 2, nombre_rol: "Directora de Innovacion", nivel_seguridad: "Nivel 4 - Estratégico" },
-      { id_rol: 3, nombre_rol: "Experto en tecnologia extraterrestre", nivel_seguridad: "Nivel 5 - Clasificado Especial" },
-      { id_rol: 4, nombre_rol: "Especialista en seguridad", nivel_seguridad: "Nivel 4 - Táctico" },
-      { id_rol: 5, nombre_rol: "Inventor/Tester", nivel_seguridad: "Nivel 3 - Operativo" },
-      { id_rol: 6, nombre_rol: "Gestor de proyectos", nivel_seguridad: "Nivel 3 - Operativo" },
-      { id_rol: 7, nombre_rol: "Usuario", nivel_seguridad: "Nivel 1 - Básico" },
-    ];
-  }
-  
-  const data = await res.json();
-  if (Array.isArray(data)) return data;
-  if (data && typeof data === "object") {
-    if (Array.isArray(data.data)) return data.data;
-    if (Array.isArray(data.roles)) return data.roles;
-  }
-  return [];
+  return [
+    { id_rol: 1, nombre_rol: "Administrador", nivel_seguridad: "Nivel 5 - Acceso Total" },
+    { id_rol: 2, nombre_rol: "Directora de Innovacion", nivel_seguridad: "Nivel 4 - Estratégico" },
+    { id_rol: 3, nombre_rol: "Experto en tecnologia extraterrestre", nivel_seguridad: "Nivel 5 - Clasificado Especial" },
+    { id_rol: 4, nombre_rol: "Especialista en seguridad", nivel_seguridad: "Nivel 4 - Táctico" },
+    { id_rol: 5, nombre_rol: "Inventor/Tester", nivel_seguridad: "Nivel 3 - Operativo" },
+    { id_rol: 6, nombre_rol: "Gestor de proyectos", nivel_seguridad: "Nivel 3 - Operativo" },
+    { id_rol: 7, nombre_rol: "Usuario", nivel_seguridad: "Nivel 1 - Básico" },
+  ];
 };
 
 // Validar si un nombre de usuario ya existe

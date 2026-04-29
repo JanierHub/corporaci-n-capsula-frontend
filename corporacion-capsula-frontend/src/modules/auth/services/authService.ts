@@ -70,13 +70,13 @@ const extractErrorMessage = (payload: unknown, fallback: string) => {
 const requestJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
   const token = getStoredAccessToken()
   
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(init?.headers ?? {}),
+    ...(init?.headers as Record<string, string> ?? {}),
   }
   
-  // Agregar Authorization header si hay token (y no es login)
-  if (token && !url.endsWith('/session')) {
+  // Agregar Authorization header si hay token (y no es login/logout)
+  if (token && !url.includes('/auth/login') && !url.includes('/auth/logout')) {
     headers['Authorization'] = `Bearer ${token}`
   }
 
@@ -101,7 +101,7 @@ const requestJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
 }
 
 export const loginUser = async (data: LoginBody) => {
-  return requestJson<LoginResponse>(`${API_URL}/session`, {
+  return requestJson<LoginResponse>(`${API_URL}/auth/login`, {
     method: "POST",
     body: JSON.stringify(data),
   })
@@ -115,7 +115,7 @@ export const createUser = async (data: CreateUserBody) => {
 }
 
 export const logoutUser = async () => {
-  return requestJson(`${API_URL}/session`, {
+  return requestJson(`${API_URL}/auth/logout`, {
     method: "DELETE",
   })
 }
