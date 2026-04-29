@@ -92,7 +92,7 @@ const requestJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
 }
 
 export const loginUser = async (data: LoginBody) => {
-  return requestJson<LoginResponse>(`${API_URL}/auth/login`, {
+  return requestJson<LoginResponse>(`${API_URL}/session`, {
     method: "POST",
     body: JSON.stringify(data),
   })
@@ -106,7 +106,7 @@ export const createUser = async (data: CreateUserBody) => {
 }
 
 export const logoutUser = async () => {
-  return requestJson(`${API_URL}/auth/logout`, {
+  return requestJson(`${API_URL}/session`, {
     method: "DELETE",
   })
 }
