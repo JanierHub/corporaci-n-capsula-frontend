@@ -38,10 +38,18 @@ export const triggerAuditRefresh = () => {
 
 const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   const token = getStoredAccessToken();
+  
+  console.log("🔐 [Audit] Token disponible:", token ? "✅ SÍ" : "❌ NO");
+  if (token) {
+    console.log("🔐 [Audit] Token preview:", token.substring(0, 50) + "...");
+  }
+  
   const headers: HeadersInit = {
     "Content-Type": "application/json",
     ...(token ? { "Authorization": `Bearer ${token}` } : {}),
   };
+  
+  console.log("🔐 [Audit] Headers:", { ...headers, Authorization: headers.Authorization ? "Bearer [TOKEN]" : undefined });
 
   console.log("📡 [Audit] Fetching:", url, options.method || "GET");
   const res = await fetch(url, { ...options, headers });
