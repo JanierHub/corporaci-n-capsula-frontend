@@ -112,8 +112,8 @@ export const updateUserRole = async (userId: number, newRoleId: number): Promise
     throw new Error(`ID de rol inválido: ${newRoleId}`);
   }
   
-  // Endpoint: /api/v1/user/{id}/role
-  const url = `${API_URL}/user/${Number(userId)}/role`;
+  // Endpoint: /api/v1/user/{id} (PATCH)
+  const url = `${API_URL}/user/${Number(userId)}`;
   const body = JSON.stringify({ id_rol: Number(newRoleId) });
   const headers = getAuthHeaders();
   
