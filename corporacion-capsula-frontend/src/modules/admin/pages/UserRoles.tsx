@@ -52,8 +52,31 @@ const UserRoles = () => {
         getAllRoles()
       ])
       console.log("📥 [UserRoles] Usuarios cargados:", usersData)
-      console.log("📥 [UserRoles] Primer usuario:", usersData[0])
-      console.log("📥 [UserRoles] ¿Tiene id_usuario?", usersData.map(u => ({ nombre: u.nombre, id_usuario: u.id_usuario, id: (u as any).id })))
+      console.log("📥 [UserRoles] Primer usuario COMPLETO:", usersData[0])
+      
+      // Ver TODOS los campos del primer usuario para identificar el ID
+      if (usersData[0]) {
+        const u = usersData[0] as any
+        console.log("� [UserRoles] TODOS los campos del primer usuario:", {
+          id_usuario: u.id_usuario,
+          id: u.id,
+          userId: u.userId,
+          user_id: u.user_id,
+          idUser: u.idUser,
+          idusuario: u.idusuario,
+          IdUsuario: u.IdUsuario,
+          ID: u.ID,
+          keys: Object.keys(u)
+        })
+      }
+      
+      console.log("📥 [UserRoles] Mapeo de IDs:", usersData.map(u => ({ 
+        nombre: u.nombre, 
+        id_usuario: (u as any).id_usuario, 
+        id: (u as any).id,
+        userId: (u as any).userId,
+        user_id: (u as any).user_id
+      })))
       setUsers(usersData)
       setFilteredUsers(usersData)
       setRoles(rolesData)

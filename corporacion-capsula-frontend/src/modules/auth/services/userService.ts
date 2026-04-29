@@ -64,14 +64,46 @@ export const getAllUsers = async (): Promise<User[]> => {
     else if (Array.isArray(data.usuarios)) users = data.usuarios;
   }
   
-  // 🔧 Normalizar: si el backend devuelve 'id' en lugar de 'id_usuario'
-  const normalizedUsers = users.map(u => ({
-    ...u,
-    id_usuario: u.id_usuario ?? u.id ?? undefined,
-    id_rol: u.id_rol ?? u.rol_id ?? u.role_id ?? undefined,
-  }));
+  // 🔧 Normalizar: buscar ID en múltiples posibles nombres de campo
+  const normalizedUsers = users.map(u => {
+    // Buscar el ID del usuario en múltiples variantes posibles
+    const idUsuario = u.id_usuario ?? 
+                      u.id ?? 
+                      u.userId ?? 
+                      u.user_id ?? 
+                      u.idUser ?? 
+                      u.idusuario ??
+                      u.IdUsuario ??
+                      u.ID ??
+                      undefined;
+    
+    // Buscar el ID del rol en múltiples variantes
+    const idRol = u.id_rol ?? 
+                   u.rol_id ?? 
+                   u.role_id ?? 
+                   u.rolId ??
+                   u.idRol ??
+                   u.id_rol_usuario ??
+                   undefined;
+    
+    return {
+      ...u,
+      id_usuario: idUsuario,
+      id_rol: idRol,
+    };
+  });
   
-  console.log("📥 [userService] Normalized users:", normalizedUsers.map(u => ({ nombre: u.nombre, id_usuario: u.id_usuario })));
+  console.log("📥 [userService] Normalized users:", normalizedUsers.map(u => ({ 
+    nombre: u.nombre, 
+    id_usuario: u.id_usuario,
+    id_rol: u.id_rol
+  })));
+  
+  // Verificar si hay usuarios sin ID
+  const usersSinId = normalizedUsers.filter(u => !u.id_usuario);
+  if (usersSinId.length > 0) {
+    console.error("❌ [userService] Usuarios SIN ID encontrados:", usersSinId.map(u => ({ nombre: u.nombre, keys: Object.keys(u) })));
+  }
   
   return normalizedUsers;
 };
