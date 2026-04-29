@@ -99,10 +99,20 @@ export const getAllUsers = async (): Promise<User[]> => {
     id_rol: u.id_rol
   })));
   
-  // Verificar si hay usuarios sin ID
+  // Verificar si hay usuarios sin ID - mostrar datos completos para diagnóstico
   const usersSinId = normalizedUsers.filter(u => !u.id_usuario);
   if (usersSinId.length > 0) {
-    console.error("❌ [userService] Usuarios SIN ID encontrados:", usersSinId.map(u => ({ nombre: u.nombre, keys: Object.keys(u) })));
+    console.error("❌ [userService] Usuarios SIN ID encontrados:", usersSinId.length);
+    usersSinId.forEach((u, idx) => {
+      console.error(`❌ [userService] Usuario ${idx + 1} sin ID:`, {
+        nombre: u.nombre,
+        allKeys: Object.keys(u),
+        allValues: Object.entries(u).reduce((acc, [k, v]) => {
+          acc[k] = typeof v === 'string' ? v.substring(0, 30) : v;
+          return acc;
+        }, {} as any)
+      });
+    });
   }
   
   return normalizedUsers;
