@@ -3,10 +3,12 @@ import { useArtefactos } from "../../../context/ArtefactosContext"
 import { 
   getStoredUserName, 
   getStoredUserRole, 
+  getStoredAccessToken,
   isAdministrator, 
   isProjectManager,
   isInnovationDirector,
-  normalizeRole
+  normalizeRole,
+  isAuthenticated
 } from "../../auth/utils/roles"
 import CategoryDashboard from "../components/CategoryDashboard"
 import AlertsPanel from "../components/AlertsPanel"
@@ -73,6 +75,32 @@ const AdminPanel = () => {
     }
   }, [artefactos])
 
+  // Función de diagnóstico de sesión
+  const diagnosticarSesion = () => {
+    const token = getStoredAccessToken()
+    const nombre = getStoredUserName()
+    const rol = getStoredUserRole()
+    const autenticado = isAuthenticated()
+    
+    console.log("=".repeat(60))
+    console.log("🔍 DIAGNÓSTICO DE SESIÓN")
+    console.log("=".repeat(60))
+    console.log("isAuthenticated:", autenticado)
+    console.log("Usuario:", nombre || "❌ No hay usuario")
+    console.log("Rol:", rol || "❌ No hay rol")
+    console.log("Token:", token ? `✅ Presente (${token.substring(0, 50)}...)` : "❌ No hay token")
+    console.log("=".repeat(60))
+    
+    alert(`Diagnóstico de Sesión:
+
+Autenticado: ${autenticado ? '✅ SÍ' : '❌ NO'}
+Usuario: ${nombre || '❌ No hay usuario'}
+Rol: ${rol || '❌ No hay rol'}
+Token: ${token ? '✅ Presente' : '❌ No hay token'}
+
+Abre la consola (F12) para ver más detalles.`)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
       {/* Header */}
@@ -95,9 +123,18 @@ const AdminPanel = () => {
               </p>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-cyan-300">{userName || "Usuario"}</p>
-            <p className="text-gray-400 text-xs">{userRole || "Sin rol"}</p>
+          <div className="text-right flex items-center gap-3">
+            <div>
+              <p className="text-cyan-300">{userName || "Usuario"}</p>
+              <p className="text-gray-400 text-xs">{userRole || "Sin rol"}</p>
+            </div>
+            <button
+              onClick={diagnosticarSesion}
+              className="bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 px-3 py-1 rounded text-xs transition"
+              title="Diagnóstico de sesión"
+            >
+              🔍 Verificar
+            </button>
           </div>
         </div>
       </div>

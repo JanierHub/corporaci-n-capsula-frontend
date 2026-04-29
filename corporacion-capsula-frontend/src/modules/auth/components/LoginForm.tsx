@@ -21,13 +21,24 @@ const LoginForm = () => {
 
   const handleSubmit = async () => {
     try {
+      console.log("🔐 [LoginForm] Intentando login con usuario:", userName.trim())
+      
       const session = await loginUser({
         userName: userName.trim(),
         password,
       })
+      
+      console.log("🔐 [LoginForm] Respuesta del backend:", session)
+      console.log("🔐 [LoginForm] Token en session.data:", session.data?.substring(0, 50) + "...")
+      console.log("🔐 [LoginForm] Token en session.token:", session.token?.substring(0, 50) + "...")
+      console.log("🔐 [LoginForm] Token en session.session:", session.session?.substring(0, 50) + "...")
 
       localStorage.setItem(SESSION_USER_NAME_KEY, userName.trim())
       persistSessionFromLoginResponse(session)
+      
+      // Verificar si el token se guardó
+      const savedToken = getStoredAccessToken()
+      console.log("🔐 [LoginForm] Token guardado en localStorage:", savedToken ? "✅ SÍ" : "❌ NO")
       
       // Pre-fetch: Cargar datos en caché después del login
       // Esto permite que la navegación sea instantánea
