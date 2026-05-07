@@ -57,8 +57,9 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     throw new Error(err.message || `HTTP ${res.status}`);
   }
   const data = await res.json();
-  console.log("✅ [Audit] Data received, records:", Array.isArray(data) ? data.length : "N/A");
-  return data;
+console.log("✅ [Audit] Data received, records:", Array.isArray(data) ? data.length : "N/A");
+console.log("✅ [Audit] Estructura real:", JSON.stringify(data).slice(0, 200)); // ← solo agrega esta
+return data;
 };
 
 // Endpoint /audit según el backend real (inglés)
@@ -66,8 +67,11 @@ export const getAllAuditLogs = async (): Promise<AuditLog[]> => {
   console.log("🔄 [Audit] Getting all audit logs...");
   try {
     const data = await fetchWithAuth(`${API_URL}/audit-logs`);
-    console.log("✅ [Audit] Logs loaded:", data.length || 0, "records");
-    return data;
+    const logs = Array.isArray(data) 
+    ? data 
+    : data.data ?? data.logs ?? data.audit_logs ?? data.records ?? [];
+    console.log("✅ [Audit] Logs loaded:", logs.length, "records");
+    return logs;
   } catch (error) {
     console.error("❌ [Audit] Error loading logs:", error);
     throw error;
