@@ -308,15 +308,18 @@ const ArtefactoForm = ({ onSubmit, initialData, mode = "create" }: Props) => {
           className={`p-2 bg-black border border-orange-400 rounded text-white ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         />
 
-        <input
-          placeholder="Id tipo (número)"
-          type="number"
-          min={1}
-          value={idTipo}
-          onChange={(e) => setIdTipo(e.target.value)}
-          disabled={fieldsDisabled}
-          className={`p-2 bg-black border border-orange-400 rounded text-white ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-        />
+       <select
+        value={idTipo}
+        onChange={(e) => setIdTipo(e.target.value)}
+        disabled={fieldsDisabled}
+        className={`p-2 bg-black border border-orange-400 rounded text-white ${fieldsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      >
+        <option value="1">Tipo 1</option>
+        <option value="2">Tipo 2</option>
+        <option value="3">Tipo 3</option>
+        <option value="4">Tipo 4</option>
+        <option value="5">Tipo 5</option>
+      </select>
 
         <select
           value={idCategoria}
