@@ -16,6 +16,7 @@ const RegisterForm = () => {
   const [biometria, setBiometria] = useState("")
   const [adn, setAdn] = useState("")
   const [role, setRole] = useState("7")
+  const [authType, setAuthType] = useState<"DNA_SAIYAN" | "DNA_HUMAN">("DNA_HUMAN") // ← nuevo
   const [roles, setRoles] = useState<Role[]>([])
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
@@ -23,13 +24,11 @@ const RegisterForm = () => {
   const [checkingName, setCheckingName] = useState(false)
   const [nameExists, setNameExists] = useState(false)
 
-  // Cargar roles dinámicamente desde la API (HU-01)
   useEffect(() => {
     const loadRoles = async () => {
       try {
         const rolesData = await getAllRoles()
         setRoles(rolesData)
-        // Seleccionar el primer rol por defecto
         if (rolesData.length > 0) {
           setRole(String(rolesData[0].id_rol))
         }
@@ -40,7 +39,6 @@ const RegisterForm = () => {
     loadRoles()
   }, [])
 
-  // Validar si el nombre ya existe (con debounce)
   useEffect(() => {
     if (!name.trim()) {
       setNameExists(false)
@@ -68,7 +66,6 @@ const RegisterForm = () => {
   }, [name])
 
   const handleSubmit = async () => {
-    // Validaciones
     if (!name || !age || !password) {
       setError("Debes completar todos los campos obligatorios (nombre, edad, contraseña)")
       setSuccess("")
@@ -99,19 +96,20 @@ const RegisterForm = () => {
       await createUser({
         nombre: name.trim(),
         edad: parsedAge,
-        contraseña: password,  // Backend espera "contraseña", no "password"
+        contraseña: password,
         biometria: biometria.trim() || undefined,
         adn: adn.trim() || undefined,
-        rol: Number(role),  // Backend espera "rol", no "id_rol"
+        rol: Number(role),
+        authType, // ← nuevo
       })
 
-      // Limpiar formulario
       setName("")
       setAge("")
       setPassword("")
       setBiometria("")
       setAdn("")
       setRole(roles.length > 0 ? String(roles[0].id_rol) : "7")
+      setAuthType("DNA_HUMAN") // ← reset
       setError("")
       setSuccess("Usuario creado exitosamente. Puedes crear otro o volver al panel.")
     } catch (err) {
@@ -138,24 +136,16 @@ const RegisterForm = () => {
         }}
       >
         <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-
         <div className="relative w-full max-w-md px-4">
           <div className="bg-black/40 backdrop-blur-xl border border-cyan-400 rounded-2xl p-8 shadow-xl shadow-cyan-500/20 text-center">
-            <img
-              src={logo}
-              className="w-28 h-16 object-contain mx-auto mb-6"
-            />
-
+            <img src={logo} className="w-28 h-16 object-contain mx-auto mb-6" />
             <h2 className="text-white text-2xl mb-4">Acceso restringido</h2>
-
             <p className="text-gray-300 text-sm mb-3">
               Solo un <span className="text-cyan-300 font-semibold">Administrador</span> autenticado puede crear usuarios desde este formulario.
             </p>
-
             <p className="text-gray-400 text-xs mb-6">
               Rol detectado: {getStoredUserRole() || "Sin sesion"}
             </p>
-
             <button
               type="button"
               className="w-full bg-cyan-400 text-black p-3 rounded-lg font-bold"
@@ -191,9 +181,7 @@ const RegisterForm = () => {
             <img src={logo} className="w-28 h-16 object-contain" />
           </div>
 
-          <h2 className="text-white text-center text-2xl mb-2">
-            CREAR USUARIO
-          </h2>
+          <h2 className="text-white text-center text-2xl mb-2">CREAR USUARIO</h2>
 
           <p className="text-gray-400 text-xs text-center mb-6">
             El backend crea el usuario usando la cookie del administrador actual.
@@ -201,7 +189,7 @@ const RegisterForm = () => {
 
           <div className="relative">
             <input
-              className={`w-full mb-1 p-3 bg-black/60 border ${nameExists ? 'border-red-400' : 'border-cyan-400'} text-white rounded-lg`}
+              className={`w-full mb-1 p-3 bg-black/60 border ${nameExists ? "border-red-400" : "border-cyan-400"} text-white rounded-lg`}
               placeholder="Nombre *"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -232,23 +220,9 @@ const RegisterForm = () => {
             autoComplete="new-password"
           />
 
-          <input
-            className="w-full mb-4 p-3 bg-black/60 border border-gray-600 text-white rounded-lg text-sm"
-            placeholder="Biometría (opcional)"
-            value={biometria}
-            onChange={(e) => setBiometria(e.target.value)}
-          />
-
-          <input
-            className="w-full mb-4 p-3 bg-black/60 border border-gray-600 text-white rounded-lg text-sm"
-            placeholder="ADN (opcional)"
-            value={adn}
-            onChange={(e) => setAdn(e.target.value)}
-          />
-
           <label className="text-gray-400 text-sm mb-1 block">Rol *</label>
           <select
-            className="w-full mb-5 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+            className="w-full mb-4 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
             value={role}
             onChange={(e) => setRole(e.target.value)}
           >
@@ -263,13 +237,19 @@ const RegisterForm = () => {
             )}
           </select>
 
-          {error ? (
-            <p className="mb-4 text-sm text-red-300">{error}</p>
-          ) : null}
+          {/* ← NUEVO: selector authType */}
+          <label className="text-gray-400 text-sm mb-1 block">Tipo de autenticación *</label>
+          <select
+            className="w-full mb-5 p-3 bg-black/60 border border-cyan-400 text-white rounded-lg"
+            value={authType}
+            onChange={(e) => setAuthType(e.target.value as "DNA_SAIYAN" | "DNA_HUMAN")}
+          >
+            <option value="DNA_HUMAN">DNA_HUMAN — Humano estándar</option>
+            <option value="DNA_SAIYAN">DNA_SAIYAN — Guerrero Saiyan</option>
+          </select>
 
-          {success ? (
-            <p className="mb-4 text-sm text-emerald-300">{success}</p>
-          ) : null}
+          {error ? <p className="mb-4 text-sm text-red-300">{error}</p> : null}
+          {success ? <p className="mb-4 text-sm text-emerald-300">{success}</p> : null}
 
           <button
             className="w-full bg-cyan-400 text-black p-3 rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed"

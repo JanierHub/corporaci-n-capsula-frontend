@@ -26,10 +26,11 @@ export interface Role {
 export interface CreateUserData {
   nombre: string;
   edad: number;
-  contraseña: string;  // Backend espera español, no "password"
+  contraseña: string;
   biometria?: string;
   adn?: string;
-  rol: number;  // Backend espera "rol", no "id_rol"
+  rol: number;
+  authType: "DNA_SAIYAN" | "DNA_HUMAN";  // ← solo esto se agrega
 }
 
 // Helper function to get auth headers with Authorization Bearer token
@@ -158,8 +159,8 @@ export const updateUserRole = async (userId: number, newRoleId: number): Promise
   }
   
   // Endpoint: /api/v1/users/{id}/role (PATCH)
-  const url = `${API_URL}/users/${Number(userId)}/role`;
-  const body = JSON.stringify({ id_rol: Number(newRoleId) });
+  const url = `${API_URL}/user/${Number(userId)}/role`;
+  const body = JSON.stringify({ role: Number(newRoleId) });
   const headers = getAuthHeaders();
   
   console.log("🔄 PATCH updateUserRole:", { url, body, userId, newRoleId });
