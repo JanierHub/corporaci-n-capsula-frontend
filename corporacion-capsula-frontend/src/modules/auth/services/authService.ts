@@ -4,7 +4,7 @@ import { getStoredAccessToken } from "../utils/roles"
 export type LoginBody = {
   userName: string
   password: string
-  biometria?: string   
+  biometria: string   
 }
 
 export type LoginResponse = {
@@ -102,9 +102,19 @@ const requestJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
 }
 
 export const loginUser = async (data: LoginBody) => {
+  const body: Record<string, unknown> = {
+    userName: data.userName,
+    password: data.password,
+  }
+
+  // Solo agregar biometria si viene con valor
+  if (data.biometria) {
+    body.biometria = data.biometria
+  }
+
   return requestJson<LoginResponse>(`${API_URL}/auth/login`, {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify(body),
   })
 }
 
