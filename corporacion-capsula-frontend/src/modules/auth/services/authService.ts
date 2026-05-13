@@ -4,6 +4,7 @@ import { getStoredAccessToken } from "../utils/roles"
 export type LoginBody = {
   userName: string
   password: string
+  biometria?: string   
 }
 
 export type LoginResponse = {
