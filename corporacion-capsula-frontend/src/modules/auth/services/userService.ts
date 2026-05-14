@@ -159,7 +159,7 @@ export const updateUserRole = async (userId: number, newRoleId: number): Promise
   }
   
   // Endpoint: /api/v1/users/{id}/role (PATCH)
-  const url = `${API_URL}/user/${Number(userId)}/role`;
+  const url = `${API_URL}/users/${Number(userId)}/role`;
   const body = JSON.stringify({ role: Number(newRoleId) });
   const headers = getAuthHeaders();
   
