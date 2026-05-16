@@ -1,18 +1,5 @@
-/**
- * MÓDULO AUDITORÍA - DESARROLLADO POR CARLOS
- * 📂 Archivo: src/modules/auditoria/pages/Auditoria.tsx
- *
- * ✅ FUNCIONALIDADES:
- *  - Conexión real con backend API
- *  - Filtros funcionales (usuario, acción, tabla, fecha)
- *  - Paginación real
- *  - Exportar CSV
- *  - Gráficos reales con recharts (BarChart)
- *  - Vista detalle expandible (JSON)
- *  - Filtro por rango de fechas funcional
- *  - Gráfico de actividad por usuario
- */
-
+import { logoutUser } from "../../auth/services/authService"
+import { clearStoredSession } from "../../auth/utils/roles"
 import { useNavigate } from "react-router-dom"
 import { useMemo, useState, useCallback, useEffect } from "react"
 import { useArtefactos } from "../../../context/ArtefactosContext"
@@ -397,24 +384,42 @@ export default function Auditoria() {
   return (
     <div style={s.page}>
 
-      {/* ── Top bar ── */}
+  {/* ── Top bar ── */}
       <div style={s.topbar}>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <span style={s.logo}>Capsule Corp</span>
-          <button style={s.backBtn} onClick={() => navigate("/admin")}>← Volver al Panel</button>
-        </div>
-        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-          <span style={{ fontSize: "11px", color: "#4b4b7a" }}>{logs.length} eventos</span>
-          <button 
-            style={{...s.csvBtn, opacity: loading ? 0.5 : 1}} 
-            onClick={loadLogs}
-            disabled={loading}
-            title="Recargar logs"
-          >
-            {loading ? "⟳ Cargando..." : "↻ Actualizar"}
-          </button>
-          <button style={s.csvBtn} onClick={exportarCSV}>↓ Exportar CSV</button>
-        </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+      <span style={s.logo}>Capsule Corp</span>
+      <button style={s.backBtn} onClick={() => navigate("/admin")}>← Volver al Panel</button>
+      </div>
+     <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+      <span style={{ fontSize: "11px", color: "#4b4b7a" }}>{logs.length} eventos</span>
+      <button
+        style={{ ...s.csvBtn, opacity: loading ? 0.5 : 1 }}
+        onClick={loadLogs}
+        disabled={loading}
+        title="Recargar logs"
+      >
+        {loading ? "⟳ Cargando..." : "↻ Actualizar"}
+      </button>
+      <button style={s.csvBtn} onClick={exportarCSV}>↓ Exportar CSV</button>
+      <button
+        onClick={async () => {
+          try { await logoutUser() } catch (_) {}
+          clearStoredSession()
+          navigate("/")
+        }}
+        style={{
+          background: "rgba(239,68,68,0.1)",
+          border: "1px solid rgba(239,68,68,0.3)",
+          color: "#f87171",
+          padding: "6px 12px",
+          borderRadius: "6px",
+          cursor: "pointer",
+          fontSize: "12px",
+        }}
+        >
+        Logout
+      </button>
+      </div>
       </div>
 
       <div style={s.inner}>

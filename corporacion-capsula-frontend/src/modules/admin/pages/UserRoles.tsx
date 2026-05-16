@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { getAllUsers, updateUserRole, getAllRoles, type User, type Role } from "../../auth/services/userService"
 import { getStoredAccessToken, getStoredUserName } from "../../auth/utils/roles"
 import { triggerAuditRefresh } from "../../auditoria/services/auditService"
+import { logoutUser } from "../../auth/services/authService"
+import { clearStoredSession } from "../../auth/utils/roles"
 
 const UserRoles = () => {
   const navigate = useNavigate()
@@ -142,25 +144,39 @@ const UserRoles = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <button
-            onClick={() => navigate("/admin")}
-            className="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Volver al Panel
-          </button>
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold text-purple-400 flex items-center gap-2">
-              <Users className="w-6 h-6" />
-              Gestión de Usuarios y Roles
-            </h1>
-            <p className="text-gray-400 text-sm">Asigna roles a los usuarios del sistema</p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
+  <div className="max-w-4xl mx-auto">
+    {/* Header */}
+    <div className="bg-black/60 border-b border-purple-400/30 backdrop-blur-md sticky top-0 z-50 mb-8">
+      <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
+        <button
+          onClick={() => navigate("/admin")}
+          className="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Volver al Panel
+        </button>
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold text-purple-400 flex items-center gap-2">
+            <Users className="w-6 h-6" />
+            Gestión de Usuarios y Roles
+          </h1>
+          <p className="text-gray-400 text-sm">Asigna roles a los usuarios del sistema</p>
         </div>
+        <button
+          onClick={async () => {
+            try { await logoutUser() } catch (_) {}
+            clearStoredSession()
+            navigate("/")
+          }}
+          className="flex items-center gap-2 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg hover:bg-red-500/20 transition text-red-400 text-sm"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+
+   
 
         {/* Info */}
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6 flex items-start gap-3">

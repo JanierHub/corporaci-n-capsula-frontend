@@ -1,3 +1,5 @@
+import { logoutUser } from "../../auth/services/authService"
+import { clearStoredSession } from "../../auth/utils/roles"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useArtefactos } from "../../../context/ArtefactosContext"
@@ -112,17 +114,29 @@ const MiCapsula = () => {
               <p className="text-gray-400 text-sm">Personaliza tu experiencia</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-cyan-300 font-semibold">{userName || "Usuario"}</p>
-              <p className="text-gray-400 text-sm">{userRole || "Rol"}</p>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
-              <Package className="w-5 h-5 text-white" />
-            </div>
-          </div>
+          
+        <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+          <Package className="w-5 h-5 text-white" />
         </div>
-      </div>
+        <div className="text-right">
+          <p className="text-cyan-300 font-semibold">{userName || "Usuario"}</p>
+          <p className="text-gray-400 text-xs">{userRole || "Rol"}</p>
+        </div>
+        <button
+          onClick={async () => {
+            try { await logoutUser() } catch (_) {}
+            clearStoredSession()
+            navigate("/")
+          }}
+          className="flex items-center gap-2 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg hover:bg-red-500/20 transition text-red-400 text-sm"
+        >
+          Logout
+        </button>
+          </div>
+          </div>
+          </div>
+      
 
       {/* Tabs */}
       <div className="max-w-7xl mx-auto px-6 py-6">

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-
 import bg from "../../../assets/4.webp"
 import logo from "../../../assets/7.webp"
 import capsule from "../../../assets/13.gif"
 import { createUser, getAllRoles, checkUserExists, type Role } from "../services/userService"
 import { getStoredUserRole, isAdministrator } from "../utils/roles"
+import { logoutUser } from "../services/authService"
+import { clearStoredSession } from "../utils/roles"
 
 const RegisterForm = () => {
   const navigate = useNavigate()
@@ -258,6 +259,16 @@ const RegisterForm = () => {
           >
             {loading ? "Creando..." : "Crear usuario"}
           </button>
+          <button
+            onClick={async () => {
+              try { await logoutUser() } catch (_) {}
+              clearStoredSession()
+              navigate("/")
+            }}
+            className="w-full mt-2 border border-red-400/50 text-red-400 p-3 rounded-lg font-bold hover:bg-red-400/10 transition"
+            >
+            Cerrar sesión
+            </button>
 
           <p className="text-gray-300 text-sm text-center mt-4">
             ¿Quieres volver al panel?{" "}

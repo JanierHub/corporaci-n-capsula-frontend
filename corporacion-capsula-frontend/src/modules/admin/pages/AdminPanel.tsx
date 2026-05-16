@@ -1,3 +1,5 @@
+import { logoutUser } from "../../auth/services/authService"
+import { clearStoredSession } from "../../auth/utils/roles"
 import { useNavigate } from "react-router-dom"
 import { useArtefactos } from "../../../context/ArtefactosContext"
 import { 
@@ -135,6 +137,16 @@ Abre la consola (F12) para ver más detalles.`)
             >
               🔍 Verificar
             </button>
+            <button
+             onClick={async () => {
+            try { await logoutUser() } catch (_) {}
+            clearStoredSession()
+           navigate("/")
+           }}
+          className="bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 px-3 py-1 rounded text-xs transition"
+          >
+          Logout
+          </button>
           </div>
         </div>
       </div>

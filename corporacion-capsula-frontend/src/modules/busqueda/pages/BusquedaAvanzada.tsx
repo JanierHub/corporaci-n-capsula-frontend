@@ -1,23 +1,5 @@
-/**
- * � MÓDULO BÚSQUEDA AVANZADA - DESARROLLADO POR JUAN
- * 📂 Archivo: src/modules/busqueda/pages/BusquedaAvanzada.tsx
- * 🎨 Colores: azul (#3b82f6) / cyan (#06b6d4)
- *
- * ✅ FUNCIONALIDADES:
- * - Consumo de datos con useArtefactos() (contexto)
- * - Filtros: búsqueda por texto, categorías, origen, inventor
- * - Sliders de peligrosidad y confidencialidad (rango 1-10)
- * - Ordenamiento por múltiples criterios
- * - Vista lista y vista grid
- * - Paginación (10/25/50 resultados por página)
- * - Estadísticas de resultados
- * - Autocompletado mientras escribe
- * - Búsqueda difusa con fuse.js
- * - Filtro por rango de fechas
- * - Exportar resultados a CSV
- * - Atajo de teclado Ctrl+K para buscar
- */
-
+import { logoutUser } from "../../auth/services/authService"
+import { clearStoredSession } from "../../auth/utils/roles"
 import { useState, useMemo, useEffect, useRef, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { useArtefactos } from "../../../context/ArtefactosContext"
@@ -302,6 +284,17 @@ const BusquedaAvanzada = () => {
 
           <div className="flex items-center gap-2">
             {/* Exportar CSV */}
+            <button
+                onClick={async () => {
+                 try { await logoutUser() } catch (_) {}
+                 clearStoredSession()
+                navigate("/")
+                 }}
+              className="flex items-center gap-2 px-3 py-2 bg-red-500/10 border border-red-500/30
+             rounded-lg hover:bg-red-500/20 transition text-red-400 text-sm"
+              >
+            Logout
+            </button>
             <button
               onClick={() => exportarCSV(resultadosFiltrados)}
               title="Exportar resultados a CSV"
