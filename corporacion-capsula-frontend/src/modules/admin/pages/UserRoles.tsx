@@ -1,3 +1,4 @@
+import bgGif from "../../../assets/users.gif"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft, Users, Shield, AlertCircle, Search, Filter, RefreshCw } from "lucide-react"
 import { useState, useEffect } from "react"
@@ -144,177 +145,193 @@ const UserRoles = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
-  <div className="max-w-4xl mx-auto">
-    {/* Header */}
-    <div className="bg-black/60 border-b border-purple-400/30 backdrop-blur-md sticky top-0 z-50 mb-8">
-      <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-        <button
-          onClick={() => navigate("/admin")}
-          className="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Volver al Panel
-        </button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-purple-400 flex items-center gap-2">
-            <Users className="w-6 h-6" />
-            Gestión de Usuarios y Roles
-          </h1>
-          <p className="text-gray-400 text-sm">Asigna roles a los usuarios del sistema</p>
-        </div>
-        <button
-          onClick={async () => {
-            try { await logoutUser() } catch (_) {}
-            clearStoredSession()
-            navigate("/")
-          }}
-          className="flex items-center gap-2 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg hover:bg-red-500/20 transition text-red-400 text-sm"
-        >
-          Logout
-        </button>
-      </div>
-    </div>
+    // ✅ DIV RAÍZ con el GIF de fondo
+    <div
+      className="min-h-screen text-white relative"
+      style={{
+        backgroundImage: `url(${bgGif})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed",
+      }}
+    >
+      {/* Overlay oscuro para que el texto sea legible sobre el GIF */}
+      <div className="absolute inset-0 bg-black/75 z-0" />
 
-   
+      {/* Todo el contenido va aquí, con z-10 para estar sobre el overlay */}
+      <div className="relative z-10">
+        <div className="max-w-4xl mx-auto">
 
-        {/* Info */}
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-amber-300 font-medium">Solo Administradores</p>
-            <p className="text-gray-400 text-sm">Esta funcionalidad está reservada para usuarios con rol Administrador.</p>
-          </div>
-        </div>
-
-        {/* Roles disponibles */}
-        <div className="bg-black/40 border border-gray-700 rounded-xl p-4 mb-6">
-          <h3 className="text-lg font-semibold text-gray-300 mb-3 flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            Roles del Sistema
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {roles.map((rol: Role) => (
-              <div key={rol.id_rol} className="flex items-center gap-2 text-sm">
-                <span className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400 text-xs font-bold">
-                  {rol.id_rol}
-                </span>
-                <span className="text-gray-400">{rol.nombre_rol}</span>
-                <span className="text-xs text-gray-600">({rol.nivel_seguridad})</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* HU-05: Filtros y búsqueda */}
-        <div className="bg-black/40 border border-gray-700 rounded-xl p-4 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
-              <input
-                type="text"
-                placeholder="Buscar por nombre..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-cyan-400"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-gray-400" />
-              <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value === "all" ? "all" : Number(e.target.value))}
-                className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+          {/* Header */}
+          <div className="bg-black/60 border-b border-purple-400/30 backdrop-blur-md sticky top-0 z-50 mb-8">
+            <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
+              <button
+                onClick={() => navigate("/admin")}
+                className="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition"
               >
-                <option value="all">Todos los roles</option>
-                {roles.map(r => (
-                  <option key={r.id_rol} value={r.id_rol}>
-                    {r.nombre_rol}
-                  </option>
-                ))}
-              </select>
+                <ArrowLeft className="w-5 h-5" />
+                Volver al Panel
+              </button>
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold text-purple-400 flex items-center gap-2">
+                  <Users className="w-6 h-6" />
+                  Gestión de Usuarios y Roles
+                </h1>
+                <p className="text-gray-400 text-sm">Asigna roles a los usuarios del sistema</p>
+              </div>
+              <button
+                onClick={async () => {
+                  try { await logoutUser() } catch (_) {}
+                  clearStoredSession()
+                  navigate("/")
+                }}
+                className="flex items-center gap-2 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg hover:bg-red-500/20 transition text-red-400 text-sm"
+              >
+                Logout
+              </button>
             </div>
-            <button
-              onClick={loadData}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-400 hover:bg-purple-500/30 transition"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Actualizar
-            </button>
           </div>
-        </div>
 
-        {/* HU-05: Lista de usuarios con filtros */}
-        <div className="bg-black/40 border border-gray-700 rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-gray-700 bg-gray-900/50 flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-cyan-400">
-              Usuarios ({filteredUsers.length} de {users.length})
+          {/* Info */}
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-amber-300 font-medium">Solo Administradores</p>
+              <p className="text-gray-400 text-sm">Esta funcionalidad está reservada para usuarios con rol Administrador.</p>
+            </div>
+          </div>
+
+          {/* Roles disponibles */}
+          <div className="bg-black/40 border border-gray-700 rounded-xl p-4 mb-6">
+            <h3 className="text-lg font-semibold text-gray-300 mb-3 flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              Roles del Sistema
             </h3>
-          </div>
-
-          {loading ? (
-            <div className="p-8 text-center text-gray-500">Cargando usuarios...</div>
-          ) : error ? (
-            <div className="p-8 text-center text-red-400">{error}</div>
-          ) : filteredUsers.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              {users.length === 0 ? "No hay usuarios registrados" : "No se encontraron usuarios con los filtros aplicados"}
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-800">
-              {filteredUsers.map((user) => (
-                <div key={user.id_usuario} className="p-4 flex items-center justify-between hover:bg-white/5 transition">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center">
-                      <span className="text-cyan-400 font-bold">
-                        {user.nombre?.charAt(0)?.toUpperCase() || "U"}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-white">{user.nombre}</p>
-                      <p className="text-xs text-gray-500">
-                        ID: {user.id_usuario} {user.edad && `• ${user.edad} años`}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-400 hidden md:inline">
-                      Rol: <span className="text-purple-400">{getRoleName(user.id_rol)}</span>
-                    </span>
-                    
-                    {/* HU-04: No permitir cambiar el propio rol */}
-                    <select
-                      value={user.id_rol}
-                      onChange={(e) => {
-                        const selectedRoleId = Number(e.target.value)
-                        console.log("📝 [onChange] Usuario:", user.nombre, "id_usuario:", user.id_usuario, "nuevo rol:", selectedRoleId)
-                        if (!user.id_usuario) {
-                          console.error("❌ [onChange] user.id_usuario es undefined!", user)
-                          alert("Error: No se pudo obtener el ID del usuario")
-                          return
-                        }
-                        handleUpdateRole(user.id_usuario, selectedRoleId)
-                      }}
-                      disabled={updating === user.id_usuario || !canModifyOwnRole(user.nombre)}
-                      className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                      title={!canModifyOwnRole(user.nombre) ? "No puedes cambiar tu propio rol" : getRoleSecurityLevel(user.id_rol)}
-                    >
-                      {roles.map(rol => (
-                        <option key={rol.id_rol} value={rol.id_rol}>
-                          {rol.nombre_rol}
-                        </option>
-                      ))}
-                    </select>
-
-                    {updating === user.id_usuario && (
-                      <span className="text-xs text-purple-400">Actualizando...</span>
-                    )}
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {roles.map((rol: Role) => (
+                <div key={rol.id_rol} className="flex items-center gap-2 text-sm">
+                  <span className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400 text-xs font-bold">
+                    {rol.id_rol}
+                  </span>
+                  <span className="text-gray-400">{rol.nombre_rol}</span>
+                  <span className="text-xs text-gray-600">({rol.nivel_seguridad})</span>
                 </div>
               ))}
             </div>
-          )}
+          </div>
+
+          {/* HU-05: Filtros y búsqueda */}
+          <div className="bg-black/40 border border-gray-700 rounded-xl p-4 mb-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-gray-400" />
+                <select
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value === "all" ? "all" : Number(e.target.value))}
+                  className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+                >
+                  <option value="all">Todos los roles</option>
+                  {roles.map(r => (
+                    <option key={r.id_rol} value={r.id_rol}>
+                      {r.nombre_rol}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                onClick={loadData}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-400 hover:bg-purple-500/30 transition"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Actualizar
+              </button>
+            </div>
+          </div>
+
+          {/* HU-05: Lista de usuarios con filtros */}
+          <div className="bg-black/40 border border-gray-700 rounded-xl overflow-hidden">
+            <div className="p-4 border-b border-gray-700 bg-gray-900/50 flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-cyan-400">
+                Usuarios ({filteredUsers.length} de {users.length})
+              </h3>
+            </div>
+
+            {loading ? (
+              <div className="p-8 text-center text-gray-500">Cargando usuarios...</div>
+            ) : error ? (
+              <div className="p-8 text-center text-red-400">{error}</div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">
+                {users.length === 0 ? "No hay usuarios registrados" : "No se encontraron usuarios con los filtros aplicados"}
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-800">
+                {filteredUsers.map((user) => (
+                  <div key={user.id_usuario} className="p-4 flex items-center justify-between hover:bg-white/5 transition">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center">
+                        <span className="text-cyan-400 font-bold">
+                          {user.nombre?.charAt(0)?.toUpperCase() || "U"}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-white">{user.nombre}</p>
+                        <p className="text-xs text-gray-500">
+                          ID: {user.id_usuario} {user.edad && `• Edad: ${user.edad} años`}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-400 hidden md:inline">
+                        Rol: <span className="text-purple-400">{getRoleName(user.id_rol)}</span>
+                      </span>
+                      
+                      {/* HU-04: No permitir cambiar el propio rol */}
+                      <select
+                        value={user.id_rol}
+                        onChange={(e) => {
+                          const selectedRoleId = Number(e.target.value)
+                          console.log("📝 [onChange] Usuario:", user.nombre, "id_usuario:", user.id_usuario, "nuevo rol:", selectedRoleId)
+                          if (!user.id_usuario) {
+                            console.error("❌ [onChange] user.id_usuario es undefined!", user)
+                            alert("Error: No se pudo obtener el ID del usuario")
+                            return
+                          }
+                          handleUpdateRole(user.id_usuario, selectedRoleId)
+                        }}
+                        disabled={updating === user.id_usuario || !canModifyOwnRole(user.nombre)}
+                        className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={!canModifyOwnRole(user.nombre) ? "No puedes cambiar tu propio rol" : getRoleSecurityLevel(user.id_rol)}
+                      >
+                        {roles.map(rol => (
+                          <option key={rol.id_rol} value={rol.id_rol}>
+                            {rol.nombre_rol}
+                          </option>
+                        ))}
+                      </select>
+
+                      {updating === user.id_usuario && (
+                        <span className="text-xs text-purple-400">Actualizando...</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
     </div>
