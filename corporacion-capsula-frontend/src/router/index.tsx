@@ -22,6 +22,7 @@ import RequireAuth from "./RequireAuth"
 import RequireAdmin from "./RequireAdmin"
 import RequireRole from "./RequireRole"
 import AccesoDenegado from "./AccesoDenegado"
+import LogoutCredits from "../modules/home/pages/components/LogoutCredits"
 
 export const AppRouter = () => {
   return (
@@ -29,6 +30,7 @@ export const AppRouter = () => {
       <Routes>
 
         <Route path="/" element={<Login />} />
+         <Route path="/logout-credits" element={<LogoutCredits />} />
 
         <Route element={<RequireAuth />}>
           <Route path="/register" element={<Register />} />
